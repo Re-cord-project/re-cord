@@ -3,6 +3,7 @@ package com.commitmate.re_cord.domain.post.post.entity;
 import com.commitmate.re_cord.domain.post.category.entity.Category;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.global.jpa.BaseEntity;
+import com.commitmate.re_cord.global.jpa.UpdateStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -41,7 +42,6 @@ public class Post extends BaseEntity {
     private PostStatus status;
 
     @Enumerated(EnumType.STRING)
-    private UpdateStatus updatedStatus;
-
+    private UpdateStatus updateStatus = UpdateStatus.NOT_EDITED;
 
 }
