@@ -15,5 +15,6 @@ public class ApiV1PostController {
     @PostMapping
     public String create(){
         return "Post Created";
+
     }
 }
