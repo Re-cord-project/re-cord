@@ -2,9 +2,8 @@ package com.commitmate.re_cord.domain.user.block.entity;
 
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.global.jpa.BaseEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,17 +11,19 @@ import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @Entity
+@Table(name = "block")
 @Getter
-@AllArgsConstructor
-@NoArgsConstructor
 @SuperBuilder
-@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class Block extends BaseEntity {
-    @ManyToOne
-    @JoinColumn(name = "blocker_id")
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "blocker_id", nullable = false)
     private User blockerId;
 
-    @ManyToOne
-    @JoinColumn(name = "blocked_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "blocked_id", nullable = false)
     private User blockedId;
+
 }
