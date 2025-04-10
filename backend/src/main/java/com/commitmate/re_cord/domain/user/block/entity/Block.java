@@ -3,6 +3,7 @@ package com.commitmate.re_cord.domain.user.block.entity;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.global.jpa.BaseEntity;
 import jakarta.persistence.*;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
