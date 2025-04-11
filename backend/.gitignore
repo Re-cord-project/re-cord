@@ -40,3 +40,4 @@ out/
 ##Custom ###
 
 application-secret.yml
+db_dev.*

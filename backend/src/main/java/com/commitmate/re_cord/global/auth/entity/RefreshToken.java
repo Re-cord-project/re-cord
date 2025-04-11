@@ -1,7 +1,6 @@
 package com.commitmate.re_cord.global.auth.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
@@ -12,6 +11,9 @@ import lombok.*;
 @Builder
 public class RefreshToken {
     @Id
-    private String email;
-    private String token;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(name = "user_id")
+    private Long userId;
+    private String tokenValue;
 }
