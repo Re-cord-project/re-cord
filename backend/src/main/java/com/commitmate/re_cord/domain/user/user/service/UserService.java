@@ -1,14 +1,18 @@
 package com.commitmate.re_cord.domain.user.user.service;
 
 import com.commitmate.re_cord.domain.user.user.dto.SignUpRequestDTO;
+import com.commitmate.re_cord.domain.user.user.dto.UserLoginResponseDTO;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.enums.Role;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
+import com.commitmate.re_cord.global.auth.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,10 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
+
 
     // 회원가입
     @Transactional
-    public User registUser(SignUpRequestDTO request) {
+    public User registerUser(SignUpRequestDTO request) {
         checkDuplicated(request.getEmail(), request.getUsername());
 
         if (!isValidPassword(request.getPassword())) {
@@ -34,7 +40,6 @@ public class UserService {
                 .role(Role.basic)
                 .build();
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
@@ -55,5 +60,25 @@ public class UserService {
         boolean hasLetter = password.matches(".*[a-zA-Z].*");
         boolean hasDigitOrSymbol = password.matches(".*[0-9\\W_].*"); // 숫자 or 특수문자
         return hasLetter && hasDigitOrSymbol;
+    }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).get();
+    }
+
+    public String login(String email, String password) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
+        }
+        String accessToken = jwtProvider.createAccessToken(user);
+        String refreshToken = jwtProvider.createRefreshToken(user);
+
+        user.setRefreshToken(refreshToken); // refreshToken 컬럼에 저장
+        userRepository.save(user);
+
+        return accessToken;
     }
 }

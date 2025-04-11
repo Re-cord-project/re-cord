@@ -27,6 +27,8 @@ public class User extends BaseEntity {
     private String password;
     private String bootcamp;
     private int generation;
+    private String refreshToken;
+
     @Enumerated(EnumType.STRING)
     private Provider provider;
     @Enumerated(EnumType.STRING)

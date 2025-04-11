@@ -18,7 +18,7 @@ public class JwtProvider {
     private final byte[] refreshSecret;
 
     public static final Long ACCESS_TOKEN_EXPIRE_COUNT = 30*60*1000L; // 유지시간 30분
-    public static final Long REFRESH_TOKEN_EXPIRE_COUNT = 30*60*1000L;
+    public static final Long REFRESH_TOKEN_EXPIRE_COUNT = 24*60*60*1000L;
 
     // application.yml에서 가져오기
 
@@ -27,7 +27,7 @@ public class JwtProvider {
         this.refreshSecret = refreshSecret.getBytes(StandardCharsets.UTF_8);
     }
 
-    public String generateAccessToken(User user, Long expire, byte[] secretKey) {
+    public String generateToken(User user, Long expire, byte[] secretKey) {
         Claims claims = Jwts.claims().setSubject(user.getEmail());
 
         claims.put("userId", user.getId());
@@ -50,11 +50,11 @@ public class JwtProvider {
     }
 
     public String createAccessToken(User user) {
-        return generateAccessToken(user, ACCESS_TOKEN_EXPIRE_COUNT, accessSecret);
+        return generateToken(user, ACCESS_TOKEN_EXPIRE_COUNT, accessSecret);
     }
 
     public String createRefreshToken(User user){
-        return generateAccessToken(user, REFRESH_TOKEN_EXPIRE_COUNT, refreshSecret);
+        return generateToken(user, REFRESH_TOKEN_EXPIRE_COUNT, refreshSecret);
     }
 
     public Claims parseToken(String token, byte[] secretKey){
