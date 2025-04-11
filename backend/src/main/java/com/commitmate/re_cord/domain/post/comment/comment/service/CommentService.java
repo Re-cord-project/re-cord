@@ -36,6 +36,6 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
 
 
-        return new CommentResponseDTO(savedComment.getId(), savedComment.getContent(),user.getUsername(),savedComment.getCreatedAt());
+        return new CommentResponseDTO(savedComment.getId(), savedComment.getContent(),user.getUsername(),savedComment.getCreatedAt().toString());
     }
 }
