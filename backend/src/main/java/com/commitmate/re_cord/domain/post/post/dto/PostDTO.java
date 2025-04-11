@@ -1,0 +1,31 @@
+package com.commitmate.re_cord.domain.post.post.dto;
+
+
+import com.commitmate.re_cord.domain.post.post.entity.Post;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@AllArgsConstructor
+public class PostDTO {
+    private Long id;
+    private Long userId;
+    private String title;
+    private String content;
+    private LocalDateTime createdAt;
+
+
+
+    public static PostDTO getEntity(Post post){
+        return new PostDTO(
+                post.getId(),
+                post.getUser().getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getCreatedAt()
+        );
+    }
+
+}
