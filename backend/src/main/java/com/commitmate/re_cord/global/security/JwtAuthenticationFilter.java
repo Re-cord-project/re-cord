@@ -1,7 +1,8 @@
 package com.commitmate.re_cord.global.security;
 
+import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.global.auth.jwt.JwtProvider;
-import com.commitmate.re_cord.global.security.CustomUserDetails.CustomUserDetails_depre;
+import com.commitmate.re_cord.global.security.CustomUserDetails.CustomUserDetails;
 import com.commitmate.re_cord.global.security.exception.JwtExceptionCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -9,7 +10,6 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,38 +23,44 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
     private final JwtProvider jwtProvider;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
         String uri = request.getRequestURI();
 
-        // 인증 필요 없는 URI는 필터 무시
-        if (uri.equals("/login") || uri.equals("/loginform") || uri.startsWith("/h2-console")) {
+        // 인증이 필요 없는 URI는 필터를 건너뛰기 (예: 로그인, 로그인 폼, H2 콘솔)
+        if (uri.equals("/login") || uri.startsWith("/loginform") || uri.startsWith("/h2-console")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // request로부터 토큰을 얻어와야함
+
+        // Authorization 헤더에서 토큰 추출
         String token = getToken(request);
-        // UserDetails 형태로 SecurityContextholder에 넣어주자
+
         if (StringUtils.hasText(token)) {
             try {
-                // 아래 두줄 짤라고 아래 메서드들이랑 JwtAuthenticationToken같은 클래스 만든거
+                // 토큰을 기반으로 Authentication 객체 생성
                 Authentication authentication = getAuthentication(token);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-            } catch (ExpiredJwtException e){
+            } catch (ExpiredJwtException e) {
                 request.setAttribute("exception", JwtExceptionCode.EXPIRED_TOKEN.getCode());
-                log.error("Expired Token : {}",token,e);
+                log.error("Expired Token: {}", token, e);
                 SecurityContextHolder.clearContext();
                 throw new BadCredentialsException("Expired token exception", e);
-            }catch (UnsupportedJwtException e){
+            } catch (UnsupportedJwtException e) {
                 request.setAttribute("exception", JwtExceptionCode.UNSUPPORTED_TOKEN.getCode());
                 log.error("Unsupported Token: {}", token, e);
                 SecurityContextHolder.clearContext();
@@ -62,66 +68,66 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             } catch (MalformedJwtException e) {
                 request.setAttribute("exception", JwtExceptionCode.INVALID_TOKEN.getCode());
                 log.error("Invalid Token: {}", token, e);
-
                 SecurityContextHolder.clearContext();
-
                 throw new BadCredentialsException("Invalid token exception", e);
             } catch (IllegalArgumentException e) {
                 request.setAttribute("exception", JwtExceptionCode.NOT_FOUND_TOKEN.getCode());
                 log.error("Token not found: {}", token, e);
-
                 SecurityContextHolder.clearContext();
-
                 throw new BadCredentialsException("Token not found exception", e);
             } catch (Exception e) {
-                log.error("JWT Filter - Internal Error : {}", token, e);
-                SecurityContextHolder.clearContext();   // 클리어 해줘야 다음에 또 쓴다
-                throw new BadCredentialsException("JWT Filter - Internal Error");
+                log.error("JWT Filter - Internal Error: {}", token, e);
+                SecurityContextHolder.clearContext();
+                throw new BadCredentialsException("JWT Filter - Internal Error", e);
             }
         }
 
         filterChain.doFilter(request, response);
     }
 
-    // 토큰 얻어오기
+    // 헤더에서 Bearer 토큰 추출 (쿠키 등 다른 저장소를 사용하려면 추가 가능)
     private String getToken(HttpServletRequest request) {
-        // 헤더를 통해 토큰을 넘겨줬다면
         String authorization = request.getHeader("Authorization");
-        // Bearer 다음 문자열부터가 토큰이다
         if (StringUtils.hasText(authorization) && authorization.startsWith("Bearer ")) {
             return authorization.substring(7);
-        }
-
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("access_token")) {
-                    return cookie.getValue();
-                }
-            }
         }
         return null;
     }
 
-
-    // 토큰에서 claim(사용자 정보) 꺼내기
+    // 토큰을 파싱하여 Authentication 객체 생성
     private Authentication getAuthentication(String token) {
         Claims claims = jwtProvider.parseAccessToken(token);
         String email = claims.getSubject();
-        Long userId = claims.get("userId", Long.class);
-        String name = claims.get("name", String.class);
         String username = claims.get("username", String.class);
-        // 권한
+        String name = claims.get("name", String.class);
+        // claim으로부터 권한 리스트 추출
         List<GrantedAuthority> grantedAuthorities = getGrantedAuthorities(claims);
 
-        // UserDetails객체로 변형
-        CustomUserDetails_depre customUserDetails = new CustomUserDetails_depre(username, "", name, grantedAuthorities);
+        // DB 접근 없이 토큰의 Claim 정보만 가지고 UserDetails를 생성하기 위해, dummy User 객체 생성
+        User dummyUser = User.builder()
+                .email(email)
+                .username(username)
+                // password는 JWT 기반 인증에서는 필요 없으므로 빈 문자열 사용
+                .password("")
+                // bootcamp, generation 등은 없으면 기본값 처리 (필요 시 Claim에서 추가 추출)
+                .bootcamp("")
+                .generation(0)
+                // role은 JWT Claim에 포함되어 있으므로 생략하거나 null 처리
+                .role(null)
+                .build();
+
+        // CustomUserDetails 생성: 이제 이전 Deprecated 버전 대신 새 CustomUserDetails를 사용
+        CustomUserDetails customUserDetails = new CustomUserDetails(dummyUser);
+
         return new JwtAuthenticationToken(grantedAuthorities, customUserDetails, null);
     }
-    // 클레임에서 권한 꺼내기
+
+    // Claims의 "roles" 항목을 기반으로 GrantedAuthority 목록 생성
     private List<GrantedAuthority> getGrantedAuthorities(Claims claims) {
         List<String> roles = (List<String>) claims.get("roles");
+        if (roles == null) {
+            return List.of();
+        }
         return roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
     }
 }
-

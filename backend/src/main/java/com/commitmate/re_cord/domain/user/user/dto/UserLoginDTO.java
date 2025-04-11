@@ -2,17 +2,19 @@ package com.commitmate.re_cord.domain.user.user.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Setter
-public class SignUpRequestDTO {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class UserLoginDTO {
     @NotBlank
     @Email
     private String email;
-    private String username;
+    @NotBlank
     private String password;
-    private String bootcamp;
-    private int generation;
 }
