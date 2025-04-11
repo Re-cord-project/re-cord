@@ -21,7 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 @ToString
-@Table(name="users") //usere는 h2데이터베이스 기본 예약어
+@Table(name="users") //user는 h2데이터베이스 기본 예약어
 
 public class User extends BaseEntity {
     private String email;

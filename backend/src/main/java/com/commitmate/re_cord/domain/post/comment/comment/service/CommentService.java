@@ -21,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public CommentResponseDTO registerComment(CommentRequestDTO commentRequestDTO, Long postId, Long userId){
@@ -36,6 +36,6 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
 
 
-        return new CommentResponseDTO(savedComment.getId(), savedComment.getContent(),user.getUsername(),savedComment.getCreatedAt().toString());
+        return new CommentResponseDTO(savedComment.getId(), savedComment.getContent(),user.getUsername(),savedComment.getCreatedAt());
     }
 }
