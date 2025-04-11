@@ -1,5 +1,6 @@
 package com.commitmate.re_cord.domain.user.user.entity;
 
+import com.commitmate.re_cord.domain.user.block.entity.Block;
 import com.commitmate.re_cord.domain.user.follow.entity.Follow;
 import com.commitmate.re_cord.domain.user.user.enums.Provider;
 import com.commitmate.re_cord.domain.user.user.enums.Role;
@@ -8,10 +9,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.OneToMany;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
@@ -19,6 +17,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
@@ -42,8 +41,8 @@ public class User extends BaseEntity {
     private List<Follow> followerList = new ArrayList<>();
 
     @OneToMany(mappedBy = "blockedId")
-    private List<Follow> blockingList = new ArrayList<>();
+    private List<Block> blockingList = new ArrayList<>();
 
     @OneToMany(mappedBy = "blockingId")
-    private List<Follow> blockedList = new ArrayList<>();
+    private List<Block> blockedList = new ArrayList<>();
 }
