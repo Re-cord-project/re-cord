@@ -11,14 +11,6 @@ public class ReCordApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(ReCordApplication.class, args);
-
-
-
-
-
-
-
-
 	}
 
 }

@@ -45,4 +45,3 @@ public class Post extends BaseEntity {
     private UpdateStatus updateStatus = UpdateStatus.NOT_EDITED;
 
 }
-
