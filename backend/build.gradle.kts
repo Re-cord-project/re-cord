@@ -24,7 +24,8 @@ repositories {
 }
 
 dependencies {
-	implementation ("org.springframework.boot:spring-boot-starter-security") //2025-04-14 추가
+	implementation ("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0") //2025-04-14 swagger 테스트로 추가
+	implementation ("org.springframework.boot:spring-boot-starter-security") //2025-04-14 테스트로 추가
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
