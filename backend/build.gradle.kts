@@ -40,6 +40,10 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 
+	// swagger
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
+
+
 	//gson - json 메시지를 다루기 위한 라이브러리
 	implementation("com.google.code.gson:gson")
 

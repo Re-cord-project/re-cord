@@ -49,6 +49,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         response.setContentType("application/json;charset=UTF-8");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.getWriter().write(jsonResponse);
+
+
     }
 
     private void handlePageResponse(HttpServletRequest request, HttpServletResponse response, String exception) throws IOException {

@@ -99,7 +99,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Claims claims = jwtProvider.parseAccessToken(token);
         String email = claims.getSubject();
         String username = claims.get("username", String.class);
-        String name = claims.get("name", String.class);
         // claim으로부터 권한 리스트 추출
         List<GrantedAuthority> grantedAuthorities = getGrantedAuthorities(claims);
 
@@ -116,7 +115,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .role(null)
                 .build();
 
-        // CustomUserDetails 생성: 이제 이전 Deprecated 버전 대신 새 CustomUserDetails를 사용
         CustomUserDetails customUserDetails = new CustomUserDetails(dummyUser);
 
         return new JwtAuthenticationToken(grantedAuthorities, customUserDetails, null);
