@@ -3,6 +3,7 @@ package com.commitmate.re_cord.global.jpa;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.CreatedDate;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @MappedSuperclass
 @NoArgsConstructor
 @Getter
+@Setter
 @ToString
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
