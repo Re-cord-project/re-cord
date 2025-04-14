@@ -56,7 +56,7 @@ public class Post extends BaseEntity {
     // 엔티티가 저장되기 전에 호출되는 @PrePersist
     @PrePersist
     public void prePersist() {
-
+        // 만약 updateStatus가 null이면 기본값으로 설정
         if (this.updateStatus == null) {
             this.updateStatus = UpdateStatus.NOT_EDITED;
         }

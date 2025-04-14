@@ -32,7 +32,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Page<Post> searchVisiblePosts(@Param("keyword") String keyword, Pageable pageable);
 
 
-    // 삭제되지 않은 모든 포스트를 찾는 메서드
+    // PUBLISHED 인 글만 조회
     Page<Post> findAllByUpdateStatus(UpdateStatus updateStatus, Pageable pageable);
 
     List<Post> findAllByUpdateStatusAndUpdatedAtBefore(UpdateStatus status, LocalDateTime time);
