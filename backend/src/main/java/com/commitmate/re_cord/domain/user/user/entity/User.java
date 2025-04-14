@@ -21,6 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 @ToString
+
 @Table(name="users") //user는 h2데이터베이스 기본 예약어
 
 public class User extends BaseEntity {
@@ -41,6 +42,7 @@ public class User extends BaseEntity {
     //나를 팔로우하는
     @OneToMany(mappedBy = "followingId")
     private List<Follow> followerList = new ArrayList<>();
+
 
     //내가 차단한
     @OneToMany(mappedBy = "blockedId")

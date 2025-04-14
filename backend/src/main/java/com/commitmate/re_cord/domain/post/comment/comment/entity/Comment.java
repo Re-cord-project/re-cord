@@ -16,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(exclude ={"userId", "postId"})
+@ToString(exclude ={"user", "post"})
 public class Comment extends BaseEntity {
 
     private int likes;
@@ -28,10 +28,10 @@ public class Comment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User userId;
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "comment_id")
-    private Post postId;
+    @JoinColumn(name = "post_id")
+    private Post post;
 
 }
