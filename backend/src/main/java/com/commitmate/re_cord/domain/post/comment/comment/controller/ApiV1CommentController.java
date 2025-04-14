@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/comments")
+@RequestMapping("/{postId}/comments")
 @RequiredArgsConstructor
 public class ApiV1CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/{postId}/{userId}")
+    @PostMapping("/user/{userId}")
     public ResponseEntity<CommentResponseDTO> registerComment(
             @PathVariable Long postId,
             @PathVariable Long userId,
@@ -26,4 +26,16 @@ public class ApiV1CommentController {
         CommentResponseDTO response = commentService.registerComment(requestDTO,postId,userId);
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/user/{userId}/{commentId}")
+    public void deleteComment(
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            @PathVariable Long userId
+    ){
+        commentService.deleteComment(commentId,userId);
+
+    }
+
+
 }
