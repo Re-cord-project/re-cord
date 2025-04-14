@@ -32,10 +32,23 @@ public class CommentService {
                 .orElseThrow(()-> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
 
         Comment comment = new Comment(0,commentRequestDTO.getContent(), UpdateStatus.NOT_EDITED,user,post);
-
         Comment savedComment = commentRepository.save(comment);
 
 
         return new CommentResponseDTO(savedComment.getId(), savedComment.getContent(),user.getUsername(),savedComment.getCreatedAt().toString());
+    }
+
+    @Transactional
+    public void deleteComment(Long commentId, Long userId){
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(()-> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+
+        if(!comment.getUserId().getId().equals(userId)){
+            throw new IllegalArgumentException("댓글 작성자만 삭제할 수 있습니다.");
+        }
+
+        commentRepository.delete(comment);
+
     }
 }
