@@ -40,4 +40,4 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
-}a
+}
