@@ -20,7 +20,7 @@ import java.util.List;
 public class FollowController {
 
     private final FollowService followService;
-    private final UserService userService; // ✅ 여기 변경됨
+    private final UserService userService;
 
     // 1. 팔로우
     @Operation(summary = "특정 유저 팔로우", description = "로그인한 사용자가 다른 유저를 팔로우합니다.")
