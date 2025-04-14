@@ -6,9 +6,11 @@ import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service // 서비스 레이어로 등록 (스프링 빈)
 @RequiredArgsConstructor // 생성자 주입 자동 생성 (final 필드에만 적용)
 public class FollowService {
@@ -17,7 +19,7 @@ public class FollowService {
     private final UserRepository userRepository;
 
     /**
-     * 팔로우 기능 - 로그인한 유저(follower)가 다른 유저(following)를 팔로우
+     * 팔로우 기능 - 로그인한 유저(follower, A)가 다른 유저(following, B)를 팔로우
      *
      * @param follower 로그인한 사용자 (보통 SecurityContext에서 주입)
      * @param followingId 팔로우할 대상 유저의 ID
@@ -50,19 +52,23 @@ public class FollowService {
         followRepository.save(follow);
     }
 
-    /**
-     * 언팔로우 기능 - 팔로우 관계 해제
-     *
-     * @param follower 로그인한 사용자
-     * @param followId 언팔로우할 Follow 엔티티의 ID
-     */
-    @Transactional
-    public void unfollow(User follower, Long followId) {
+//    /**
+//     * 언팔로우 기능 - 팔로우 관계 해제
+//     *
+//     * @param follower 로그인한 사용자
+//     * @param followId 언팔로우할 Follow 엔티티의 ID
+//     */
+//    @Transactional
+//    public void unfollow(User follower, Long followId) {
+//
+//        // 1. 해당 followId가 존재하고, 현재 로그인 유저가 팔로워인지 검증
+//        Follow follow = followRepository.findByIdAndFollowerId(followId, follower)
+//                .orElseThrow(() -> new EntityNotFoundException("팔로우 정보를 찾을 수 없습니다."));
+//
+//        followRepository.delete(follow); // 언팔로우 (삭제)
+//    }
 
-        // 해당 followId가 존재하고, 현재 로그인 유저가 팔로워인지 검증
-        Follow follow = followRepository.findByIdAndFollowerId(followId, follower)
-                .orElseThrow(() -> new EntityNotFoundException("팔로우 정보를 찾을 수 없습니다."));
 
-        followRepository.delete(follow); // 언팔로우 (삭제)
-    }
+
+
 }

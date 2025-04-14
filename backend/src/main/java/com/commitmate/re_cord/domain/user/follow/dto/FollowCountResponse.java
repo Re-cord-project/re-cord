@@ -20,4 +20,4 @@ public class FollowCountResponse {
         this.followingCount = followingCount;
         this.followerCount = followerCount;
     }
-}변수
+}
