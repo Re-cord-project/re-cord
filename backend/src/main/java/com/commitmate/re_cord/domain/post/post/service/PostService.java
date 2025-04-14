@@ -89,7 +89,8 @@ public class PostService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // 삭제된 포스트를 제외하고 조회
-        Page<Post> postPage = postRepository.findAllByUpdateStatusNot(UpdateStatus.DELETED, pageable);
+        Page<Post> postPage = postRepository.findAllByUpdateStatus(UpdateStatus.EDITED, pageable);
+
 
         return postPage.map(PostResponseDto::new);
     }
@@ -100,23 +101,23 @@ public class PostService {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         // 카테고리와 삭제되지 않은 포스트들을 조회
-        Page<Post> postPage = postRepository.findAllByCategoryIdAndUpdateStatusNot(categoryId, UpdateStatus.DELETED, pageable);
+        Page<Post> postPage = postRepository.findAllByCategoryIdAndUpdateStatus(categoryId, UpdateStatus.EDITED, pageable);
 
         return postPage.map(PostResponseDto::new);
     }
 
     // 게시글 검색
-    @Transactional
+    // 게시글 검색
+    @Transactional(readOnly = true)
     public Page<PostResponseDto> searchPosts(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        // 제목, 내용, 작성자 이름을 기준으로 검색하고, 삭제되지 않은 포스트만 필터링
-        Page<Post> postPage = postRepository.findByUpdateStatusNotAndTitleContainingIgnoreCaseOrUpdateStatusNotAndContentContainingIgnoreCaseOrUpdateStatusNotAndUser_UsernameContainingIgnoreCase(
-                UpdateStatus.DELETED, keyword, UpdateStatus.DELETED, keyword, UpdateStatus.DELETED, keyword, pageable
-        );
+        // EDITED 상태이고, 제목/내용/작성자 기준 검색
+        Page<Post> postPage = postRepository.searchVisiblePosts(keyword, pageable);
 
         return postPage.map(PostResponseDto::new);
     }
+
 
     // 게시글 상세 보기
     @Transactional

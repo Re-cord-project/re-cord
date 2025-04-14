@@ -20,8 +20,6 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 @ToString
-@Table(name = "\"user\"")
-
 public class User extends BaseEntity {
     private String email;
     private String username;
