@@ -21,7 +21,9 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 @ToString
-@Table(name = "users")
+
+@Table(name="users") //user는 h2데이터베이스 기본 예약어
+
 public class User extends BaseEntity {
     private String email;
     private String username;
@@ -33,15 +35,20 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    //내가 팔로잉하는
     @OneToMany(mappedBy = "followerId")
     private List<Follow> followingList = new ArrayList<>();
 
+    //나를 팔로우하는
     @OneToMany(mappedBy = "followingId")
     private List<Follow> followerList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "blockerId")
+
+    //내가 차단한
+    @OneToMany(mappedBy = "blockedId")
     private List<Block> blockingList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "blockedId")
-    private List<Block> blockedList = new ArrayList<>();
+    //나를 차단한
+//    @OneToMany(mappedBy = "blockingId")
+//    private List<Follow> blockedList = new ArrayList<>();
 }
