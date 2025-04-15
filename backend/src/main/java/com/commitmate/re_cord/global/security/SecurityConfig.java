@@ -1,8 +1,11 @@
 package com.commitmate.re_cord.global.security;
 
+import com.commitmate.re_cord.domain.user.user.service.UserService;
+import com.commitmate.re_cord.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -66,5 +69,10 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public CustomAuthenticationFilter customAuthenticationFilter(UserService userService, Rq rq) {
+        return new CustomAuthenticationFilter(userService, rq);
     }
 }
