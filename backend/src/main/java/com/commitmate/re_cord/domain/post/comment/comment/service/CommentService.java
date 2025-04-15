@@ -44,11 +44,26 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(()-> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
 
-        if(!comment.getUserId().getId().equals(userId)){
+        if(!comment.getUser().getId().equals(userId)){
             throw new IllegalArgumentException("댓글 작성자만 삭제할 수 있습니다.");
         }
 
         commentRepository.delete(comment);
 
+    }
+
+    @Transactional
+    public CommentResponseDTO updateComment(CommentRequestDTO commentRequestDTO, Long postId, Long userId, Long commentId){
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(()-> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+
+        if(!comment.getUser().getId().equals(userId)){
+            throw new IllegalArgumentException("댓글 작성자만 수정할 수 있습니다.");
+        }
+
+        comment.setContent(commentRequestDTO.getContent());
+        comment.setUpdateStatus(UpdateStatus.EDITED);
+        return new CommentResponseDTO(comment.getId(),comment.getContent(),comment.getUser().getUsername(),comment.getUpdatedAt().toString());
     }
 }

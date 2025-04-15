@@ -37,5 +37,19 @@ public class ApiV1CommentController {
 
     }
 
+    @PatchMapping("/user/{userId}/{commentId}")
+    public ResponseEntity<CommentResponseDTO> updateComment(
+            @PathVariable Long postId,
+            @PathVariable Long commentId,
+            @PathVariable Long userId,
+            @RequestBody CommentRequestDTO requestDTO
+    ){
+        CommentResponseDTO response = commentService.updateComment(requestDTO,postId,userId,commentId);
+        return ResponseEntity.ok(response);
+
+    }
+
+
+
 
 }

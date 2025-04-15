@@ -1,9 +1,6 @@
 package com.commitmate.re_cord.domain.post.comment.comment.DTO;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
