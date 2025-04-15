@@ -36,8 +36,27 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	runtimeOnly("com.mysql:mysql-connector-j")
 
-	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")//swagger UI
-//	implementation("org.springframework.boot:spring-boot-starter-oauth2-client") //oauth2
+	// jwt & json
+	// jwts
+	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+
+	// swagger
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
+
+
+	//gson - json 메시지를 다루기 위한 라이브러리
+	implementation("com.google.code.gson:gson")
+
+	implementation("jakarta.validation:jakarta.validation-api:3.0.2")
+	// security
+	implementation("org.springframework.boot:spring-boot-starter-security")
+
+	// Oauth2
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+
+
 
 }
 
