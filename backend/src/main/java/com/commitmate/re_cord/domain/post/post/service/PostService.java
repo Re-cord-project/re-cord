@@ -1,8 +1,6 @@
 package com.commitmate.re_cord.domain.post.post.service;
 
-import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentDTO;
 import com.commitmate.re_cord.domain.post.post.dto.PostDTO;
-import com.commitmate.re_cord.domain.post.post.entity.Post;
 import com.commitmate.re_cord.domain.post.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
