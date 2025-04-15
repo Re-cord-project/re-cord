@@ -6,6 +6,7 @@ import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.Map;
@@ -18,6 +19,38 @@ public class UserService {
     private final AuthTokenService authTokenService;
     private final UserRepository userRepository;
 
+    // 일반 회원가입
+    @Transactional
+    public String register(String email, String password, String username, String nickname,
+                           String bootcamp, int generation) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            return "Email already exists";
+        }
+        User user = new User();
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setUsername(username);
+        user.setNickname(nickname);
+        user.setBootcamp(bootcamp);
+        user.setGeneration(generation);
+        userRepository.save(user);
+        return "User registered successfully";
+    }
+
+    // 일반 로그인
+    @Transactional
+    public String login(String email, String password) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if (user.isPresent() && password.equals(user.get().getPassword())) {
+            return authTokenService.genAccessToken(user.get());
+        }
+        return null;
+    }
+
+    // 로그아웃
+    // 토큰 비활성화 필요
+
+    // 소셜 로그인
     public long count() {
         return userRepository.count();
     }
@@ -88,6 +121,14 @@ public class UserService {
         }
 
         return join(username, "", nickname);
+    }
+
+    public User getUserById(long id) {
+        return userRepository.getUserById(id).get();
+    }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email).get();
     }
 
 }

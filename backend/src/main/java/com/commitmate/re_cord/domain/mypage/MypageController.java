@@ -27,11 +27,11 @@ public class MypageController {
         return ResponseEntity.ok(posts);
     }
 
-    @GetMapping("/comments/{userId}")
-    public ResponseEntity<List<CommentDTO>> getCommentsByUser(@PathVariable("userId") Long userId) {
-        List<CommentDTO> comments = commentService.getCommentsByUser(userId);
-        return ResponseEntity.ok(comments);
-    }
+//    @GetMapping("/comments/{userId}")
+//    public ResponseEntity<List<CommentDTO>> getCommentsByUser(@PathVariable("userId") Long userId) {
+//        List<CommentDTO> comments = commentService.getCommentsByUser(userId);
+//        return ResponseEntity.ok(comments);
+//    }
 }
 
 

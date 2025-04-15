@@ -111,7 +111,7 @@ public class Rq {
     public String makeAuthCookies(User user) {
         String accessToken = userService.genAccessToken(user);
 
-        setCookie("apiKey", user.getRefreshToken());
+        setCookie("refreshToken", user.getRefreshToken());
         setCookie("accessToken", accessToken);
 
         return accessToken;

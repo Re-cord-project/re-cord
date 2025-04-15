@@ -3,7 +3,7 @@ package com.commitmate.re_cord.domain.post.comment.comment.controller;
 
 import com.commitmate.re_cord.domain.post.comment.comment.DTO.CommentRequestDTO;
 import com.commitmate.re_cord.domain.post.comment.comment.DTO.CommentResponseDTO;
-import com.commitmate.re_cord.domain.post.comment.comment.service.CommentService;
+import com.commitmate.re_cord.domain.post.comment.comment.Service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

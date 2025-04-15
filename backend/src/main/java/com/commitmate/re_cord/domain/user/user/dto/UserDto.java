@@ -25,5 +25,6 @@ public class UserDto {
 //        this.createDate = user.getCreatedDate();
 //        this.modifyDate = user.getModifiedDate();
         this.nickname = user.getNickname();
+
     }
 }

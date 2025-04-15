@@ -7,10 +7,7 @@ import com.commitmate.re_cord.domain.user.user.enums.Role;
 import com.commitmate.re_cord.global.jpa.BaseEntity;
 import jakarta.persistence.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,7 +19,6 @@ import java.util.Collection;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
 @Getter
 @Setter
 @AllArgsConstructor
