@@ -85,4 +85,33 @@ class FollowServiceTest {
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("팔로우 대상 사용자가 존재하지 않습니다.");
     }
+
+    @Test
+    void 언팔로우_성공_테스트() {
+        // 1. 먼저 팔로우를 한 후
+        followService.follow(userA, userB.getId());
+        Follow follow = followRepository.findAll().get(0);
+
+        // 2. 언팔로우 수행
+        followService.unfollow(userA, follow.getId());
+
+        // 3. 검증 - follow 테이블이 비어 있어야 함
+        assertThat(followRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void 존재하지않는_팔로우_언팔로우_예외() {
+        Long notExistFollowId = 999L;
+
+        assertThatThrownBy(() -> followService.unfollow(userA, notExistFollowId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("팔로우 정보를 찾을 수 없습니다.");
+    }
+
+
+
+
+
+
+
 }

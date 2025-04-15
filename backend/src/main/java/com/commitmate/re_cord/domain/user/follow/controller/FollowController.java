@@ -1,14 +1,17 @@
 package com.commitmate.re_cord.domain.user.follow.controller;
 
+import com.commitmate.re_cord.domain.user.follow.dto.FollowUserResponse;
 import com.commitmate.re_cord.domain.user.follow.service.FollowService;
 import com.commitmate.re_cord.domain.user.user.entity.User;
+import com.commitmate.re_cord.domain.user.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -17,29 +20,35 @@ import org.springframework.web.bind.annotation.RestController;
 public class FollowController {
 
     private final FollowService followService;
+    private final UserService userService;
 
-    //원래 코드
-//    @PostMapping("/{followingId}/follow")
-//    public ResponseEntity<String> followUser(@PathVariable Long followingId, @AuthenticationPrincipal User currentUser) {
-//        followService.follow(currentUser, followingId);
-//        return ResponseEntity.ok("팔로우 완료!");
-//    }
-
-    //테스트용 인증 사용자 말고 그냥 사용자 코드
-    @PostMapping("/{followingId}/follow")
-    public ResponseEntity<String> followUser(@PathVariable Long followingId) {
-        User currentUser = getDummyLoginUser(); // 로그인 유저 흉내내기
-
+    // 1. 팔로우
+    @Operation(summary = "특정 유저 팔로우", description = "로그인한 사용자가 다른 유저를 팔로우합니다.")
+    @PostMapping("/{userId}/follow/{followingId}")
+    public ResponseEntity<String> followUser(
+            @Parameter(description = "로그인한 사용자 ID", example = "1")
+            @PathVariable("userId") Long userId,
+            @Parameter(description = "팔로우할 대상 유저의 ID", example = "2")
+            @PathVariable("followingId") Long followingId
+    ) {
+        User currentUser = userService.getUserById(userId);
         followService.follow(currentUser, followingId);
         return ResponseEntity.ok("팔로우 완료!");
     }
 
-    private User getDummyLoginUser() {
-        return User.builder()
-                .id(1L)
-                .email("dummy@just.com")
-                .username("그냥이")
-                .password("1234")
-                .build();
+    // 2. 언팔로우
+    @Operation(summary = "팔로우 취소", description = "로그인한 사용자가 팔로우를 취소합니다.")
+    @DeleteMapping("/{userId}/follows/{followId}")
+    public ResponseEntity<String> unfollowUser(
+            @Parameter(description = "로그인한 사용자 ID", example = "1")
+            @PathVariable("userId") Long userId,
+            @Parameter(description = "팔로우 관계의 ID", example = "1")
+            @PathVariable("followId") Long followId
+    ) {
+        User currentUser = userService.getUserById(userId);
+        followService.unfollow(currentUser, followId);
+        return ResponseEntity.ok("언팔로우 완료!");
     }
+
+
 }
