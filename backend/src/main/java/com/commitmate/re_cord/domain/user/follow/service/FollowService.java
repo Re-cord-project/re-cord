@@ -1,5 +1,6 @@
 package com.commitmate.re_cord.domain.user.follow.service;
 
+import com.commitmate.re_cord.domain.user.follow.dto.FollowUserResponse;
 import com.commitmate.re_cord.domain.user.follow.entity.Follow;
 import com.commitmate.re_cord.domain.user.follow.repository.FollowRepository;
 import com.commitmate.re_cord.domain.user.user.entity.User;
@@ -9,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service // 서비스 레이어로 등록 (스프링 빈)
@@ -67,5 +70,36 @@ public class FollowService {
 
         // 2. 삭제
         followRepository.delete(follow);
+    }
+
+
+    // 내가 팔로우한 사람들
+    @Transactional(readOnly = true)
+    public List<FollowUserResponse> getFollowingList(User currentUser) {
+        return followRepository.findAllByFollowerId(currentUser).stream()
+                .map(follow -> {
+                    User following = follow.getFollowingId();
+                    return FollowUserResponse.builder()
+                            .userId(following.getId())
+                            .username(following.getUsername())
+                            .email(following.getEmail())
+                            .build();
+                })
+                .toList(); // Java 16 이상이면 toList(), 아니면 collect(Collectors.toList())
+    }
+
+    // 나를 팔로우한 사람들
+    @Transactional(readOnly = true)
+    public List<FollowUserResponse> getFollowerList(User currentUser) {
+        return followRepository.findAllByFollowingId(currentUser).stream()
+                .map(follow -> {
+                    User follower = follow.getFollowerId();
+                    return FollowUserResponse.builder()
+                            .userId(follower.getId())
+                            .username(follower.getUsername())
+                            .email(follower.getEmail())
+                            .build();
+                })
+                .toList();
     }
 }
