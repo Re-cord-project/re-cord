@@ -1,4 +1,4 @@
-package com.commitmate.re_cord.domain.post.comment.comment.DTO;
+package com.commitmate.re_cord.domain.post.comment.comment.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

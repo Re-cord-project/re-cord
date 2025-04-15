@@ -1,8 +1,9 @@
 package com.commitmate.re_cord.domain.post.comment.comment.service;
 
 
-import com.commitmate.re_cord.domain.post.comment.comment.DTO.CommentRequestDTO;
-import com.commitmate.re_cord.domain.post.comment.comment.DTO.CommentResponseDTO;
+import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentDTO;
+import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentRequestDTO;
+import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentResponseDTO;
 import com.commitmate.re_cord.domain.post.comment.comment.entity.Comment;
 import com.commitmate.re_cord.domain.post.comment.comment.repository.CommentRepository;
 import com.commitmate.re_cord.domain.post.post.entity.Post;
@@ -15,10 +16,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class CommentService {
+
+
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -44,11 +50,22 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(()-> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
 
-        if(!comment.getUserId().getId().equals(userId)){
+        if(!comment.getUser().getId().equals(userId)){
             throw new IllegalArgumentException("댓글 작성자만 삭제할 수 있습니다.");
         }
 
         commentRepository.delete(comment);
 
     }
+
+    public List<CommentDTO> getCommentsByUser(Long userId) {
+        return commentRepository.findMyComment(userId).stream()
+                .map(CommentDTO::getEntity)
+                .collect(Collectors.toList());
+
+    }
+
+
+
+
 }

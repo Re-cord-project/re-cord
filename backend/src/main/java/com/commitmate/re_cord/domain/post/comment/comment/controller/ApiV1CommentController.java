@@ -1,8 +1,8 @@
 package com.commitmate.re_cord.domain.post.comment.comment.controller;
 
 
-import com.commitmate.re_cord.domain.post.comment.comment.DTO.CommentRequestDTO;
-import com.commitmate.re_cord.domain.post.comment.comment.DTO.CommentResponseDTO;
+import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentRequestDTO;
+import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentResponseDTO;
 import com.commitmate.re_cord.domain.post.comment.comment.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
