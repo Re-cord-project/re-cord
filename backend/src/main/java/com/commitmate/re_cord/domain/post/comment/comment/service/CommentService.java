@@ -51,4 +51,10 @@ public class CommentService {
         commentRepository.delete(comment);
 
     }
+
+    public List<CommentDTO> getCommentsByUser(Long userId) {
+    return commentRepository.findMyComment(userId).stream()
+            .map(CommentDTO::getEntity)
+            .collect(Collectors.toList());
+
 }
