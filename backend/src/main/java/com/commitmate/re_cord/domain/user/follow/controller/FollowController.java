@@ -51,4 +51,28 @@ public class FollowController {
     }
 
 
+    // 3. 내가 팔로우한 사람 목록 조회
+    @Operation(summary = "내가 팔로우한 사람들 목록", description = "지정한 사용자 ID가 팔로우한 사람 목록을 조회합니다.")
+    @GetMapping("/{userId}/followings")
+    public ResponseEntity<List<FollowUserResponse>> getFollowingList(
+            @Parameter(description = "팔로잉 목록을 조회할 사용자 ID", example = "1")
+            @PathVariable("userId") Long userId
+    ) {
+        User currentUser = userService.getUserById(userId);
+        List<FollowUserResponse> followings = followService.getFollowingList(currentUser);
+        return ResponseEntity.ok(followings);
+    }
+
+    // 4. 나를 팔로우한 사람 목록 조회
+    @Operation(summary = "나를 팔로우한 사람들 목록", description = "지정한 사용자 ID를 팔로우한 사람 목록을 조회합니다.")
+    @GetMapping("/{userId}/followers")
+    public ResponseEntity<List<FollowUserResponse>> getFollowerList(
+            @Parameter(description = "팔로워 목록을 조회할 사용자 ID", example = "1")
+            @PathVariable("userId") Long userId
+    ) {
+        User currentUser = userService.getUserById(userId);
+        List<FollowUserResponse> followers = followService.getFollowerList(currentUser);
+        return ResponseEntity.ok(followers);
+    }
+
 }
