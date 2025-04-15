@@ -101,19 +101,19 @@ public class Rq {
         return req.getHeader(name);
     }
 
-    public void refreshAccessToken(User user) {
-        String newAccessToken = userService.genAccessToken(user);
-
-        setHeader("Authorization", "Bearer " + user.getRefreshToken() + " " + newAccessToken);
-        setCookie("accessToken", newAccessToken);
-    }
-
-    public String makeAuthCookies(User user) {
-        String accessToken = userService.genAccessToken(user);
-
-        setCookie("apiKey", user.getRefreshToken());
-        setCookie("accessToken", accessToken);
-
-        return accessToken;
-    }
+//    public void refreshAccessToken(User user) {
+//        String newAccessToken = userService.genAccessToken(user);
+//
+//        setHeader("Authorization", "Bearer " + user.getRefreshToken() + " " + newAccessToken);
+//        setCookie("accessToken", newAccessToken);
+//    }
+//
+//    public String makeAuthCookies(User user) {
+//        String accessToken = userService.genAccessToken(user);
+//
+//        setCookie("apiKey", user.getRefreshToken());
+//        setCookie("accessToken", accessToken);
+//
+//        return accessToken;
+//    }
 }
