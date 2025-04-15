@@ -1,6 +1,7 @@
 package com.commitmate.re_cord.global.security;
 
 import com.commitmate.re_cord.domain.user.user.entity.User;
+import com.commitmate.re_cord.domain.user.user.enums.Provider;
 import com.commitmate.re_cord.domain.user.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +34,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String nickname = attributesProperties.get("nickname");
         String profileImgUrl = attributesProperties.get("profile_image");
         String username = providerTypeCode + "__" + oauthId;
+        Provider provider = Provider.valueOf(providerTypeCode);
 
         // 서비스 회원가입
-        User user = userService.modifyOrJoin(username, nickname);
+        User user = userService.modifyOrJoin(username, nickname, provider);
 
         return new SecurityUser(
                 user.getId(),

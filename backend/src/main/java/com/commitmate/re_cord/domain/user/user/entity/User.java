@@ -6,13 +6,10 @@ import com.commitmate.re_cord.domain.user.user.enums.Provider;
 import com.commitmate.re_cord.domain.user.user.enums.Role;
 import com.commitmate.re_cord.global.jpa.BaseEntity;
 import jakarta.persistence.*;
-
 import lombok.*;
-
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,8 +52,8 @@ public class User extends BaseEntity {
     //내가 차단한
     @OneToMany(mappedBy = "blockedId")
     private List<Block> blockingList = new ArrayList<>();
-  
-  //나를 차단한
+
+    //나를 차단한
 
 //    @OneToMany(mappedBy = "blockingId")
 //    private List<Follow> blockedList = new ArrayList<>();
