@@ -56,6 +56,25 @@ public class CommentService {
 
     }
 
+    @Transactional
+    public CommentResponseDTO updateComment(CommentRequestDTO commentRequestDTO, Long postId, Long userId, Long commentId){
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(()-> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+
+        if(!comment.getUser().getId().equals(userId)){
+            throw new IllegalArgumentException("댓글 작성자만 수정할 수 있습니다.");
+        }
+
+        String timeToShow = comment.getUpdateStatus() == UpdateStatus.EDITED
+                ? comment.getUpdatedAt().toString()
+                : comment.getCreatedAt().toString(); //수정했을 경우 수정시간을, 안했을 경우 최초 등록 시간을 보여주기 위해서
+
+        comment.setContent(commentRequestDTO.getContent());
+        comment.setUpdateStatus(UpdateStatus.EDITED);
+        return new CommentResponseDTO(comment.getId(),comment.getContent(),comment.getUser().getUsername(),timeToShow);
+    }
+
     public List<CommentDTO> getCommentsByUser(Long userId) {
         return commentRepository.findMyComment(userId).stream()
                 .map(CommentDTO::getEntity)
