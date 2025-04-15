@@ -17,12 +17,17 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Block extends BaseEntity {
-    // 나(차단한 사람, A)
+
+
+    //차단 한 사람
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blocker_id", nullable = false)
     private User blockerId;
 
-    // 상대방(차단당한 사람, B)
+
+    //차단 당한사람
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "blocked_id", nullable = false)
     private User blockedId;

@@ -50,6 +50,7 @@ public class FollowController {
         return ResponseEntity.ok("언팔로우 완료!");
     }
 
+
     // 3. 내가 팔로우한 사람 목록 조회
     @Operation(summary = "내가 팔로우한 사람들 목록", description = "지정한 사용자 ID가 팔로우한 사람 목록을 조회합니다.")
     @GetMapping("/{userId}/followings")
@@ -73,4 +74,5 @@ public class FollowController {
         List<FollowUserResponse> followers = followService.getFollowerList(currentUser);
         return ResponseEntity.ok(followers);
     }
+
 }
