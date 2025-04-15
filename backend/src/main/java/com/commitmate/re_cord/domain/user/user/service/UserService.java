@@ -51,27 +51,27 @@ public class UserService {
         return userRepository.findByRefreshToken(refreshToken);
     }
 
-//    public String genAccessToken(User user) {
-//        return authTokenService.genAccessToken(user);
-//    }
-//
-//    public String genAuthToken(User user) {
-//        return user.getRefreshToken() + " " + genAccessToken(user);
-//    }
-//
-//    public User getMemberFromAccessToken(String accessToken) {
-//        Map<String, Object> payload = authTokenService.payload(accessToken);
-//
-//        if (payload == null) return null;
-//
-//        long id = (long) payload.get("id");
-//        String username = (String) payload.get("username");
-//        String nickname = (String) payload.get("nickname");
-//
-//        User user = new User(id, username, nickname);
-//
-//        return user;
-//    }
+    public String genAccessToken(User user) {
+        return authTokenService.genAccessToken(user);
+    }
+
+    public String genAuthToken(User user) {
+        return user.getRefreshToken() + " " + genAccessToken(user);
+    }
+
+    public User getMemberFromAccessToken(String accessToken) {
+        Map<String, Object> payload = authTokenService.payload(accessToken);
+
+        if (payload == null) return null;
+
+        long id = (long) payload.get("id");
+        String username = (String) payload.get("username");
+        String nickname = (String) payload.get("nickname");
+
+        User user = new User(id, username, nickname);
+
+        return user;
+    }
 
     public void modify(User user, @NotBlank String nickname) {
         user.setNickname(nickname);
