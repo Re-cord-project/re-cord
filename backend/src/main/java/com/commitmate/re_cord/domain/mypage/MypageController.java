@@ -1,6 +1,6 @@
 package com.commitmate.re_cord.domain.mypage;
 
-import com.commitmate.re_cord.domain.post.comment.comment.Service.CommentService;
+import com.commitmate.re_cord.domain.post.comment.comment.service.CommentService;
 import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentDTO;
 import com.commitmate.re_cord.domain.post.post.dto.PostDTO;
 import com.commitmate.re_cord.domain.post.post.service.PostService;
