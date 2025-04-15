@@ -52,23 +52,20 @@ public class FollowService {
         followRepository.save(follow);
     }
 
-//    /**
-//     * 언팔로우 기능 - 팔로우 관계 해제
-//     *
-//     * @param follower 로그인한 사용자
-//     * @param followId 언팔로우할 Follow 엔티티의 ID
-//     */
-//    @Transactional
-//    public void unfollow(User follower, Long followId) {
-//
-//        // 1. 해당 followId가 존재하고, 현재 로그인 유저가 팔로워인지 검증
-//        Follow follow = followRepository.findByIdAndFollowerId(followId, follower)
-//                .orElseThrow(() -> new EntityNotFoundException("팔로우 정보를 찾을 수 없습니다."));
-//
-//        followRepository.delete(follow); // 언팔로우 (삭제)
-//    }
+    /**
+     * 언팔로우 기능 - 로그인한 유저(follower, A)가 특정 followId(B)를 삭제함
+     *
+     * @param follower 로그인한 사용자 (보통 SecurityContext에서 주입)
+     * @param followId 삭제할 Follow 엔티티의 ID
+     */
+    @Transactional
+    public void unfollow(User follower, Long followId) {
 
+        // 1. 팔로우 엔티티가 존재하고, 로그인한 사용자가 소유자인지 확인
+        Follow follow = followRepository.findByIdAndFollowerId(followId, follower)
+                .orElseThrow(() -> new EntityNotFoundException("팔로우 정보를 찾을 수 없습니다."));
 
-
-
+        // 2. 삭제
+        followRepository.delete(follow);
+    }
 }
