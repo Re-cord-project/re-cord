@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
-public class FollowController {
+public class ApiV1FollowController {
 
     private final FollowService followService;
     private final UserService userService;
