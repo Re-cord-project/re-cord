@@ -7,6 +7,7 @@ import com.commitmate.re_cord.global.security.SecurityUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,7 +27,7 @@ import java.util.Optional;
 public class Rq {
     private final HttpServletRequest req;
     private final HttpServletResponse resp;
-    private final UserService userService;
+    private final @Lazy UserService userService;
 
     public void setLogin(User user) {
         UserDetails userDetails = new SecurityUser(

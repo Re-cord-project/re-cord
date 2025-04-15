@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class UserService {
     private final AuthTokenService authTokenService;
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // 일반 회원가입
     @Transactional
@@ -29,9 +31,13 @@ public class UserService {
         if (userRepository.findByEmail(email).isPresent()) {
             return "Email already exists";
         }
+
+        String encodedPassword = passwordEncoder.encode(password); // 비밀번호 암호화
+
+
         User user = new User();
         user.setEmail(email);
-        user.setPassword(password);
+        user.setPassword(encodedPassword);
         user.setUsername(username);
         user.setNickname(nickname);
         user.setBootcamp(bootcamp);
@@ -45,23 +51,17 @@ public class UserService {
     @Transactional
     public String login(String email, String password) {
         Optional<User> userOptional = userRepository.findByEmail(email);
-        if (userOptional.isPresent() && password.equals(userOptional.get().getPassword())) {
+        if (userOptional.isPresent()) {
             User user = userOptional.get();
 
-            // 리프레시 토큰 생성
-            String refreshToken = UUID.randomUUID().toString();
+            if (passwordEncoder.matches(password, user.getPassword())) {
+                String refreshToken = UUID.randomUUID().toString();
+                user.setRefreshToken(refreshToken);
+                userRepository.save(user);
 
-            // 생성된 리프레시 토큰을 사용자 엔티티에 저장
-            user.setRefreshToken(refreshToken);
-
-            // 사용자 정보 업데이트 (리프레시 토큰 저장)
-            userRepository.save(user);
-
-            // 액세스 토큰 생성
-            String accessToken = authTokenService.genAccessToken(user);
-
-            // 리프레시 토큰과 액세스 토큰을 결합하여 반환 (예: 클라이언트에게 전달)
-            return user.getRefreshToken() + " " + accessToken;
+                String accessToken = authTokenService.genAccessToken(user);
+                return user.getRefreshToken() + " " + accessToken;
+            }
         }
 
         return null;
@@ -154,6 +154,7 @@ public class UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("해당 이메일을 찾을 수 없습니다."));
     }
+
 
 
 }

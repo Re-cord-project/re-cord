@@ -6,6 +6,7 @@ import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.service.UserService;
 import com.commitmate.re_cord.global.security.UserLoginDto;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -36,7 +37,7 @@ public class ApiV1UserController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         if(user.getEmail()  == null || user.getEmail().isEmpty() || user.getPassword() == null || user.getPassword().isEmpty()){
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body("Email and Password are required");
         }
         return ResponseEntity.status(200).body(userService.register(user.getEmail(), user.getPassword(), user.getUsername(), user.getNickname(),
                 user.getBootcamp(), user.getGeneration()));
@@ -45,7 +46,7 @@ public class ApiV1UserController {
     // 로그인
     @PostMapping("/login")
 
-    public ResponseEntity<?> login(@RequestBody UserLoginDto userLoginDto, HttpServletResponse response) {
+    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDto userLoginDto, HttpServletResponse response) {
         User user = userService.findByEmail(userLoginDto.getEmail());
         String token = userService.login(userLoginDto.getEmail(), userLoginDto.getPassword());
 
