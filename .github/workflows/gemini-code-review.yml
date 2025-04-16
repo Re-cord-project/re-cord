@@ -56,8 +56,10 @@ jobs:
             const genAI = new GoogleGenerativeAI("${{ secrets.GEMINI_API_KEY }}");
             const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-            const prompt = `You are a senior software engineer. Given the following git diff, your task is to generate inline review comments ONLY on lines that are part of the diff. Your response MUST be a JSON array in this exact format:[{"path": "파일 경로 (예: src/main/java/com/example/Foo.java)","line": 줄 번호 (diff에서 변경된 줄 번호만), "text": "리뷰 코멘트 내용", "side": "RIGHT"}]DO NOT include lines that were not part of the diff.DO NOT include any extra text outside the JSON.<git diff>${diff_output}</git diff>`;
+            const prompt = `You are a senior software engineer. Given the git diff below, you need to review the code. Output ONLY in JSON array format: [{"path":"파일 경로", "line":줄번호, "text":"리뷰 코멘트", "side":"RIGHT"}]. Do not return anything else.\n<git diff>${diff_output}</git diff>`;
 
+            const result = await model.generateContent(prompt);
+            const response = await result.response;
             const text = response.text();
 
             fs.writeFileSync('review_result.txt', text);

@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -22,7 +23,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     private final Rq rq;
 
 
-    record AuthTokens(String apiKey, String accessToken) {
+    record AuthTokens(String refreshToken, String accessToken) {
     }
 
     private AuthTokens getAuthTokensFromRequest() {
@@ -36,11 +37,11 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                 return new AuthTokens(tokenBits[0], tokenBits[1]);
         }
 
-        String apiKey = rq.getCookieValue("apiKey");
+        String refreshToken = rq.getCookieValue("refreshToken");
         String accessToken = rq.getCookieValue("accessToken");
 
-        if (apiKey != null && accessToken != null)
-            return new AuthTokens(apiKey, accessToken);
+        if (refreshToken != null && accessToken != null)
+            return new AuthTokens(refreshToken, accessToken);
 
         return null;
     }
@@ -86,7 +87,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String refreshToken = authTokens.apiKey;
+        String refreshToken = authTokens.refreshToken;
         String accessToken = authTokens.accessToken;
 
         User user = userService.getMemberFromAccessToken(accessToken);
