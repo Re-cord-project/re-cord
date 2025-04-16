@@ -15,6 +15,8 @@ public class CommentDTO {
     private LocalDateTime createdAt;
     private Long postId;
     private String postTitle;
+    private int likes;
+
 
 
     public static CommentDTO getEntity(Comment comment){
@@ -24,7 +26,8 @@ public class CommentDTO {
                 comment.getContent(),
                 comment.getCreatedAt(),
                 comment.getPost().getId(),
-                comment.getPost().getTitle()
+                comment.getPost().getTitle(),
+                comment.getLikes()
         );
     }
 
