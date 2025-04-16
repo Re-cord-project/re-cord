@@ -68,7 +68,14 @@ public class UserService {
     }
 
     // 로그아웃
-    // 토큰 비활성화 필요
+    @Transactional
+    public void logout(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+
+        user.setRefreshToken(null); // refreshToken 제거
+        userRepository.save(user);  // 변경사항 저장
+    }
 
     // 소셜 로그인
     public long count() {
@@ -155,6 +162,32 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("해당 이메일을 찾을 수 없습니다."));
     }
 
+    // 소셜 로그인 시 임시 유저 생성
+    public User createTempUser(String username, String nickname, Provider provider) {
+        // 이미 존재하면 그대로 반환
+        return userRepository.findByUsername(username).orElseGet(() -> {
+            User user = User.builder()
+                    .username(username)
+                    .nickname(nickname)
+                    .provider(provider)
+                    .refreshToken(UUID.randomUUID().toString())
+                    .role(Role.basic)
+                    .build();
+            return userRepository.save(user);
+        });
+    }
 
+    @Transactional
+    public User completeOAuth2Signup(String username, String nickname, String bootcamp, int generation) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("임시 계정이 없습니다"));
+
+        user.setNickname(nickname);
+        user.setBootcamp(bootcamp);
+        user.setGeneration(generation);
+        user.setRefreshToken(UUID.randomUUID().toString());
+
+        return userRepository.save(user);
+    }
 
 }
