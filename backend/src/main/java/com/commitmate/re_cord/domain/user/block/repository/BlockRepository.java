@@ -8,6 +8,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface BlockRepository extends JpaRepository<Block, Long> {
 
-    // 특정 유저가 다른 유저를 차단했는지 확인
+    // 차단한 유저와 차단된 유저가 존재하는지 확인
     boolean existsByBlockerIdAndBlockedId(User blocker, User blocked);
+
+    // 차단한 유저와 차단된 유저의 관계 삭제
+    void deleteByBlockerIdAndBlockedId(User blocker, User blocked);
 }
