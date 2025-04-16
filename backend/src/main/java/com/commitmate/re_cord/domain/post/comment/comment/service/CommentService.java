@@ -68,7 +68,9 @@ public class CommentService {
 
         comment.setContent(commentRequestDTO.getContent());
         comment.setUpdateStatus(UpdateStatus.EDITED);
-        return new CommentResponseDTO(comment.getId(),comment.getContent(),comment.getUser().getUsername(),comment.getCreatedAt().toString());
+
+        Comment updatedComment = commentRepository.save(comment);
+        return new CommentResponseDTO(updatedComment.getId(),updatedComment.getContent(),updatedComment.getUser().getUsername(),updatedComment.getCreatedAt().toString());
     }
 
     public List<CommentDTO> getCommentsByUser(Long userId) {
