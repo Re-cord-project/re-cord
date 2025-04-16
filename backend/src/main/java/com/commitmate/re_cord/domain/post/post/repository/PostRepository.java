@@ -1,10 +1,8 @@
 package com.commitmate.re_cord.domain.post.post.repository;
 
-import com.commitmate.re_cord.domain.post.post.dto.PostDTO;
 import com.commitmate.re_cord.domain.post.post.entity.Post;
 import com.commitmate.re_cord.domain.post.post.entity.PostStatus;
 import com.commitmate.re_cord.domain.user.user.entity.User;
-import com.commitmate.re_cord.global.jpa.UpdateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,7 +12,6 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
 
 public interface PostRepository extends JpaRepository<Post,Long> {
 
@@ -59,15 +56,16 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 
     List<Object[]> getMonthlyViews(@Param("userId") Long userId);
 
-    
+    // 게시물의 상태중에서 updateAt이 가장 최신인 글을 가져오는 메서드
     Optional<Post> findTopByUserAndStatusOrderByUpdatedAtDesc(User user, PostStatus status);
-    // 카테고리와 PUBLISHED 인 게시글만 보는 메서드
-    Page<Post> findAllByCategoryIdAndUpdateStatus(Long categoryId, UpdateStatus updateStatus, Pageable pageable);
 
-    // 제목, 내용, 작성자 이름을 기준으로 검색하되, 삭제되지 않은 포스트만 필터링하는 메서드
+    // 카테고리와 PUBLISHED 인 게시글만 보는 메서드
+    Page<Post> findAllByCategoryIdAndStatus(Long categoryId, PostStatus status, Pageable pageable);
+
+    // 제목, 내용, 작성자 이름을 기준으로 검색하고, 상태가 EDITED 인 게시물만 가져오는 메서드
     @Query("""
     SELECT p FROM Post p
-    WHERE p.updateStatus = 'EDITED'
+    WHERE p.status = 'PUBLISHED'
       AND (
         LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
         LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
@@ -76,10 +74,13 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 """)
     Page<Post> searchVisiblePosts(@Param("keyword") String keyword, Pageable pageable);
 
+    // 상태가 EDITED 인 게시물만 가져오는 메서드
+    Page<Post> findAllByStatus(PostStatus status, Pageable pageable);
 
-    // 삭제되지 않은 모든 포스트를 찾는 메서드
-    Page<Post> findAllByUpdateStatus(UpdateStatus updateStatus, Pageable pageable);
+    // 특정 시간이 지난 게시물을 가져오는 메서드
+    List<Post> findAllByStatusAndUpdatedAtBefore(PostStatus status, LocalDateTime time);
 
-    List<Post> findAllByUpdateStatusAndUpdatedAtBefore(UpdateStatus status, LocalDateTime time);
+    // 특정 유저의 특정 상태의 게시물을 삭제하는 메서드
+    void deleteByUserAndStatus(User user, PostStatus status);
 
 }
