@@ -1,6 +1,7 @@
 package com.commitmate.re_cord.scheduler;
 
 import com.commitmate.re_cord.domain.post.post.entity.Post;
+import com.commitmate.re_cord.domain.post.post.entity.PostStatus;
 import com.commitmate.re_cord.domain.post.post.repository.PostRepository;
 import com.commitmate.re_cord.global.jpa.UpdateStatus;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class PostCleanupScheduler {
     @Scheduled(cron = "0 0 3 * * *")
     public void deleteOldSoftDeletedPosts() {
         LocalDateTime threshold = LocalDateTime.now().minusDays(15);
-        List<Post> oldDeletedPosts = postRepository.findAllByUpdateStatusAndUpdatedAtBefore(UpdateStatus.DELETED, threshold);
+        List<Post> oldDeletedPosts = postRepository.findAllByStatusAndUpdatedAtBefore(PostStatus.DELETED, threshold);
 
         postRepository.deleteAll(oldDeletedPosts);
         System.out.println("[Scheduler] 하드 삭제된 게시글 수: " + oldDeletedPosts.size());

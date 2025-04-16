@@ -21,18 +21,19 @@ import java.util.Optional;
 public class ApiV1PostCreateController {
     private final PostService postService;
     private final UserRepository userRepository;
+
     // 게시글 등록
     @PostMapping
     public ResponseEntity<String> createPost(
             @RequestBody @Validated PostRequestDto dto,
             @AuthenticationPrincipal SecurityUser userDetails) {
 
-        postService.createPost(dto, userDetails.getId()); // getUsername() → getId()
+        postService.createPost(dto, userDetails.getId());
         return ResponseEntity.ok("게시글 등록 완료");
     }
 
     // 현재 로그인한 사용자가 마지막으로 저장한 임시 글을 불러오는 API
-    @GetMapping("/posts/drafts/latest")
+    @GetMapping("/drafts/latest")
     public ResponseEntity<PostResponseDto> getLatestDraft(@AuthenticationPrincipal SecurityUser userDetails) {
         // userId 꺼냄
         long userId = userDetails.getId();
@@ -45,7 +46,7 @@ public class ApiV1PostCreateController {
         Optional<Post> draftOpt = postService.getLatestDraftByUser(user);
 
         if (draftOpt.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 임시 글 없을 경우 204
+            return ResponseEntity.noContent().build();
         }
 
         PostResponseDto dto = new PostResponseDto(draftOpt.get());
