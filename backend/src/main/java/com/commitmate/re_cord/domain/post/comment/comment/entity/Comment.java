@@ -34,4 +34,14 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "post_id")
     private Post post;
 
+    public void increaseLikeCount(){
+        this.likes++;
+    }
+
+    public void decreaseLikeCount(){
+        if(this.likes>0){
+            this.likes--;
+        }
+    }
+
 }

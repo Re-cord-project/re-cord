@@ -5,14 +5,12 @@ import com.commitmate.re_cord.domain.user.follow.entity.Follow;
 import com.commitmate.re_cord.domain.user.user.enums.Provider;
 import com.commitmate.re_cord.domain.user.user.enums.Role;
 import com.commitmate.re_cord.global.jpa.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-
 import lombok.*;
-
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,7 +26,7 @@ import java.util.List;
 @ToString
 
 @Table(name="users") //user는 h2데이터베이스 기본 예약어
-
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User extends BaseEntity {
     private String email;
     private String username;
@@ -55,8 +53,8 @@ public class User extends BaseEntity {
     //내가 차단한
     @OneToMany(mappedBy = "blockedId")
     private List<Block> blockingList = new ArrayList<>();
-  
-  //나를 차단한
+
+    //나를 차단한
 
 //    @OneToMany(mappedBy = "blockingId")
 //    private List<Follow> blockedList = new ArrayList<>();

@@ -4,23 +4,7 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
-#spring:
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          kakao:
-#            clientId: ON_SECRET
-#            scope: profile_nickname, profile_image
-#            client-name: Kakao
-#            authorization-grant-type: authorization_code
-#            redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
-#        provider:
-#          kakao:
-#            authorization-uri: https://kauth.kakao.com/oauth/authorize
-#            token-uri: https://kauth.kakao.com/oauth/token
-#            user-info-uri: https://kapi.kakao.com/v2/user/me
-#            user-name-attribute: id
+
   profiles:
     active: dev
     include: secret
@@ -49,12 +33,35 @@ spring:
             client-name: Kakao
             authorization-grant-type: authorization_code
             redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
+          github:
+            clientId: ON_SECRET
+            scope: user
+            client-name: Github
+            authorization-grant-type: authorization_code
+            redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
+          google:
+            clientId: ON_SECRET
+            scope: profile_email
+            client-name: Google
+            authorization-grant-type: authorization_code
+            redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+          github:
+            authorization-uri: https://github.com/login/oauth/authorize
+            token-uri: https://github.com/login/oauth/access_token
+            user-info-uri: https://api.github.com/user
+            user-name-attribute: id
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: id
+
 logging:
   level:
     com.ll.blog: DEBUG
