@@ -5,6 +5,7 @@ import com.commitmate.re_cord.domain.user.follow.entity.Follow;
 import com.commitmate.re_cord.domain.user.user.enums.Provider;
 import com.commitmate.re_cord.domain.user.user.enums.Role;
 import com.commitmate.re_cord.global.jpa.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -25,7 +26,7 @@ import java.util.List;
 @ToString
 
 @Table(name="users") //user는 h2데이터베이스 기본 예약어
-
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User extends BaseEntity {
     private String email;
     private String username;

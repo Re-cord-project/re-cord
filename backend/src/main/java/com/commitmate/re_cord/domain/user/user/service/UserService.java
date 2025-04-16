@@ -22,7 +22,7 @@ import java.util.UUID;
 public class UserService {
     private final AuthTokenService authTokenService;
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+//    private final PasswordEncoder passwordEncoder;
 
     // 일반 회원가입
     @Transactional
@@ -32,12 +32,13 @@ public class UserService {
             return "Email already exists";
         }
 
-        String encodedPassword = passwordEncoder.encode(password); // 비밀번호 암호화
+//        String encodedPassword = passwordEncoder.encode(password); // 비밀번호 암호화
 
 
         User user = new User();
         user.setEmail(email);
-        user.setPassword(encodedPassword);
+//        user.setPassword(encodedPassword);
+        user.setPassword(password);
         user.setUsername(username);
         user.setNickname(nickname);
         user.setBootcamp(bootcamp);
@@ -54,7 +55,13 @@ public class UserService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
 
-            if (passwordEncoder.matches(password, user.getPassword())) {
+//            if (passwordEncoder.matches(password, user.getPassword())) {
+//                String refreshToken = UUID.randomUUID().toString();
+//                user.setRefreshToken(refreshToken);
+//                userRepository.save(user);
+
+            // 평문 비교 (보안 위험 있음 - 테스트용만)
+            if (password.equals(user.getPassword())) {
                 String refreshToken = UUID.randomUUID().toString();
                 user.setRefreshToken(refreshToken);
                 userRepository.save(user);
