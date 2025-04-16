@@ -27,7 +27,7 @@ import java.util.Optional;
 public class Rq {
     private final HttpServletRequest req;
     private final HttpServletResponse resp;
-    private final @Lazy UserService userService;
+    private final UserService userService;
 
     public void setLogin(User user) {
         UserDetails userDetails = new SecurityUser(

@@ -16,9 +16,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+@Component
 @RequiredArgsConstructor
 public class CustomAuthenticationFilter extends OncePerRequestFilter {
-    private final @Lazy UserService userService;
+    private final UserService userService;
     private final Rq rq;
 
 
