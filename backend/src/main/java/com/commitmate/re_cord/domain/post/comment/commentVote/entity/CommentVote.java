@@ -17,18 +17,18 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(exclude ={"userId", "commentId"})
+@ToString(exclude ={"user", "comment"})
 public class CommentVote extends BaseEntity {
-    public boolean commentLike;
+//    public boolean commentLike; //commentLike는 존재여부로 판단하면 되는데 굳이 필요할까?
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User userId;
+    private User user; //userId에서 user로 수정
 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comment_id")
-    private Comment commentId;
+    private Comment comment;
 
 
 }
