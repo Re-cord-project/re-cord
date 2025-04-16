@@ -45,8 +45,8 @@ public class ApiV1UserController {
 
     // 로그인
     @PostMapping("/login")
-
-    public ResponseEntity<?> login(@Valid @RequestBody UserLoginDto userLoginDto, HttpServletResponse response) {
+    @Valid
+    public ResponseEntity<?> login( @RequestBody UserLoginDto userLoginDto, HttpServletResponse response) {
         User user = userService.findByEmail(userLoginDto.getEmail());
         String token = userService.login(userLoginDto.getEmail(), userLoginDto.getPassword());
 
