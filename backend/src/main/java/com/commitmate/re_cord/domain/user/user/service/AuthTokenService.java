@@ -2,7 +2,6 @@ package com.commitmate.re_cord.domain.user.user.service;
 
 import com.commitmate.re_cord.Ut.Ut;
 import com.commitmate.re_cord.domain.user.user.entity.User;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -38,3 +37,4 @@ public class AuthTokenService {
         return Map.of("id", id, "username", username);
     }
 }
+
