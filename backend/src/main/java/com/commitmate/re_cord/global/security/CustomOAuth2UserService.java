@@ -34,7 +34,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         Map<String, Object> attributes = oAuth2User.getAttributes();
         Map<String, String> attributesProperties = (Map<String, String>) attributes.get("properties");
-
+        Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
+        String email = null;
+        if (kakaoAccount != null && kakaoAccount.get("email") != null) {
+            email = (String) kakaoAccount.get("email");
+        }
         String nickname = attributesProperties.get("nickname");
 //        String profileImgUrl = attributesProperties.get("profile_image"); // 이미지는 안받아옴
         String username = providerTypeCode + "__" + oauthId;
@@ -52,6 +56,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User tempUser = userService.createTempUser(username, nickname, provider);
 
         // 이후 프론트에서 /signup/oauth2 페이지로 이동하여 추가 정보 입력 유도
-        throw new OAuth2AdditionalInfoRequiredException(username);
+        throw new OAuth2AdditionalInfoRequiredException(username, nickname, email);
     }
 }

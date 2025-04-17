@@ -24,7 +24,6 @@ import java.util.List;
 @SuperBuilder
 @Builder
 @ToString
-
 @Table(name="users") //user는 h2데이터베이스 기본 예약어
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User extends BaseEntity {
@@ -41,18 +40,18 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    //내가 팔로잉하는
-    @OneToMany(mappedBy = "followerId")
-    private List<Follow> followingList = new ArrayList<>();
-
-    //나를 팔로우하는
-    @OneToMany(mappedBy = "followingId")
-    private List<Follow> followerList = new ArrayList<>();
-
-
-    //내가 차단한
-    @OneToMany(mappedBy = "blockedId")
-    private List<Block> blockingList = new ArrayList<>();
+//    //내가 팔로잉하는
+//    @OneToMany(mappedBy = "followerId")
+//    private List<Follow> followingList = new ArrayList<>();
+//
+//    //나를 팔로우하는
+//    @OneToMany(mappedBy = "followingId")
+//    private List<Follow> followerList = new ArrayList<>();
+//
+//
+//    //내가 차단한
+//    @OneToMany(mappedBy = "blockedId")
+//    private List<Block> blockingList = new ArrayList<>();
 
     //나를 차단한
 
