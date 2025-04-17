@@ -17,6 +17,7 @@ public class ApiV1MyPageUserController {
 
     private final MyPageUserService myPageUserService;
 
+    //유저의 세부 정보 변경
     @PutMapping("/{userId}/userUpdate")
     public ResponseEntity<UpdateUserDTO> updateUser(@PathVariable("userId") Long userId, @RequestBody UpdateUserDTO updateUserDTO) {
         UpdateUserDTO updatedUser = myPageUserService.updateUser(userId, updateUserDTO);
