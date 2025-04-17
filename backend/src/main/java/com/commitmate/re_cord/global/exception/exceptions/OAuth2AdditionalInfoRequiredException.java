@@ -3,27 +3,18 @@ package com.commitmate.re_cord.global.exception.exceptions;
 import org.springframework.security.core.AuthenticationException;
 
 public class OAuth2AdditionalInfoRequiredException extends AuthenticationException {
-    private final String username;
-    private final String nickname;
-    private final String email;
+    private final String oauthId;
 
-    public OAuth2AdditionalInfoRequiredException(String username, String nickname, String email) {
+    public OAuth2AdditionalInfoRequiredException(String oauthId, String username, String email) {
         super("Additional signup info required for username: " + username);
-        this.username = username;
-        this.nickname = nickname;
-        this.email = email;
+        this.oauthId = oauthId;
+
     }
 
-    public String getUsername() {
-        return username;
+    public String getOauthId() {
+        return oauthId;
     }
 
-    public String getNickname() {
-        return nickname;
-    }
 
-    public String getEmail() {
-        return email;
-    }
 }
 

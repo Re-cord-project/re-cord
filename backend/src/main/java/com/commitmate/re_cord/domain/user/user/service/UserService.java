@@ -6,12 +6,14 @@ import com.commitmate.re_cord.domain.user.user.enums.Provider;
 import com.commitmate.re_cord.domain.user.user.enums.Role;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 
 import java.util.Map;
@@ -28,7 +30,7 @@ public class UserService {
 
     // 일반 회원가입
     @Transactional
-    public String register(String email, String password, String username, String nickname,
+    public String register(String oauthId, String email, String password, String username,
                            String bootcamp, int generation) {
         if (userRepository.findByEmail(email).isPresent()) {
             return "Email already exists";
@@ -38,11 +40,11 @@ public class UserService {
 
 
         User user = new User();
+        user.setOauthId(user.getOauthId());
         user.setEmail(email);
 //        user.setPassword(encodedPassword);
         user.setPassword(password);
         user.setUsername(username);
-        user.setNickname(nickname);
         user.setBootcamp(bootcamp);
         user.setGeneration(generation);
         user.setRole(Role.basic);
@@ -91,7 +93,7 @@ public class UserService {
         return userRepository.count();
     }
 
-    public User join(String username, String password, String nickname, Provider provider) {
+    public User join(String oauthId, String username, String password, Provider provider) {
         userRepository
                 .findByUsername(username)
                 .ifPresent(member -> {
@@ -99,9 +101,9 @@ public class UserService {
                 });
 
         User user = User.builder()
+                .oauthId(oauthId)
                 .username(username)
                 .password(password)
-                .nickname(nickname)
                 .provider(provider)
                 .refreshToken(UUID.randomUUID().toString())
                 .build();
@@ -136,15 +138,12 @@ public class UserService {
 
         long id = (long) payload.get("id");
         String username = (String) payload.get("username");
-        String nickname = (String) payload.get("nickname");
 
-        User user = new User(id, username, nickname);
-
-        return user;
+        return new User(id, username);
     }
 
-    public void modify(User user, @NotBlank String nickname) {
-        user.setNickname(nickname);
+    public void modify(User user, @NotBlank String username) {
+        user.setUsername(username);
     }
 
     public User modifyOrJoin(String username, String nickname, Provider provider) {
@@ -171,8 +170,9 @@ public class UserService {
                 .orElseThrow(() -> new EntityNotFoundException("해당 이메일을 찾을 수 없습니다."));
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     // 소셜 로그인 시 임시 유저 생성
-    public User createTempUser(String username, String nickname, Provider provider) {
+    public User createTempUser(String oauthId, String username, Provider provider) {
         // 이미 존재하면 그대로 반환
 
         User user = userRepository.findByUsername(username).orElse(null);
@@ -180,8 +180,8 @@ public class UserService {
         if (user == null) {
             // 유저가 존재하지 않으면 새로운 유저 생성
             user = User.builder()
+                    .oauthId(oauthId)
                     .username(username)
-                    .nickname(nickname)
                     .provider(provider)
                     .refreshToken(UUID.randomUUID().toString())
                     .role(Role.basic)
@@ -191,8 +191,8 @@ public class UserService {
             User savedUser = userRepository.save(user);
 
             // 로그 확인
-            log.info("임시 유저 생성 완료 - username: {}, nickname: {}, provider: {}",
-                    savedUser.getUsername(), savedUser.getNickname(), savedUser.getProvider());
+            log.info("임시 유저 생성 완료 - oauthId: {}, username: {}, provider: {}",
+                    savedUser.getOauthId(), savedUser.getUsername(), savedUser.getProvider());
             return savedUser;
         } else {
             // 유저가 존재하면 기존 유저 반환
@@ -201,13 +201,12 @@ public class UserService {
     }
 
     @Transactional
-    public User completeOAuth2Signup(String email, String username, String nickname, String bootcamp, int generation) {
-        User user = userRepository.findByUsername(username)
+    public User completeOAuth2Signup(String oauthId, String email, String bootcamp, int generation) {
+        System.out.println(oauthId);
+        User user = userRepository.findByOauthId(oauthId)
                 .orElseThrow(() -> new RuntimeException("임시 계정이 없습니다"));
 
         user.setEmail(email);
-        user.setUsername(username);
-        user.setNickname(nickname);
         user.setBootcamp(bootcamp);
         user.setGeneration(generation);
         user.setRefreshToken(UUID.randomUUID().toString());
