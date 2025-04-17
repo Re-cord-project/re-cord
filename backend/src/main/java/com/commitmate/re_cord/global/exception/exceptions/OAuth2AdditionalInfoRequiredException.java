@@ -1,6 +1,8 @@
 package com.commitmate.re_cord.global.exception.exceptions;
 
-public class OAuth2AdditionalInfoRequiredException extends RuntimeException {
+import org.springframework.security.core.AuthenticationException;
+
+public class OAuth2AdditionalInfoRequiredException extends AuthenticationException {
     private final String username;
 
     public OAuth2AdditionalInfoRequiredException(String username) {

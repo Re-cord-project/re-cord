@@ -2,6 +2,7 @@ package com.commitmate.re_cord.global.security;
 
 
 import com.commitmate.re_cord.domain.user.user.service.UserService;
+import com.commitmate.re_cord.global.exception.handler.OAuth2FailureHandler;
 import com.commitmate.re_cord.global.rq.Rq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +22,7 @@ public class SecurityConfig {
     private final CustomAuthenticationFilter customAuthenticationFilter;
     private final CustomOAuth2AuthenticationSuccessHandler customOAuth2AuthenticationSuccessHandler;
     private final CustomAuthorizationRequestResolver customAuthorizationRequestResolver;
-
+    private final OAuth2FailureHandler oAuth2FailureHandler;
     @Bean
     public SecurityFilterChain baseSecurityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -59,6 +60,7 @@ public class SecurityConfig {
                                                 authorizationEndpoint
                                                         .authorizationRequestResolver(customAuthorizationRequestResolver)
                                 )
+                                .failureHandler(oAuth2FailureHandler)
                 )
                 .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
