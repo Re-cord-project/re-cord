@@ -4,12 +4,11 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
-
   profiles:
     active: dev
     include: secret
     datasource:
-      url: jdbc:h2:./db_dev;MODE=MySQL;DB_CLOSE_DELAY=-1
+      url: jdbc:h2:./db_dev;MODE=MySQL;
       username: sa
       password:
       driver-class-name: org.h2.Driver
@@ -83,5 +82,4 @@ custom:
     cookieDomain: "${custom.dev.cookieDomain}"
     frontUrl: "${custom.dev.frontUrl}"
     backUrl: "${custom.dev.backUrl}"
-
 
