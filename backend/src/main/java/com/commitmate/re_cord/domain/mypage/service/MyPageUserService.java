@@ -15,7 +15,7 @@ public class MyPageUserService {
     private final UserRepository userRepository;
 
     public UpdateUserDTO updateUser(Long userId, UpdateUserDTO dto) {
-        // 유저를 찾고, 없으면 예외를 던짐
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
