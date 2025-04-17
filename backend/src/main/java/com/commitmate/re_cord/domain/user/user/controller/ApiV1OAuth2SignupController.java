@@ -25,7 +25,7 @@ public class ApiV1OAuth2SignupController {
     public ResponseEntity<String> completeSignup(@RequestBody OAuth2SignupRequest signupRequest) {
         // 새 유저 정보 처리
         try {
-            userService.completeOAuth2Signup(signupRequest.getUsername(), signupRequest.getNickname(), signupRequest.getBootcamp(), signupRequest.getGeneration());
+            userService.completeOAuth2Signup(signupRequest.getEmail(), signupRequest.getUsername(), signupRequest.getNickname(), signupRequest.getBootcamp(), signupRequest.getGeneration());
             return ResponseEntity.ok("회원가입 완료");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("회원가입 실패");

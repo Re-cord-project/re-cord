@@ -9,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
     private final AuthTokenService authTokenService;
     private final UserRepository userRepository;
@@ -172,23 +174,39 @@ public class UserService {
     // 소셜 로그인 시 임시 유저 생성
     public User createTempUser(String username, String nickname, Provider provider) {
         // 이미 존재하면 그대로 반환
-        return userRepository.findByUsername(username).orElseGet(() -> {
-            User user = User.builder()
+
+        User user = userRepository.findByUsername(username).orElse(null);
+
+        if (user == null) {
+            // 유저가 존재하지 않으면 새로운 유저 생성
+            user = User.builder()
                     .username(username)
                     .nickname(nickname)
                     .provider(provider)
                     .refreshToken(UUID.randomUUID().toString())
                     .role(Role.basic)
                     .build();
-            return userRepository.save(user);
-        });
+
+            // 유저 저장
+            User savedUser = userRepository.save(user);
+
+            // 로그 확인
+            log.info("임시 유저 생성 완료 - username: {}, nickname: {}, provider: {}",
+                    savedUser.getUsername(), savedUser.getNickname(), savedUser.getProvider());
+            return savedUser;
+        } else {
+            // 유저가 존재하면 기존 유저 반환
+            return user;
+        }
     }
 
     @Transactional
-    public User completeOAuth2Signup(String username, String nickname, String bootcamp, int generation) {
+    public User completeOAuth2Signup(String email, String username, String nickname, String bootcamp, int generation) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("임시 계정이 없습니다"));
 
+        user.setEmail(email);
+        user.setUsername(username);
         user.setNickname(nickname);
         user.setBootcamp(bootcamp);
         user.setGeneration(generation);

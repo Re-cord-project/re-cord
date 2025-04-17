@@ -68,9 +68,11 @@ public class ApiV1UserController {
     }
 
     // 소셜 회원가입 시 추가 정보 받기
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/api/oauth2/complete-signup")
     public ResponseEntity<?> completeSignup(@RequestBody OAuth2SignupRequest dto) {
         User user = userService.completeOAuth2Signup(
+                dto.getEmail(),
                 dto.getUsername(),
                 dto.getNickname(),
                 dto.getBootcamp(),

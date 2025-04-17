@@ -8,21 +8,21 @@ spring:
   profiles:
     active: dev
     include: secret
-    datasource:
-      url: jdbc:h2:./db_dev;MODE=MySQL;DB_CLOSE_DELAY=-1
-      username: sa
-      password:
-      driver-class-name: org.h2.Driver
-    jpa:
-      open-in-view: false
+  datasource:
+    url: jdbc:h2:./db_dev;MODE=MySQL;
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: create
+    properties:
       hibernate:
-        ddl-auto: update
-      properties:
-        hibernate:
-          default_batch_fetch_size: 100
-          format_sql: true
-          highlight_sql: true
-          use_sql_comments: true
+        default_batch_fetch_size: 100
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
   security:
     oauth2:
       client:
@@ -33,6 +33,8 @@ spring:
             client-name: Kakao
             authorization-grant-type: authorization_code
             redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
+#            redirect-uri: "http://localhost:8090/login/oauth2/code/kakao"
+
           github:
             clientId: ON_SECRET
             scope:
@@ -41,6 +43,7 @@ spring:
             client-name: Github
             authorization-grant-type: authorization_code
             redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
+
           google:
             clientId: ON_SECRET
             scope:
