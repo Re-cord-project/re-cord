@@ -2,7 +2,9 @@ package com.commitmate.re_cord.domain.post.post.dto;
 
 
 import com.commitmate.re_cord.domain.post.post.entity.Post;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
