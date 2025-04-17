@@ -14,7 +14,7 @@ public class ApiV1PostReadController {
     private final PostService postService;
 
     // 게시글 전체 목록 보기
-    @GetMapping("/posts")
+    @GetMapping
     public Page<PostResponseDto> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
@@ -40,7 +40,7 @@ public class ApiV1PostReadController {
     }
 
     // 카테고리별로 보는 API
-    @GetMapping("/posts/category/{categoryId}")
+    @GetMapping("/category/{categoryId}")
     public ResponseEntity<Page<PostResponseDto>> getPostsByCategory(
             @PathVariable Long categoryId,
             @RequestParam(value = "page", defaultValue = "0") int page,
