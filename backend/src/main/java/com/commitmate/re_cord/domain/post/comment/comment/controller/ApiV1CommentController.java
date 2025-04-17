@@ -6,6 +6,7 @@ import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentResponseDTO
 import com.commitmate.re_cord.domain.post.comment.comment.service.CommentService;
 import com.commitmate.re_cord.domain.post.comment.commentVote.service.CommentVoteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,6 +61,17 @@ public class ApiV1CommentController {
         CommentResponseDTO response = commentService.updateComment(requestDTO,postId,userId,commentId);
         return ResponseEntity.ok(response);
 
+    }
+
+    @GetMapping
+    public Page<CommentResponseDTO> getComment(
+            @PathVariable Long postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+
+
+        return commentService.getCommentByPostId(postId,page,size);
     }
 
 
