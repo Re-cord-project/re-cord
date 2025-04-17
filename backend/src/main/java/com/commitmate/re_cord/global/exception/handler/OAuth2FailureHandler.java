@@ -24,7 +24,7 @@ public class OAuth2FailureHandler implements AuthenticationFailureHandler {
             throws IOException, ServletException {
 
         if (exception instanceof OAuth2AdditionalInfoRequiredException ex) {
-            String redirectUrl = frontendUrl + "/signup/oauth2?username=" + ex.getUsername();
+            String redirectUrl = frontendUrl + "/signup/oauth2?oauthId=" + ex.getOauthId();
             response.setStatus(HttpServletResponse.SC_TEMPORARY_REDIRECT); // 307
             response.setHeader("Location", redirectUrl);
         } else {

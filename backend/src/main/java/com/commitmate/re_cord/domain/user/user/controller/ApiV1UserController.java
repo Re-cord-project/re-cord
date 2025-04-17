@@ -43,7 +43,7 @@ public class ApiV1UserController {
         if(user.getEmail()  == null || user.getEmail().isEmpty() || user.getPassword() == null || user.getPassword().isEmpty()){
             return ResponseEntity.badRequest().body("Email and Password are required");
         }
-        return ResponseEntity.status(200).body(userService.register(user.getEmail(), user.getPassword(), user.getUsername(), user.getNickname(),
+        return ResponseEntity.status(200).body(userService.register(user.getOauthId(), user.getEmail(), user.getPassword(), user.getUsername(),
                 user.getBootcamp(), user.getGeneration()));
     }
 
@@ -68,13 +68,12 @@ public class ApiV1UserController {
     }
 
     // 소셜 회원가입 시 추가 정보 받기
-    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/api/oauth2/complete-signup")
     public ResponseEntity<?> completeSignup(@RequestBody OAuth2SignupRequest dto) {
         User user = userService.completeOAuth2Signup(
+                dto.getOauthId(),
                 dto.getEmail(),
-                dto.getUsername(),
-                dto.getNickname(),
+//                dto.getUsername(),
                 dto.getBootcamp(),
                 dto.getGeneration()
         );

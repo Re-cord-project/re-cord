@@ -20,6 +20,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/", "/loginform", "/login")
+                                .requestMatchers("/", "/loginform", "/oauth2/**")
                                 .permitAll()
                                 .requestMatchers("/h2-console/**", "/v3/api-docs/**", "/swagger-ui/index.html", "/swagger-ui.html", "/swagger-ui/**")
                                 .permitAll()
@@ -56,16 +57,15 @@ public class SecurityConfig {
                                 csrf.disable()
                 )
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // CORS 설정 추가
-//                .formLogin(
-//                        AbstractHttpConfigurer::disable
-//                )
-                .formLogin(form -> form.disable())
+                .formLogin(
+                        AbstractHttpConfigurer::disable
+                )
+//                .formLogin(form -> form.disable())
                 .sessionManagement((sessionManagement) -> sessionManagement
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .oauth2Login(
                         oauth2Login -> oauth2Login
-                                .loginPage("/oauth2/authorization")
                                 .successHandler(customOAuth2AuthenticationSuccessHandler)
                                 .authorizationEndpoint(
                                         authorizationEndpoint ->
@@ -87,15 +87,16 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowedOrigins(List.of("http://localhost:3000")); // '*' 대신 명시적으로
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true); // credentials 허용
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 
 
 }

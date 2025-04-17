@@ -8,9 +8,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class OAuth2SignupRequest {
+    private String oauthId;
     private String email;
-    private String username;
-    private String nickname;
+//    private String username;
     private String bootcamp;
     private int generation;
 }
