@@ -64,6 +64,11 @@ public class PostService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
 
+        // 로그인한 유저가 draft 로 임시저장하면 그전 draft 인 게시물은 삭제 = 임시저장은 제일 최신꺼만 볼 수 있음
+        if (status == PostStatus.DRAFT) {
+            postRepository.deleteByUserAndStatus(user, PostStatus.DRAFT);
+        }
+
         Post post = Post.builder()
                 .title(postRequestDto.getTitle())
                 .content(postRequestDto.getContent())
@@ -101,8 +106,8 @@ public class PostService {
     public Page<PostResponseDto> getAllPosts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        // 삭제된 포스트를 제외하고 조회
-        Page<Post> postPage = postRepository.findAllByUpdateStatus(UpdateStatus.EDITED, pageable);
+        // 상태가 PUBLISHED인 게시물을 가져오는 메서드
+        Page<Post> postPage = postRepository.findAllByStatus(PostStatus.PUBLISHED, pageable);
 
 
         return postPage.map(PostResponseDto::new);
@@ -113,19 +118,18 @@ public class PostService {
     public Page<PostResponseDto> getPostsByCategory(Long categoryId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        // 카테고리와 삭제되지 않은 포스트들을 조회
-        Page<Post> postPage = postRepository.findAllByCategoryIdAndUpdateStatus(categoryId, UpdateStatus.EDITED, pageable);
+        // 특정 카테고리와 PUBLISHED를 만족하는 게시글을 조회
+        Page<Post> postPage = postRepository.findAllByCategoryIdAndStatus(categoryId, PostStatus.PUBLISHED, pageable);
 
         return postPage.map(PostResponseDto::new);
     }
 
     // 게시글 검색
-    // 게시글 검색
     @Transactional(readOnly = true)
     public Page<PostResponseDto> searchPosts(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        // EDITED 상태이고, 제목/내용/작성자 기준 검색
+        // PUBLISHED 상태이고, 제목/내용/작성자 기준 검색
         Page<Post> postPage = postRepository.searchVisiblePosts(keyword, pageable);
 
         return postPage.map(PostResponseDto::new);
@@ -175,7 +179,7 @@ public class PostService {
             throw new SecurityException("작성자 본인만 삭제할 수 있습니다.");
         }
 
-        post.setUpdateStatus(UpdateStatus.DELETED);
+        post.setStatus(PostStatus.DELETED);
         postRepository.save(post);
     }
 
