@@ -1,4 +1,4 @@
-package com.commitmate.re_cord.global.security;
+package com.commitmate.re_cord.global.security.handler;
 
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.service.UserService;
@@ -32,10 +32,6 @@ public class CustomOAuth2AuthenticationSuccessHandler extends SavedRequestAwareA
         if (redirectUrl == null || redirectUrl.isBlank()) {
             redirectUrl = "http://localhost:3000"; // fallback URL
         }
-        response.sendRedirect(redirectUrl);
-
-
-        // 프론트 주소로 redirect
         response.sendRedirect(redirectUrl);
     }
 
