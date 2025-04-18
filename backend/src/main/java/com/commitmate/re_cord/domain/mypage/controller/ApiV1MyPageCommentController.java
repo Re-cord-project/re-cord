@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/mypage/comments")
+@RequestMapping("api/mypage/comments")
 
 public class ApiV1MyPageCommentController {
 
