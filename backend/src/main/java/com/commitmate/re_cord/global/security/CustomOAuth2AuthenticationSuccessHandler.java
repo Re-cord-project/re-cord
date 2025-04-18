@@ -26,7 +26,14 @@ public class CustomOAuth2AuthenticationSuccessHandler extends SavedRequestAwareA
         // 토큰 발급
         rq.makeAuthCookies(actor);
 
+//        String redirectUrl = request.getParameter("state");
+
         String redirectUrl = request.getParameter("state");
+        if (redirectUrl == null || redirectUrl.isBlank()) {
+            redirectUrl = "http://localhost:3000"; // fallback URL
+        }
+        response.sendRedirect(redirectUrl);
+
 
         // 프론트 주소로 redirect
         response.sendRedirect(redirectUrl);

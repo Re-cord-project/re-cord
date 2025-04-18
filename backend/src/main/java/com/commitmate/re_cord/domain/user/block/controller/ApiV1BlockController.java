@@ -1,5 +1,6 @@
 package com.commitmate.re_cord.domain.user.block.controller;
 
+import com.commitmate.re_cord.domain.user.block.entity.Block;
 import com.commitmate.re_cord.domain.user.block.service.BlockService;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.service.UserService;
@@ -8,6 +9,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/blocks")
@@ -51,5 +55,23 @@ public class ApiV1BlockController {
         User currentUser = userService.getUserById(userId); // 로그인한 사용자 정보 조회
         blockService.unblockUser(currentUser.getId(), blockedId); // 차단 해제 처리
         return ResponseEntity.ok("차단 해제 완료!");
+    }
+
+    // 차단한 유저 목록 조회
+    @Operation(
+            summary = "차단한 유저 목록 조회",
+            description = "로그인한 사용자가 차단한 모든 유저의 목록을 조회합니다."
+    )
+    @GetMapping("/{userId}/blocked")
+    public ResponseEntity<List<User>> getBlockedUsers(
+            @Parameter(description = "로그인한 사용자 ID", example = "1")
+            @PathVariable Long userId
+    ) {
+        List<Block> blockedUsers = blockService.getBlockedUsers(userId);
+        // 차단된 유저 목록만 추출
+        List<User> blockedUsersList = blockedUsers.stream()
+                .map(block -> block.getBlockedId())  // 차단된 유저의 정보만 가져옴
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(blockedUsersList);
     }
 }
