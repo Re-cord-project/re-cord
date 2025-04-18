@@ -35,6 +35,13 @@ public class User extends BaseEntity {
     private int generation;
     private String refreshToken;
 
+    @Column(columnDefinition = "TEXT DEFAULT ''")
+    private String introduction = ""; // 자기소개, 기본값 공백
+
+    @Column(nullable = true)
+    private String profileImageUrl; //프로필 이미지, 기본값 제공
+
+
     @Enumerated(EnumType.STRING)
     private Provider provider;
     @Enumerated(EnumType.STRING)
