@@ -5,6 +5,7 @@ import com.commitmate.re_cord.domain.user.user.dto.OAuth2SignupRequest;
 import com.commitmate.re_cord.domain.user.user.dto.UserLoginResponseDto;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.service.UserService;
+import com.commitmate.re_cord.global.rq.Rq;
 import com.commitmate.re_cord.global.security.UserLoginDto;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -17,10 +18,11 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
+
 @RequiredArgsConstructor
 public class ApiV1UserController {
     private final UserService userService;
-
+    private final Rq rq;
 
     @Value("${custom.site.backUrl}")
     private String backUrl;
@@ -64,6 +66,9 @@ public class ApiV1UserController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestParam Long userId) {
         userService.logout(userId);
+        rq.deleteCookie("accessToken");
+        rq.deleteCookie("refreshToken");
+
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
