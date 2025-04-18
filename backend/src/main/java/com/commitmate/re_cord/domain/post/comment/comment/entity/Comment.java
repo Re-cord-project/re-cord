@@ -1,5 +1,6 @@
 package com.commitmate.re_cord.domain.post.comment.comment.entity;
 
+import com.commitmate.re_cord.domain.post.comment.commentVote.entity.CommentVote;
 import com.commitmate.re_cord.domain.post.post.entity.Post;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.global.jpa.BaseEntity;
@@ -7,6 +8,8 @@ import com.commitmate.re_cord.global.jpa.UpdateStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -32,6 +35,9 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "post_id")
     private Post post;
 
+    @OneToMany(mappedBy = "comment",cascade = CascadeType.REMOVE)
+    private List<CommentVote> commentVotes;
+
     public void increaseLikeCount(){
         this.likes++;
     }
@@ -41,5 +47,14 @@ public class Comment extends BaseEntity {
             this.likes--;
         }
     }
+
+    public Comment(int likes, String content, UpdateStatus updateStatus, User user, Post post) {
+        this.likes = likes;
+        this.content = content;
+        this.updateStatus = updateStatus;
+        this.user = user;
+        this.post = post;
+    }
+
 
 }
