@@ -82,7 +82,8 @@ public class ApiV1UserController {
                 dto.getGeneration()
         );
 
-        String accessToken = userService.genAccessToken(user);
+        String accessToken = rq.getCookieValue("accessToken");
+//        String accessToken = userService.genAccessToken(user);
 
         return ResponseEntity.ok(Map.of(
                 "accessToken", accessToken,
