@@ -18,12 +18,12 @@ public class UserDto {
 //    private final LocalDateTime modifyDate;
 
     @NonNull
-    private final String nickname;
+    private final String username;
 
     public UserDto(User user) {
         this.id = user.getId();
 //        this.createDate = user.getCreatedDate();
 //        this.modifyDate = user.getModifiedDate();
-        this.nickname = user.getNickname();
+        this.username = user.getUsername();
     }
 }

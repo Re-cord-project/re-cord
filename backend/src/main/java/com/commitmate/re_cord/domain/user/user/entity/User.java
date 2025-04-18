@@ -24,13 +24,12 @@ import java.util.List;
 @SuperBuilder
 @Builder
 @ToString
-
 @Table(name="users") //user는 h2데이터베이스 기본 예약어
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User extends BaseEntity {
+    private String oauthId;    // 카카오에서 받아올 oauthId -> 추가 필요
     private String email;
     private String username;
-    private String nickname;    // 카카오에서 받아올 닉네임 -> 추가 필요
     private String password;
     private String bootcamp;
     private int generation;
@@ -48,28 +47,33 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    //내가 팔로잉하는
-    @OneToMany(mappedBy = "followerId")
-    private List<Follow> followingList = new ArrayList<>();
-
-    //나를 팔로우하는
-    @OneToMany(mappedBy = "followingId")
-    private List<Follow> followerList = new ArrayList<>();
-
-
-    //내가 차단한
-    @OneToMany(mappedBy = "blockedId")
-    private List<Block> blockingList = new ArrayList<>();
+//    //내가 팔로잉하는
+//    @OneToMany(mappedBy = "followerId")
+//    private List<Follow> followingList = new ArrayList<>();
+//
+//    //나를 팔로우하는
+//    @OneToMany(mappedBy = "followingId")
+//    private List<Follow> followerList = new ArrayList<>();
+//
+//
+//    //내가 차단한
+//    @OneToMany(mappedBy = "blockedId")
+//    private List<Block> blockingList = new ArrayList<>();
 
     //나를 차단한
 
 //    @OneToMany(mappedBy = "blockingId")
 //    private List<Follow> blockedList = new ArrayList<>();
 
-    public User(long id, String username, String nickname) {
+    public User(long id, String oauthId, String username) {
         this.setId(id);
+        this.oauthId = oauthId;
         this.username = username;
-        this.nickname = nickname;
+    }
+
+    public User(long id, String username) {
+        this.setId(id);
+        this.setUsername(username);
     }
 
     // Admin 확인하고 권한 추가

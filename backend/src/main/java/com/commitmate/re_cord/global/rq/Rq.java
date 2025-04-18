@@ -32,9 +32,9 @@ public class Rq {
     public void setLogin(User user) {
         UserDetails userDetails = new SecurityUser(
                 user.getId(),
+                user.getOauthId(),
                 user.getUsername(),
                 "",
-                user.getNickname(),
                 user.getAuthorities()
         );
 
@@ -56,7 +56,7 @@ public class Rq {
                 .map(Authentication::getPrincipal)
                 .filter(principal -> principal instanceof SecurityUser)
                 .map(principal -> (SecurityUser) principal)
-                .map(securityUser -> new User(securityUser.getId(), securityUser.getUsername(), securityUser.getNickname()))
+                .map(securityUser -> new User(securityUser.getId(), securityUser.getOauthId(), securityUser.getUsername()))
                 .orElse(null);
     }
 
