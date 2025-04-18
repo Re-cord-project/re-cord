@@ -9,15 +9,15 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UpdateUserDTO {
 
-    private String nickname;
+    private String username;
     private String email;
     private String bootcamp;
     private int generation;
     private String profileImageUrl;
     private String introduction;
 
-    public UpdateUserDTO(String nickname, String email, String bootcamp, int generation, String profileImageUrl, String introduction) {
-        this.nickname = nickname;
+    public UpdateUserDTO(String username, String email, String bootcamp, int generation, String profileImageUrl, String introduction) {
+        this.username = username;
         this.email = email;
         this.bootcamp = bootcamp;
         this.generation = generation;
