@@ -6,6 +6,7 @@ import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -14,14 +15,15 @@ public class MyPageUserService {
 
     private final UserRepository userRepository;
 
+    @Transactional
     public UpdateUserDTO updateUser(Long userId, UpdateUserDTO dto) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
 
         // 닉네임 중복 체크
-        if (userRepository.existsByNicknameAndIdNot(dto.getNickname(), userId)) {
-            throw new IllegalArgumentException("이미 사용 중인 닉네임입니다.");
+        if (userRepository.existsByUsernameAndIdNot(dto.getUsername(), userId)) {
+            throw new IllegalArgumentException("이미 사용 중인 이름입니다.");
         }
 
         // 이메일 중복 체크
@@ -30,7 +32,7 @@ public class MyPageUserService {
         }
 
         // 업데이트할 값 설정
-        user.setNickname(dto.getNickname());
+        user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setGeneration(dto.getGeneration());
         user.setBootcamp(dto.getBootcamp());

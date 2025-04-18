@@ -9,6 +9,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import org.springframework.security.access.AccessDeniedException;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -57,4 +60,23 @@ public class BlockService {
         // 차단 관계 삭제
         blockRepository.deleteByBlockerIdAndBlockedId(blocker, blocked);
     }
+
+    // 차단한 유저 목록 조회
+    @Transactional
+    public List<Block> getBlockedUsers(Long blockerId) {
+        User blocker = userService.getUserById(blockerId);
+        return blockRepository.findByBlockerId(blocker); // blocker가 차단한 유저 목록 반환
+    }
+
+    // 차단 여부 확인
+    public void checkIfBlocked(Long blockerId, Long blockedId, String message) {
+        User blocker = userService.getUserById(blockerId);    // 차단한 사람
+        User blocked = userService.getUserById(blockedId);    // 차단된 사람
+
+        // 차단된 사용자가 게시물 접근, 댓글 작성 하려고 할 때 예외를 던져서 차단
+        if (hasBlocked(blocker, blocked)) {
+            throw new AccessDeniedException(message);  // message를 전달받아 처리
+        }
+    }
+
 }

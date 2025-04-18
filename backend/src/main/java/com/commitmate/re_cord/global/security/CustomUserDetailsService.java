@@ -20,9 +20,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return new SecurityUser(
                 user.getId(),
+                user.getOauthId(),
                 user.getUsername(),
                 user.getPassword(),
-                user.getNickname(),
                 user.getAuthorities()
         );
     }
