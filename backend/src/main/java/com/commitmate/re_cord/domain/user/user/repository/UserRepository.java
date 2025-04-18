@@ -18,7 +18,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByOauthId(String oauthId);
 
     //중복 상태 체크
+
     boolean existsByUsernameAndIdNot(String username, Long id);
+
     boolean existsByEmailAndIdNot(String email, Long id);
 
 }
