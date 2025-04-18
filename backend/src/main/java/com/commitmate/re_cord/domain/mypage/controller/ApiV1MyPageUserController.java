@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/mypage")
+@RequestMapping("api/mypage")
 @RequiredArgsConstructor
 public class ApiV1MyPageUserController {
 
