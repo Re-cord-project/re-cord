@@ -4,7 +4,6 @@ spring:
   output:
     ansi:
       enabled: ALWAYS
-
   profiles:
     active: dev
     include: secret
@@ -16,7 +15,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         default_batch_fetch_size: 100
@@ -90,5 +89,4 @@ custom:
     cookieDomain: "${custom.dev.cookieDomain}"
     frontUrl: "${custom.dev.frontUrl}"
     backUrl: "${custom.dev.backUrl}"
-
 
