@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-
 @RequiredArgsConstructor
 public class ApiV1UserController {
     private final UserService userService;

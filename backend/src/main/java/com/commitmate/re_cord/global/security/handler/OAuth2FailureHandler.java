@@ -1,4 +1,4 @@
-package com.commitmate.re_cord.global.exception.handler;
+package com.commitmate.re_cord.global.security.handler;
 
 import com.commitmate.re_cord.global.exception.exceptions.OAuth2AdditionalInfoRequiredException;
 import jakarta.servlet.ServletException;
