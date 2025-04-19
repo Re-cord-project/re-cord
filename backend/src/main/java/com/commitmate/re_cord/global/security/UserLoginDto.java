@@ -20,9 +20,5 @@ public class UserLoginDto {
     @NotNull(message = "비밀번호는 필수입니다.")
     @ValidPassword
     private String password;
-    @NotNull(message = "사용자 이름은 필수입니다.")
-    private String username;
-    @Size(max = 100, message = "부트캠프명은 100자 이하여야 합니다.")
-    private String bootcamp;
-    private String role;
 }
+
