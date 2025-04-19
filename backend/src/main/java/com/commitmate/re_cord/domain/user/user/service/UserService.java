@@ -71,7 +71,8 @@ public class UserService {
                 userRepository.save(user);
 
                 String accessToken = authTokenService.genAccessToken(user);
-                return user.getRefreshToken() + " " + accessToken;
+//                return user.getRefreshToken() + " " + accessToken;    // 사용자에게 엑세스 토큰만
+                return "Bearer " + accessToken;
             }
         }
 
