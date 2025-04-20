@@ -19,14 +19,14 @@ import java.util.List;
 @RequestMapping("api/mypage/posts")
 
 public class ApiV1MyPagePostController {
-    private final PostService postService;
+
     private final MyPagePostService myPagePostService;
 
     @GetMapping
     public ResponseEntity<List<PostDTO>> getPostsByUser(
             @AuthenticationPrincipal SecurityUser userDetails) {
         Long userId = userDetails.getId();
-        List<PostDTO> posts = postService.getPostsByUserId(userId);
+        List<PostDTO> posts = myPagePostService.getPostsByUserId(userId);
         return ResponseEntity.ok(posts);
     }
 

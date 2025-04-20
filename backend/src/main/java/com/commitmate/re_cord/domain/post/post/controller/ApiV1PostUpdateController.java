@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 public class ApiV1PostUpdateController {
     private final PostService postService;
     private final UserRepository userRepository;
+
     // 게시글 수정
     @PutMapping("/{postId}")
     public ResponseEntity<String> updatePost(
