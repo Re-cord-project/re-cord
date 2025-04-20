@@ -20,7 +20,6 @@ import java.util.List;
 
 public class ApiV1MyPageCommentController {
 
-    private final CommentService commentService;
     private final MyPageCommentService myPageCommentService;
 
 
@@ -29,7 +28,7 @@ public class ApiV1MyPageCommentController {
     public ResponseEntity<List<CommentDTO>> getCommentsByUser(
             @AuthenticationPrincipal SecurityUser userDetails) {
         Long userId = userDetails.getId();
-        List<CommentDTO> comments = commentService.getCommentsByUser(userId);
+        List<CommentDTO> comments = myPageCommentService.getCommentsByUserId(userId);
         return ResponseEntity.ok(comments);
     }
 
