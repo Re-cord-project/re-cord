@@ -5,6 +5,7 @@ import com.commitmate.re_cord.domain.post.post.service.PostService;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import com.commitmate.re_cord.global.security.SecurityUser;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +20,9 @@ public class ApiV1PostUpdateController {
     private final UserRepository userRepository;
 
     // 게시글 수정
+    @Operation(
+            summary = "게시글 수정"
+    )
     @PutMapping("/{postId}")
     public ResponseEntity<String> updatePost(
             @PathVariable Long postId,
@@ -34,6 +38,9 @@ public class ApiV1PostUpdateController {
 
 
     // 게시글 추천
+    @Operation(
+            summary = "게시글 추천"
+    )
     @PostMapping("/{postId}/like")
     public ResponseEntity<Void> toggleLike(
             @PathVariable Long postId,

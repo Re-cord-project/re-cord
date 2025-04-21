@@ -6,6 +6,7 @@ import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentResponseDTO
 import com.commitmate.re_cord.domain.post.comment.comment.service.CommentService;
 import com.commitmate.re_cord.domain.post.comment.commentVote.service.CommentVoteService;
 import com.commitmate.re_cord.global.security.SecurityUser;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,9 @@ public class ApiV1CommentController {
     private final CommentService commentService;
     private final CommentVoteService commentVoteService;
 
+    @Operation(
+            summary = "댓글 작성"
+    )
     @PostMapping("/new")
     public ResponseEntity<CommentResponseDTO> registerComment(
             @PathVariable Long postId,
@@ -34,6 +38,9 @@ public class ApiV1CommentController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(
+            summary = "댓글 삭제"
+    )
     @DeleteMapping("/{commentId}/delete")
     public void deleteComment(
             @PathVariable Long postId,
@@ -45,6 +52,9 @@ public class ApiV1CommentController {
 
     }
 
+    @Operation(
+            summary = "댓글 좋아요 누르기"
+    )
     @PostMapping("/{commentId}/like")
     public ResponseEntity<Void> toggleCommentLike(
             @PathVariable Long postId,
@@ -56,7 +66,9 @@ public class ApiV1CommentController {
         return ResponseEntity.ok().build();
     }
 
-
+    @Operation(
+            summary = "댓글 수정"
+    )
     @PatchMapping("/{commentId}/edit")
     public ResponseEntity<CommentResponseDTO> updateComment(
             @PathVariable Long postId,
@@ -70,6 +82,9 @@ public class ApiV1CommentController {
 
     }
 
+    @Operation(
+            summary = "댓글 조회"
+    )
     @GetMapping
     public Page<CommentResponseDTO> getComment(
             @PathVariable Long postId,

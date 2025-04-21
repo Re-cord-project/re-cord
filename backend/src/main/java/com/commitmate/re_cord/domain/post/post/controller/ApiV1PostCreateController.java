@@ -7,6 +7,7 @@ import com.commitmate.re_cord.domain.post.post.service.PostService;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import com.commitmate.re_cord.global.security.SecurityUser;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,6 +24,9 @@ public class ApiV1PostCreateController {
     private final UserRepository userRepository;
 
     // 게시글 등록
+    @Operation(
+            summary = "새 게시글 등록"
+    )
     @PostMapping
     public ResponseEntity<String> createPost(
             @RequestBody @Validated PostRequestDto dto,
@@ -32,6 +36,9 @@ public class ApiV1PostCreateController {
         return ResponseEntity.ok("게시글 등록 완료");
     }
 
+    @Operation(
+            summary = "사용자의 마지막 저장 임시글 로드"
+    )
     // 현재 로그인한 사용자가 마지막으로 저장한 임시 글을 불러오는 API
     @GetMapping("/drafts/latest")
     public ResponseEntity<PostResponseDto> getLatestDraft(@AuthenticationPrincipal SecurityUser userDetails) {

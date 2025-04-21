@@ -4,6 +4,7 @@ package com.commitmate.re_cord.domain.mypage.controller;
 import com.commitmate.re_cord.domain.mypage.service.MyPageUserService;
 import com.commitmate.re_cord.domain.user.user.dto.UpdateUserDTO;
 import com.commitmate.re_cord.global.security.SecurityUser;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +20,9 @@ public class ApiV1MyPageUserController {
 
     private final MyPageUserService myPageUserService;
 
+    @Operation(
+            summary = "유저 정보 변경"
+    )
     //유저의 세부 정보 변경
     @PutMapping("/userUpdate")
     public ResponseEntity<UpdateUserDTO> updateUser(
