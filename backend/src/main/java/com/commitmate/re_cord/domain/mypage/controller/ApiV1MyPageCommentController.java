@@ -4,6 +4,7 @@ import com.commitmate.re_cord.domain.mypage.service.MyPageCommentService;
 import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentDTO;
 import com.commitmate.re_cord.domain.post.comment.comment.service.CommentService;
 import com.commitmate.re_cord.global.security.SecurityUser;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,6 +42,9 @@ public class ApiV1MyPageCommentController {
     }
 
     // 댓글을 좋아요 순으로 정렬
+    @Operation(
+            summary = "댓글 좋아요 순 정렬"
+    )
     @GetMapping("/likes/ordered")
     public ResponseEntity<List<CommentDTO>> getCommentsOrderByLikes(
             @AuthenticationPrincipal SecurityUser userDetails) {

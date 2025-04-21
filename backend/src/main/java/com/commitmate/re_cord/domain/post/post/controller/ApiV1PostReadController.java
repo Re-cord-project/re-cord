@@ -2,6 +2,7 @@ package com.commitmate.re_cord.domain.post.post.controller;
 
 import com.commitmate.re_cord.domain.post.post.dto.PostResponseDto;
 import com.commitmate.re_cord.domain.post.post.service.PostService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,9 @@ public class ApiV1PostReadController {
     private final PostService postService;
 
     // 게시글 전체 목록 보기
+    @Operation(
+            summary = "전체 게시글 보기"
+    )
     @GetMapping
     public Page<PostResponseDto> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
@@ -22,12 +26,18 @@ public class ApiV1PostReadController {
         return postService.getAllPosts(page, size);
     }
 
+    @Operation(
+            summary = "게시글 상세 보기"
+    )
     // 게시글 하나 상세 보기
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDto> getPost(@PathVariable Long postId) {
         return ResponseEntity.ok(postService.getPostById(postId));
     }
 
+    @Operation(
+            summary = "게시글 검색"
+    )
     // 검색 api
     @GetMapping("/search")
     public ResponseEntity<Page<PostResponseDto>> searchPosts(
@@ -40,6 +50,9 @@ public class ApiV1PostReadController {
     }
 
     // 카테고리별로 보는 API
+    @Operation(
+            summary = "카테고리별 게시글 조회"
+    )
     @GetMapping("/category/{categoryId}")
     public ResponseEntity<Page<PostResponseDto>> getPostsByCategory(
             @PathVariable Long categoryId,

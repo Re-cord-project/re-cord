@@ -32,6 +32,7 @@ public class ApiV1FollowController {
             @PathVariable("followingId") Long followingId
     ) {
         User currentUser = userService.getUserById(userId);
+        System.out.println(currentUser.toString());
         followService.follow(currentUser, followingId);
         return ResponseEntity.ok("팔로우 완료!");
     }
