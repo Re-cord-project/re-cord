@@ -83,9 +83,7 @@ public class CommentService {
     public Page<CommentResponseDTO> getCommentByPostId(Long postId, int page, int size){
         Post post = postRepository.findById(postId)
                 .orElseThrow(()->new IllegalArgumentException("해당 게시물이 존재하지 않습니다."));
-
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-
         Page<Comment> commentPage = commentRepository.findByPostId(postId,pageable);
 
 
