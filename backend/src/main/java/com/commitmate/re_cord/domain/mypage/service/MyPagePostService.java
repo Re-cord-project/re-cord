@@ -6,6 +6,7 @@ import com.commitmate.re_cord.domain.post.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,8 +15,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 
+@Transactional(readOnly = true)
 public class MyPagePostService {
     private final PostRepository postRepository;
+
+    public List<PostDTO> getPostsByUserId(Long userId) {
+        return postRepository.findMyPost(userId).stream()
+                .map(PostDTO::getEntity)
+                .collect(Collectors.toList());
+    }
 
     //게시글 조회수 총합
     public Long getTotalPostViews(Long userId) {
