@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
-@Transactional(readOnly = true)
 public class MyPageCommentService {
     private final CommentRepository commentRepository;
 
