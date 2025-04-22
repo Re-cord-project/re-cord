@@ -29,6 +29,6 @@ public class ApiExceptionHandler {
     public ResponseEntity<String> handleAuthError(Exception ex) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body("로그인 후 시도해주세요.");
+                .body("로그인 후 사용이 가능합니다.");
     }
 }
