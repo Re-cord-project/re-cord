@@ -83,4 +83,25 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     // 특정 유저의 특정 상태의 게시물을 삭제하는 메서드
     void deleteByUserAndStatus(User user, PostStatus status);
 
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.id = :id")
+    Optional<Post> findByIdWithImages(@Param("id") Long id);
+
+    @Query("SELECT p.likes FROM Post p WHERE p.id = :postId")
+    Optional<Integer> findLikesById(@Param("postId") Long postId);
+
+    @Query("SELECT p.views FROM Post p WHERE p.id = :postId")
+    Optional<Integer> findViewsById(@Param("postId") Long postId);
+
+    @Query("""
+    SELECT p 
+    FROM Post p 
+    LEFT JOIN FETCH p.images 
+    WHERE p.user.id = :userId AND p.createdAt = (
+        SELECT MAX(p2.createdAt) 
+        FROM Post p2 
+        WHERE p2.user.id = :userId
+    )
+    """)
+    Optional<Post> findTopByUserIdWithImages(@Param("userId") Long userId);
+
 }

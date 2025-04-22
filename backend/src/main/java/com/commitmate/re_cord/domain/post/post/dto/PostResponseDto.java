@@ -4,6 +4,9 @@ import com.commitmate.re_cord.domain.post.post.entity.Post;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Getter
 @NoArgsConstructor
 public class PostResponseDto {
@@ -20,6 +23,9 @@ public class PostResponseDto {
     private String createdAt;
     private String updatedAt;
 
+    // ✅ 이미지 URL 리스트 추가
+    private List<String> imageUrls;
+
     public PostResponseDto(Post post) {
         this.id = post.getId();
         this.title = post.getTitle();
@@ -29,15 +35,18 @@ public class PostResponseDto {
         this.categoryName = post.getCategory() != null ? post.getCategory().getName() : null;
         this.username = post.getUser() != null ? post.getUser().getUsername() : null;
 
-        // Enum 값을 안전하게 변환 (값이 없으면 null 처리)
         this.status = getEnumName(post.getStatus());
         this.updateStatus = getEnumName(post.getUpdateStatus());
 
         this.createdAt = post.getCreatedAt() != null ? post.getCreatedAt().toString() : null;
         this.updatedAt = post.getUpdatedAt() != null ? post.getUpdatedAt().toString() : null;
+
+        // ✅ 이미지 URL 리스트 추출
+        this.imageUrls = post.getImages().stream()
+                .map(image -> image.getUrl())
+                .collect(Collectors.toList());
     }
 
-    // Enum 값을 안전하게 변환하는 메서드
     private String getEnumName(Enum<?> enumValue) {
         return enumValue != null ? enumValue.name() : null;
     }
