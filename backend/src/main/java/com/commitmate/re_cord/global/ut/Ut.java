@@ -1,4 +1,4 @@
-package com.commitmate.re_cord.global.Ut;
+package com.commitmate.re_cord.global.ut;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
