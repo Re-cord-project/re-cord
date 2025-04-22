@@ -18,12 +18,22 @@ public class UserDto {
 //    private final LocalDateTime modifyDate;
 
     @NonNull
+    private final String email;
+
+    @NonNull
     private final String username;
+
+    private final String bootcamp;
+
+    private final int generation;
 
     public UserDto(User user) {
         this.id = user.getId();
 //        this.createDate = user.getCreatedDate();
 //        this.modifyDate = user.getModifiedDate();
+        this.email = user.getEmail();
         this.username = user.getUsername();
+        this.bootcamp = user.getBootcamp();
+        this.generation = user.getGeneration();
     }
 }

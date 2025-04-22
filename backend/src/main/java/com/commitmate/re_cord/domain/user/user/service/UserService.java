@@ -10,6 +10,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -78,15 +80,21 @@ public class UserService {
         return null;
     }
 
-    // 로그아웃
-    @Transactional
-    public void logout(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+//    // 로그아웃 - 그냥 요청 클라이언트 쿠키 삭제하는 걸로
+//    @Transactional
+//    public void logout() {
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//
+//        if (auth != null && auth.isAuthenticated()) {
+//            Object principal = auth.getPrincipal();
+//            Long userId = principal
+//        }
 
-        user.setRefreshToken(null); // refreshToken 제거
-        userRepository.save(user);  // 변경사항 저장
-    }
+
+
+//        user.setRefreshToken(null); // refreshToken 제거
+//        userRepository.save(user);  // 변경사항 저장
+//    }
 
     // 소셜 로그인
     public long count() {
