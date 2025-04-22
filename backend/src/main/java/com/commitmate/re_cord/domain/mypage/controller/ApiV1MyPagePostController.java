@@ -9,10 +9,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -34,62 +32,42 @@ public class ApiV1MyPagePostController {
         return ResponseEntity.ok(posts);
     }
 
-    // 게시글의 조회수 총합
-    @Operation(
-            summary = "내 게시글 조회수 총합"
-    )
-    @GetMapping("/views/total")
-    public ResponseEntity<Long> getTotalPostsViews(
-            @AuthenticationPrincipal SecurityUser userDetails) {
+    // 게시글의 조회수
+    @GetMapping("/views")
+    public ResponseEntity<?> getPostsViews(
+            @AuthenticationPrincipal SecurityUser userDetails,
+            @RequestParam(required = false) String type) {
+
         Long userId = userDetails.getId();
-        Long totalViews = myPagePostService.getTotalPostViews(userId);
-        return ResponseEntity.ok(totalViews);
+        switch (type) {
+            case "total":
+                return ResponseEntity.ok(myPagePostService.getTotalPostViews(userId));
+            case "ordered":
+                List<PostDTO> posts = myPagePostService.getPostsOrderedByViews(userId);
+                return ResponseEntity.ok(posts);
+            case "monthly":
+                List<MonthlyViewDTO> stats = myPagePostService.getMonthlyViewStats(userId);
+                return ResponseEntity.ok(stats);
+            default:
+                return ResponseEntity.badRequest().body("Invalid query parameter");
+        }
     }
 
-    //게시글의 좋아요 총합
-    @Operation(
-            summary = "내 게시글 좋아요 총합"
-    )
-    @GetMapping("/likes/total")
-    public long getTotalPostsLikes(
-            @AuthenticationPrincipal SecurityUser userDetails) {
+    // 게시글의 좋아요
+    @GetMapping("/likes")
+    public ResponseEntity<?> getPostsLikes (
+            @AuthenticationPrincipal SecurityUser userDetails,
+            @RequestParam(required = false) String type){
         Long userId = userDetails.getId();
-        return myPagePostService.getTotalPostLikes(userId);
+        switch (type) {
+            case "total":
+                return ResponseEntity.ok(myPagePostService.getTotalPostLikes(userId));
+            case "ordered":
+                List<PostDTO> posts = myPagePostService.getPostsOrderedByLikes(userId);
+                return ResponseEntity.ok(posts);
+            default:
+                return ResponseEntity.badRequest().body("Invalid query parameter");
+        }
     }
+  }
 
-    //게시글을 조회수 순으로 정렬
-    @Operation(
-            summary = "내 게시글 조회수 순 정렬"
-    )
-    @GetMapping("/views/ordered")
-    public ResponseEntity<List<PostDTO>> getPostsOrderByViews(
-            @AuthenticationPrincipal SecurityUser userDetails) {
-        Long userId = userDetails.getId();
-        List<PostDTO> posts = myPagePostService.getPostsOrderedByViews(userId);
-        return ResponseEntity.ok(posts);
-    }
-
-    //게시글을 좋아요 순으로 정렬
-    @Operation(
-            summary = "내 게시글 좋아요 순 정렬"
-    )
-    @GetMapping("/likes/ordered")
-    public ResponseEntity<List<PostDTO>> getPostsOrderByLikes(
-            @AuthenticationPrincipal SecurityUser userDetails) {
-        Long userId = userDetails.getId();
-        List<PostDTO> posts = myPagePostService.getPostsOrderedByLikes(userId);
-        return ResponseEntity.ok(posts);
-    }
-
-    // 포스트 월별 조회수 통계(그래프용)
-    @Operation(
-            summary = "게시글 월별 조회수"
-    )
-    @GetMapping("/views/monthly")
-    public ResponseEntity<List<MonthlyViewDTO>> getMonthlyViewStats(
-            @AuthenticationPrincipal SecurityUser userDetails) {
-        Long userId = userDetails.getId();
-        List<MonthlyViewDTO> stats = myPagePostService.getMonthlyViewStats(userId);
-        return ResponseEntity.ok(stats);
-    }
-}
