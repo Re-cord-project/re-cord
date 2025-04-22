@@ -4,6 +4,7 @@ import com.commitmate.re_cord.domain.post.post.service.PostService;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import com.commitmate.re_cord.global.security.SecurityUser;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +20,9 @@ public class ApiV1PostDeleteController {
     private final PostService postService;
     private final UserRepository userRepository;
     // 게시글 삭제
+    @Operation(
+            summary = "게시글 삭제"
+    )
     @DeleteMapping("/{postId}")
     public ResponseEntity<String> deletePost(
             @PathVariable Long postId,

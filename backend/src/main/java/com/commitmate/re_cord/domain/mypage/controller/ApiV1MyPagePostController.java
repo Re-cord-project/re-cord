@@ -5,6 +5,7 @@ import com.commitmate.re_cord.domain.mypage.service.MyPagePostService;
 import com.commitmate.re_cord.domain.post.post.dto.PostDTO;
 import com.commitmate.re_cord.domain.post.post.service.PostService;
 import com.commitmate.re_cord.global.security.SecurityUser;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,6 +23,9 @@ public class ApiV1MyPagePostController {
 
     private final MyPagePostService myPagePostService;
 
+    @Operation(
+            summary = "내 게시글 조회"
+    )
     @GetMapping
     public ResponseEntity<List<PostDTO>> getPostsByUser(
             @AuthenticationPrincipal SecurityUser userDetails) {
@@ -31,6 +35,9 @@ public class ApiV1MyPagePostController {
     }
 
     // 게시글의 조회수 총합
+    @Operation(
+            summary = "내 게시글 조회수 총합"
+    )
     @GetMapping("/views/total")
     public ResponseEntity<Long> getTotalPostsViews(
             @AuthenticationPrincipal SecurityUser userDetails) {
@@ -40,6 +47,9 @@ public class ApiV1MyPagePostController {
     }
 
     //게시글의 좋아요 총합
+    @Operation(
+            summary = "내 게시글 좋아요 총합"
+    )
     @GetMapping("/likes/total")
     public long getTotalPostsLikes(
             @AuthenticationPrincipal SecurityUser userDetails) {
@@ -48,6 +58,9 @@ public class ApiV1MyPagePostController {
     }
 
     //게시글을 조회수 순으로 정렬
+    @Operation(
+            summary = "내 게시글 조회수 순 정렬"
+    )
     @GetMapping("/views/ordered")
     public ResponseEntity<List<PostDTO>> getPostsOrderByViews(
             @AuthenticationPrincipal SecurityUser userDetails) {
@@ -57,6 +70,9 @@ public class ApiV1MyPagePostController {
     }
 
     //게시글을 좋아요 순으로 정렬
+    @Operation(
+            summary = "내 게시글 좋아요 순 정렬"
+    )
     @GetMapping("/likes/ordered")
     public ResponseEntity<List<PostDTO>> getPostsOrderByLikes(
             @AuthenticationPrincipal SecurityUser userDetails) {
@@ -66,6 +82,9 @@ public class ApiV1MyPagePostController {
     }
 
     // 포스트 월별 조회수 통계(그래프용)
+    @Operation(
+            summary = "게시글 월별 조회수"
+    )
     @GetMapping("/views/monthly")
     public ResponseEntity<List<MonthlyViewDTO>> getMonthlyViewStats(
             @AuthenticationPrincipal SecurityUser userDetails) {
