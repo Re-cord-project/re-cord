@@ -7,10 +7,7 @@ import com.commitmate.re_cord.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,20 +30,19 @@ public class ApiV1MyPageCommentController {
         return ResponseEntity.ok(comments);
     }
 
-    //댓글의 좋아요 총합
-    @GetMapping("/likes/total")
-    public long getTotalCommentsLikes(
-            @AuthenticationPrincipal SecurityUser userDetails) {
+    @GetMapping("/likes")
+    public ResponseEntity<?> getCommentsLikes (
+            @AuthenticationPrincipal SecurityUser userDetails,
+            @RequestParam(required = false) String type) {
         Long userId = userDetails.getId();
-        return myPageCommentService.getTotalCommentLikes(userId);
-    }
-
-    // 댓글을 좋아요 순으로 정렬
-    @GetMapping("/likes/ordered")
-    public ResponseEntity<List<CommentDTO>> getCommentsOrderByLikes(
-            @AuthenticationPrincipal SecurityUser userDetails) {
-        Long userId = userDetails.getId();
-        List<CommentDTO> comments = myPageCommentService.getCommentsOrderedByLikes(userId);
-        return ResponseEntity.ok(comments);
+        switch (type) {
+            case "total":
+                return ResponseEntity.ok(myPageCommentService.getTotalCommentLikes(userId));
+            case "ordred":
+                List<CommentDTO> comments = myPageCommentService.getCommentsOrderedByLikes(userId);
+                return ResponseEntity.ok(comments);
+            default:
+                return ResponseEntity.badRequest().body("Invalid query parameter");
+        }
     }
 }
