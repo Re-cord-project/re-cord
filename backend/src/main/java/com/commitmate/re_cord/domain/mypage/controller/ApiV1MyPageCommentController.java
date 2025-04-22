@@ -4,6 +4,7 @@ import com.commitmate.re_cord.domain.mypage.service.MyPageCommentService;
 import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentDTO;
 import com.commitmate.re_cord.domain.post.comment.comment.service.CommentService;
 import com.commitmate.re_cord.global.security.SecurityUser;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,7 +18,6 @@ import java.util.List;
 
 public class ApiV1MyPageCommentController {
 
-    private final CommentService commentService;
     private final MyPageCommentService myPageCommentService;
 
 
@@ -26,7 +26,7 @@ public class ApiV1MyPageCommentController {
     public ResponseEntity<List<CommentDTO>> getCommentsByUser(
             @AuthenticationPrincipal SecurityUser userDetails) {
         Long userId = userDetails.getId();
-        List<CommentDTO> comments = commentService.getCommentsByUser(userId);
+        List<CommentDTO> comments = myPageCommentService.getCommentsByUserId(userId);
         return ResponseEntity.ok(comments);
     }
 

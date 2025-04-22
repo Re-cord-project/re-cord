@@ -7,6 +7,7 @@ import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.service.UserService;
 import com.commitmate.re_cord.global.rq.Rq;
 import com.commitmate.re_cord.global.security.UserLoginDto;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("api/auth")
 @RequiredArgsConstructor
 public class ApiV1UserController {
     private final UserService userService;
@@ -39,6 +41,9 @@ public class ApiV1UserController {
     }
 
     // 회원가입
+    @Operation(
+            summary = "회원가입"
+    )
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         if(user.getEmail()  == null || user.getEmail().isEmpty() || user.getPassword() == null || user.getPassword().isEmpty()){
@@ -49,6 +54,9 @@ public class ApiV1UserController {
     }
 
     // 로그인
+    @Operation(
+            summary = "로그인"
+    )
     @PostMapping("/login")
 
     public ResponseEntity<?> login(@Valid @RequestBody UserLoginDto userLoginDto, HttpServletResponse response) {
@@ -62,6 +70,9 @@ public class ApiV1UserController {
         return ResponseEntity.ok(loginResponseDto);
     }
     // 로그아웃
+    @Operation(
+            summary = "로그아웃"
+    )
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestParam Long userId) {
         userService.logout(userId);
@@ -71,25 +82,7 @@ public class ApiV1UserController {
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
-    // 소셜 회원가입 시 추가 정보 받기
-    @PostMapping("/api/oauth2/complete-signup")
-    public ResponseEntity<?> completeSignup(@RequestBody OAuth2SignupRequest dto) {
-        User user = userService.completeOAuth2Signup(
-                dto.getOauthId(),
-                dto.getEmail(),
-//                dto.getUsername(),
-                dto.getBootcamp(),
-                dto.getGeneration()
-        );
 
-        String accessToken = rq.getCookieValue("accessToken");
-//        String accessToken = userService.genAccessToken(user);
-
-        return ResponseEntity.ok(Map.of(
-                "accessToken", accessToken,
-                "refreshToken", user.getRefreshToken()
-        ));
-    }
 
 
 }

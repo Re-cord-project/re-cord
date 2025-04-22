@@ -6,6 +6,7 @@ import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentResponseDTO
 import com.commitmate.re_cord.domain.post.comment.comment.service.CommentService;
 import com.commitmate.re_cord.domain.post.comment.commentVote.service.CommentVoteService;
 import com.commitmate.re_cord.global.security.SecurityUser;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -15,14 +16,17 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("api/{postId}/comments")
+@RequestMapping("api/posts/{postId}/comments")
 @RequiredArgsConstructor
 public class ApiV1CommentController {
 
     private final CommentService commentService;
     private final CommentVoteService commentVoteService;
 
-    @PostMapping("/new")
+    @Operation(
+            summary = "댓글 작성"
+    )
+    @PostMapping
     public ResponseEntity<CommentResponseDTO> registerComment(
             @PathVariable Long postId,
             @RequestBody CommentRequestDTO requestDTO,
@@ -34,7 +38,10 @@ public class ApiV1CommentController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{commentId}/delete")
+    @Operation(
+            summary = "댓글 삭제"
+    )
+    @DeleteMapping("/{commentId}")
     public void deleteComment(
             @PathVariable Long postId,
             @PathVariable Long commentId,
@@ -45,7 +52,10 @@ public class ApiV1CommentController {
 
     }
 
-    @PostMapping("/{commentId}/like")
+    @Operation(
+            summary = "댓글 좋아요 누르기"
+    )
+    @PostMapping("/{commentId}/likes")
     public ResponseEntity<Void> toggleCommentLike(
             @PathVariable Long postId,
             @PathVariable Long commentId,
@@ -56,8 +66,10 @@ public class ApiV1CommentController {
         return ResponseEntity.ok().build();
     }
 
-
-    @PatchMapping("/{commentId}/edit")
+    @Operation(
+            summary = "댓글 수정"
+    )
+    @PatchMapping("/{commentId}")
     public ResponseEntity<CommentResponseDTO> updateComment(
             @PathVariable Long postId,
             @PathVariable Long commentId,
@@ -70,6 +82,9 @@ public class ApiV1CommentController {
 
     }
 
+    @Operation(
+            summary = "댓글 조회"
+    )
     @GetMapping
     public Page<CommentResponseDTO> getComment(
             @PathVariable Long postId,
