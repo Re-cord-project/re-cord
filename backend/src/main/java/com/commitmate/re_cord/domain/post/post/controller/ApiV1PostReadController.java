@@ -2,7 +2,6 @@ package com.commitmate.re_cord.domain.post.post.controller;
 
 import com.commitmate.re_cord.domain.post.post.dto.PostResponseDto;
 import com.commitmate.re_cord.domain.post.post.service.PostService;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -10,34 +9,39 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/posts/read")
+@RequestMapping("/api/posts")
 public class ApiV1PostReadController {
     private final PostService postService;
 
     // 게시글 전체 목록 보기
-    @Operation(
-            summary = "전체 게시글 보기"
-    )
     @GetMapping
     public Page<PostResponseDto> getAllPosts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "5") int size) {
 
         return postService.getAllPosts(page, size);
     }
 
-    @Operation(
-            summary = "게시글 상세 보기"
-    )
     // 게시글 하나 상세 보기
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDto> getPost(@PathVariable Long postId) {
         return ResponseEntity.ok(postService.getPostById(postId));
     }
 
-    @Operation(
-            summary = "게시글 검색"
-    )
+    //게시글 좋아요 수
+    @GetMapping("/{postId}/likes")
+    public ResponseEntity<Integer> getLikes(@PathVariable Long postId) {
+        int likeCount = postService.getPostLikes(postId);
+        return ResponseEntity.ok(likeCount);
+    }
+
+    //게시글 조회수
+    @GetMapping("/{postId}/views")
+    public ResponseEntity<Integer> getViews(@PathVariable Long postId) {
+        int viewCount = postService.getPostViews(postId);
+        return ResponseEntity.ok(viewCount);
+    }
+
     // 검색 api
     @GetMapping("/search")
     public ResponseEntity<Page<PostResponseDto>> searchPosts(
@@ -50,10 +54,7 @@ public class ApiV1PostReadController {
     }
 
     // 카테고리별로 보는 API
-    @Operation(
-            summary = "카테고리별 게시글 조회"
-    )
-    @GetMapping("/category/{categoryId}")
+    @GetMapping("/categories/{categoryId}")
     public ResponseEntity<Page<PostResponseDto>> getPostsByCategory(
             @PathVariable Long categoryId,
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -62,4 +63,10 @@ public class ApiV1PostReadController {
         Page<PostResponseDto> posts = postService.getPostsByCategory(categoryId, page, size);
         return ResponseEntity.ok(posts);
     }
+    // userId에 해당하는 제일 최신글보기
+    @GetMapping("/latest/{userId}")
+    public ResponseEntity<PostResponseDto> getLatestPostByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(postService.getLatestPostByUserId(userId));
+    }
+
 }
