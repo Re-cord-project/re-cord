@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("api/{postId}/comments")
+@RequestMapping("api/posts/{postId}/comments")
 @RequiredArgsConstructor
 public class ApiV1CommentController {
 
@@ -26,7 +26,7 @@ public class ApiV1CommentController {
     @Operation(
             summary = "댓글 작성"
     )
-    @PostMapping("/new")
+    @PostMapping
     public ResponseEntity<CommentResponseDTO> registerComment(
             @PathVariable Long postId,
             @RequestBody CommentRequestDTO requestDTO,
@@ -41,7 +41,7 @@ public class ApiV1CommentController {
     @Operation(
             summary = "댓글 삭제"
     )
-    @DeleteMapping("/{commentId}/delete")
+    @DeleteMapping("/{commentId}")
     public void deleteComment(
             @PathVariable Long postId,
             @PathVariable Long commentId,
@@ -55,7 +55,7 @@ public class ApiV1CommentController {
     @Operation(
             summary = "댓글 좋아요 누르기"
     )
-    @PostMapping("/{commentId}/like")
+    @PostMapping("/{commentId}/likes")
     public ResponseEntity<Void> toggleCommentLike(
             @PathVariable Long postId,
             @PathVariable Long commentId,
@@ -69,7 +69,7 @@ public class ApiV1CommentController {
     @Operation(
             summary = "댓글 수정"
     )
-    @PatchMapping("/{commentId}/edit")
+    @PatchMapping("/{commentId}")
     public ResponseEntity<CommentResponseDTO> updateComment(
             @PathVariable Long postId,
             @PathVariable Long commentId,
