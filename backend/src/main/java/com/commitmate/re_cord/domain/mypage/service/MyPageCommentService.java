@@ -5,10 +5,12 @@ import com.commitmate.re_cord.domain.post.comment.comment.repository.CommentRepo
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Slf4j
 
