@@ -15,8 +15,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
-
-@Transactional(readOnly = true)
 public class MyPagePostService {
     private final PostRepository postRepository;
 
