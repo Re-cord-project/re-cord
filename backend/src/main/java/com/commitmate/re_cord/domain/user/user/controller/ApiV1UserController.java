@@ -2,12 +2,14 @@ package com.commitmate.re_cord.domain.user.user.controller;
 
 
 import com.commitmate.re_cord.domain.user.user.dto.OAuth2SignupRequest;
+import com.commitmate.re_cord.domain.user.user.dto.UserDto;
 import com.commitmate.re_cord.domain.user.user.dto.UserLoginResponseDto;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.service.UserService;
 import com.commitmate.re_cord.global.rq.Rq;
 import com.commitmate.re_cord.global.security.UserLoginDto;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("api/auth")
+@RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class ApiV1UserController {
     private final UserService userService;
@@ -30,6 +32,13 @@ public class ApiV1UserController {
 
     @Value("${custom.site.frontUrl}")
     private String frontUrl;
+
+    @GetMapping("/me")
+    public UserDto me() {
+        User user = userService.findById(rq.getActor().getId()).get();
+
+        return new UserDto(user);
+    }
 
     @GetMapping("/")
     public String mainPage() {
@@ -73,9 +82,9 @@ public class ApiV1UserController {
     @Operation(
             summary = "로그아웃"
     )
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestParam Long userId) {
-        userService.logout(userId);
+    @DeleteMapping("/logout")
+    public ResponseEntity<?> logout() {
+//        userService.logout();
         rq.deleteCookie("accessToken");
         rq.deleteCookie("refreshToken");
 

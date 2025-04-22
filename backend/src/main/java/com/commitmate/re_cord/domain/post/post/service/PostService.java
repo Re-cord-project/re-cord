@@ -33,7 +33,6 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final UserRepository userRepository;
 
-
     public List<PostDTO> getPostsByUserId(Long userId) {
         return postRepository.findMyPost(userId).stream()
                 .map(PostDTO::getEntity)
@@ -83,7 +82,6 @@ public class PostService {
 
         postRepository.save(post);
     }
-
 
     // PostStatus에 따라 UpdateStatus를 설정하는 메서드
     private UpdateStatus getUpdateStatusByPostStatus(PostStatus status) {
@@ -140,12 +138,24 @@ public class PostService {
     // 게시글 상세 보기
     @Transactional
     public PostResponseDto getPostById(Long postId) {
-        Post post = postRepository.findById(postId)
+        Post post = postRepository.findByIdWithImages(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
 
         post.setViews(post.getViews() + 1);
         postRepository.save(post);
         return new PostResponseDto(post);
+    }
+
+    @Transactional(readOnly = true)
+    public int getPostLikes(Long postId) {
+        return postRepository.findLikesById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public int getPostViews(Long postId) {
+        return postRepository.findViewsById(postId)
+                .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
     }
 
     // 게시글 수정
@@ -204,5 +214,12 @@ public class PostService {
 
         postRepository.save(post);
     }
+
+    public PostResponseDto getLatestPostByUserId(Long userId) {
+        Post post = postRepository.findTopByUserIdWithImages(userId)
+                .orElseThrow(() -> new RuntimeException("게시글이 없습니다."));
+        return new PostResponseDto(post); // 여기서 getImages() 안전하게 접근 가능
+    }
+
 
 }

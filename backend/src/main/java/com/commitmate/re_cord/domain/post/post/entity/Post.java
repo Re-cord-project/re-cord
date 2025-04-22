@@ -7,6 +7,10 @@ import com.commitmate.re_cord.global.jpa.UpdateStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -39,6 +43,11 @@ public class Post extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private UpdateStatus updateStatus;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @ToString.Exclude // ToString 무한 루프 방지
+    private List<Image> images = new ArrayList<>();
+
 
     // 좋아요 증가 메서드
     public void increaseLikeCount() {

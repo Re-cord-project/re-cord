@@ -7,7 +7,6 @@ import com.commitmate.re_cord.domain.post.post.service.PostService;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import com.commitmate.re_cord.global.security.SecurityUser;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,15 +17,12 @@ import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/posts/create")
-public class ApiV1PostCreateController {
+@RequestMapping("/api/posts")
+public class ApiV1PostCUDController {
     private final PostService postService;
     private final UserRepository userRepository;
 
     // 게시글 등록
-    @Operation(
-            summary = "새 게시글 등록"
-    )
     @PostMapping
     public ResponseEntity<String> createPost(
             @RequestBody @Validated PostRequestDto dto,
@@ -36,9 +32,6 @@ public class ApiV1PostCreateController {
         return ResponseEntity.ok("게시글 등록 완료");
     }
 
-    @Operation(
-            summary = "사용자의 마지막 저장 임시글 로드"
-    )
     // 현재 로그인한 사용자가 마지막으로 저장한 임시 글을 불러오는 API
     @GetMapping("/drafts/latest")
     public ResponseEntity<PostResponseDto> getLatestDraft(@AuthenticationPrincipal SecurityUser userDetails) {
@@ -60,5 +53,46 @@ public class ApiV1PostCreateController {
         return ResponseEntity.ok(dto);
     }
 
+    // 게시글 삭제
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<String> deletePost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal SecurityUser userDetails) {
+
+        // userId로 실제 User 엔티티 조회
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        postService.deletePost(postId, user);
+        return ResponseEntity.ok("게시글 삭제 완료");
+    }
+
+    // 게시글 수정
+    @PutMapping("/{postId}")
+    public ResponseEntity<String> updatePost(
+            @PathVariable Long postId,
+            @RequestBody @Validated PostRequestDto dto,
+            @AuthenticationPrincipal SecurityUser userDetails) {
+
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        postService.updatePost(postId, dto, user);
+        return ResponseEntity.ok("게시글 수정 완료");
+    }
+
+
+    // 게시글 추천
+    @PostMapping("/{postId}/like")
+    public ResponseEntity<Void> toggleLike(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal SecurityUser userDetails) {
+
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        postService.toggleLike(postId, user);
+        return ResponseEntity.ok().build();
+    }
 
 }
