@@ -16,8 +16,15 @@ import java.util.stream.Collectors;
 @Slf4j
 @Transactional(readOnly = true)
 
+@Transactional(readOnly = true)
 public class MyPagePostService {
     private final PostRepository postRepository;
+
+    public List<PostDTO> getPostsByUserId(Long userId) {
+        return postRepository.findMyPost(userId).stream()
+                .map(PostDTO::getEntity)
+                .collect(Collectors.toList());
+    }
 
     //게시글 조회수 총합
     public Long getTotalPostViews(Long userId) {

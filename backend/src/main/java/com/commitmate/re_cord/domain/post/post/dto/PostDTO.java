@@ -16,9 +16,8 @@ public class PostDTO {
     private Long userId;
     private String title;
     private String content;
+    private int likes;
     private LocalDateTime createdAt;
-
-
 
     public static PostDTO getEntity(Post post){
         return new PostDTO(
@@ -26,6 +25,7 @@ public class PostDTO {
                 post.getUser().getId(),
                 post.getTitle(),
                 post.getContent(),
+                post.getLikes(),
                 post.getCreatedAt()
         );
     }
