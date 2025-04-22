@@ -63,15 +63,11 @@ public class ApiV1MyPagePostController {
             case "total":
                 return ResponseEntity.ok(myPagePostService.getTotalPostLikes(userId));
             case "ordered":
-                List<PostDTO> posts = myPagePostService.getPostsOrderedByViews(userId);
+                List<PostDTO> posts = myPagePostService.getPostsOrderedByLikes(userId);
                 return ResponseEntity.ok(posts);
-            case "monthly":
-                List<MonthlyViewDTO> stats = myPagePostService.getMonthlyViewStats(userId);
-                return ResponseEntity.ok(stats);
             default:
                 return ResponseEntity.badRequest().body("Invalid query parameter");
         }
-
     }
   }
 
