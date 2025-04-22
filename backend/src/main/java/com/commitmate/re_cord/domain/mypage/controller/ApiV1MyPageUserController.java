@@ -24,7 +24,7 @@ public class ApiV1MyPageUserController {
             summary = "유저 정보 변경"
     )
     //유저의 세부 정보 변경
-    @PutMapping("/userUpdate")
+    @PutMapping("/users")
     public ResponseEntity<UpdateUserDTO> updateUser(
             @AuthenticationPrincipal SecurityUser userDetails,
         @RequestBody UpdateUserDTO updateUserDTO) {
