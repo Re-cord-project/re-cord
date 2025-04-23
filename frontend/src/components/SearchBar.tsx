@@ -1,3 +1,4 @@
+/*
 interface SearchBarProps {
   placeholder: string;
 }
@@ -27,4 +28,14 @@ export function SearchBar({ placeholder }: SearchBarProps) {
       </div>
     </div>
   );
+}
+*/
+
+// 임시로 검색 기능 비활성화
+interface SearchBarProps {
+  placeholder: string;
+}
+
+export function SearchBar({ placeholder }: SearchBarProps) {
+  return null;
 } 
