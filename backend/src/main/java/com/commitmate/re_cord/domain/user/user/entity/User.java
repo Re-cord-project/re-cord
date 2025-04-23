@@ -32,7 +32,9 @@ public class User extends BaseEntity {
     private String username;
     private String password;
     private String bootcamp;
+
     private Integer generation;
+
     private String refreshToken;
 
     @Column(columnDefinition = "TEXT DEFAULT ''")
@@ -100,4 +102,6 @@ public class User extends BaseEntity {
     }
 
 
+
 }
+
