@@ -89,14 +89,5 @@ public class CommentService {
 
         return commentPage.map(CommentResponseDTO::new);
     }
-
-    public List<CommentDTO> getCommentsByUser(Long userId) {
-        return commentRepository.findMyComment(userId).stream()
-                .map(CommentDTO::getEntity)
-                .collect(Collectors.toList());
-
-    }
-
-
 }
 

@@ -19,6 +19,7 @@ public class PostDTO {
     private LocalDateTime createdAt;
     private int likes;
     private int views;
+    private String profileImageUrl;
         
 
 
@@ -31,7 +32,8 @@ public class PostDTO {
                 post.getContent(),
                 post.getCreatedAt(),
                 post.getLikes(),
-                post.getViews()
+                post.getViews(),
+                post.getUser().getProfileImageUrl()
         );
     }
 
