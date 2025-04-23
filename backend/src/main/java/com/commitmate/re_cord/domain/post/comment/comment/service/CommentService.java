@@ -45,7 +45,7 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
 
 
-        return new CommentResponseDTO(savedComment.getId(), savedComment.getContent(),user.getUsername(),savedComment.getCreatedAt().toString());
+        return new CommentResponseDTO(savedComment.getId(), savedComment.getContent(),user.getUsername(),savedComment.getCreatedAt().toString(),savedComment.getUpdateStatus().name(),user.getProfileImageUrl());
     }
 
     @Transactional
@@ -68,6 +68,9 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(()-> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(()-> new IllegalArgumentException("해당 유저가 존재하지 않습니다."));
+
         if(!comment.getUser().getId().equals(userId)){
             throw new IllegalArgumentException("댓글 작성자만 수정할 수 있습니다.");
         }
@@ -76,7 +79,7 @@ public class CommentService {
         comment.setUpdateStatus(UpdateStatus.EDITED);
 
         Comment updatedComment = commentRepository.save(comment);
-        return new CommentResponseDTO(updatedComment.getId(),updatedComment.getContent(),updatedComment.getUser().getUsername(),updatedComment.getCreatedAt().toString());
+        return new CommentResponseDTO(updatedComment.getId(),updatedComment.getContent(),updatedComment.getUser().getUsername(),updatedComment.getCreatedAt().toString(),updatedComment.getUpdateStatus().name(),user.getProfileImageUrl());
     }
 
     @Transactional
