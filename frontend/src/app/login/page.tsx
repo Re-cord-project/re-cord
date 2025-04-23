@@ -125,7 +125,7 @@ export default function LoginPage() {
 
                 <div className="mt-6 text-center">
                     <span className="text-gray-600">아직 회원이 아니신가요? </span>
-                    <Link href="/register" className="text-[#78B3CE] hover:text-[#5a9ab8] font-medium">
+                    <Link href="/signup" className="text-[#78B3CE] hover:text-[#5a9ab8] font-medium">
                         회원가입
                     </Link>
                 </div>
