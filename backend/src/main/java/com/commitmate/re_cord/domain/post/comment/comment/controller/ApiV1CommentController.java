@@ -59,16 +59,7 @@ public class ApiV1CommentController {
     @Operation(
             summary = "댓글 좋아요 누르기"
     )
-//    @PostMapping("/{commentId}/likes")
-//    public ResponseEntity<Void> toggleCommentLike(
-//            @PathVariable Long postId,
-//            @PathVariable Long commentId,
-//            @AuthenticationPrincipal SecurityUser userDetails
-//    ){
-//        Long userId = userDetails.getId();
-//        commentVoteService.toggleCommentLike(postId, commentId, userId);
-//        return ResponseEntity.ok().build();
-//    }
+
     @PostMapping("/{commentId}/likes")
     public ResponseEntity<Map<String, Boolean>> toggleCommentLike(
             @PathVariable Long postId,
