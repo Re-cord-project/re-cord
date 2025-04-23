@@ -1,6 +1,7 @@
 package com.commitmate.re_cord.domain.user.user.service;
 
 
+import com.commitmate.re_cord.domain.user.user.dto.SignupDto;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.enums.Provider;
 import com.commitmate.re_cord.domain.user.user.enums.Role;
@@ -32,9 +33,8 @@ public class UserService {
 
     // 일반 회원가입
     @Transactional
-    public String register(String oauthId, String email, String password, String username,
-                           String bootcamp, int generation) {
-        if (userRepository.findByEmail(email).isPresent()) {
+    public String register(SignupDto dto) {
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             return "Email already exists";
         }
 
@@ -42,13 +42,12 @@ public class UserService {
 
 
         User user = new User();
-        user.setOauthId(user.getOauthId());
-        user.setEmail(email);
+        user.setEmail(dto.getEmail());
 //        user.setPassword(encodedPassword);
-        user.setPassword(password);
-        user.setUsername(username);
-        user.setBootcamp(bootcamp);
-        user.setGeneration(generation);
+        user.setPassword(dto.getPassword());
+        user.setUsername(dto.getUsername());
+        user.setBootcamp(dto.getBootcamp());
+        user.setGeneration(dto.getGeneration());
         user.setRole(Role.basic);
         userRepository.save(user);
         return "User registered successfully";
