@@ -35,6 +35,7 @@ public class CommentResponseDTO {
     private String createdAt;
     private String updateStatus;
     private String profileImageUrl;
+    private int likes;
 
     public CommentResponseDTO(Comment comment) {
         this.id = comment.getId();
@@ -43,5 +44,6 @@ public class CommentResponseDTO {
         this.createdAt = comment.getCreatedAt().toString();
         this.updateStatus = comment.getUpdateStatus().name();
         this.profileImageUrl = comment.getUser().getProfileImageUrl();
+        this.likes = comment.getLikes();
     }
 }

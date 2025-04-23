@@ -45,7 +45,13 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
 
 
-        return new CommentResponseDTO(savedComment.getId(), savedComment.getContent(),user.getUsername(),savedComment.getCreatedAt().toString(),savedComment.getUpdateStatus().name(),user.getProfileImageUrl());
+        return new CommentResponseDTO(savedComment.getId(),
+                savedComment.getContent(),
+                user.getUsername(),
+                savedComment.getCreatedAt().toString(),
+                savedComment.getUpdateStatus().name(),
+                user.getProfileImageUrl(),
+                savedComment.getLikes());
     }
 
     @Transactional
@@ -79,7 +85,13 @@ public class CommentService {
         comment.setUpdateStatus(UpdateStatus.EDITED);
 
         Comment updatedComment = commentRepository.save(comment);
-        return new CommentResponseDTO(updatedComment.getId(),updatedComment.getContent(),updatedComment.getUser().getUsername(),updatedComment.getCreatedAt().toString(),updatedComment.getUpdateStatus().name(),user.getProfileImageUrl());
+        return new CommentResponseDTO(updatedComment.getId(),
+                updatedComment.getContent(),
+                updatedComment.getUser().getUsername(),
+                updatedComment.getCreatedAt().toString(),
+                updatedComment.getUpdateStatus().name(),
+                user.getProfileImageUrl(),
+                updatedComment.getLikes());
     }
 
     @Transactional
