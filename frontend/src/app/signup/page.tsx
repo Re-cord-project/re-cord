@@ -15,6 +15,9 @@ export default function SignupPage() {
     })
     const [error, setError] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [emailCheckMessage, setEmailCheckMessage] = useState('')
+    const [isEmailChecked, setIsEmailChecked] = useState(false)
+    const [passwordError, setPasswordError] = useState('')
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -22,6 +25,77 @@ export default function SignupPage() {
             ...prev,
             [name]: value,
         }))
+
+        // 이메일이 변경되면 중복검사 상태 초기화
+        if (name === 'email') {
+            setIsEmailChecked(false)
+            setEmailCheckMessage('')
+        }
+
+        // 비밀번호 유효성 검사
+        if (name === 'password') {
+            validatePassword(value)
+        }
+    }
+
+    const validatePassword = (password: string) => {
+        // 비밀번호 길이 검사
+        if (password.length < 10) {
+            setPasswordError('비밀번호는 최소 10자리 이상이어야 합니다.')
+            return false
+        }
+
+        // 영문, 숫자, 특수문자 포함 여부 검사
+        const hasLetter = /[a-zA-Z]/.test(password)
+        const hasNumber = /[0-9]/.test(password)
+        const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password)
+
+        // 포함된 문자 종류 계산
+        let typeCount = 0
+        if (hasLetter) typeCount++
+        if (hasNumber) typeCount++
+        if (hasSpecial) typeCount++
+
+        if (typeCount < 2) {
+            setPasswordError('비밀번호는 영문, 숫자, 특수문자 중 2종류 이상을 포함해야 합니다.')
+            return false
+        }
+
+        setPasswordError('')
+        return true
+    }
+
+    const checkEmail = async () => {
+        if (!formData.email) {
+            setEmailCheckMessage('이메일을 입력해주세요.')
+            return
+        }
+
+        try {
+            const response = await fetch(
+                `http://localhost:8090/api/auth/check-email?email=${encodeURIComponent(formData.email)}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                },
+            )
+
+            const data = await response.text()
+
+            if (response.ok) {
+                setEmailCheckMessage(data)
+                setIsEmailChecked(true)
+            } else {
+                setEmailCheckMessage(data)
+                setIsEmailChecked(false)
+            }
+        } catch (err) {
+            setEmailCheckMessage('이메일 중복검사 중 오류가 발생했습니다.')
+            setIsEmailChecked(false)
+            console.error('Email check error:', err)
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -32,6 +106,19 @@ export default function SignupPage() {
         // 필수값 검증
         if (!formData.email || !formData.username || !formData.password) {
             setError('이메일, 이름, 비밀번호는 필수 입력값입니다.')
+            setIsSubmitting(false)
+            return
+        }
+
+        // 이메일 중복검사 확인
+        if (!isEmailChecked) {
+            setError('이메일 중복검사를 진행해주세요.')
+            setIsSubmitting(false)
+            return
+        }
+
+        // 비밀번호 유효성 검사
+        if (!validatePassword(formData.password)) {
             setIsSubmitting(false)
             return
         }
@@ -80,9 +167,9 @@ export default function SignupPage() {
                 <h1 className="text-3xl font-bold text-center mb-6 text-[#111827]">회원가입</h1>
                 <p className="text-center text-gray-600 mb-6">필수 정보를 입력해주세요</p>
 
-                {error && <div className="mb-4 p-2 text-sm text-red-600 bg-red-50 rounded-md">{error}</div>}
+                <form onSubmit={handleSubmit} className="space-y-5 max-w-xl mx-auto" noValidate>
+                    {error && <div className="w-full p-2 pl-4 text-sm text-red-600 bg-red-50 rounded-md">{error}</div>}
 
-                <form onSubmit={handleSubmit} className="space-y-5 max-w-xl mx-auto">
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                             아이디(이메일) <span className="text-red-500">*</span>
@@ -100,6 +187,7 @@ export default function SignupPage() {
                             />
                             <button
                                 type="button"
+                                onClick={checkEmail}
                                 className="px-6 py-2 text-sm font-medium text-white rounded-md whitespace-nowrap"
                                 style={{
                                     background:
@@ -110,6 +198,11 @@ export default function SignupPage() {
                                 중복확인
                             </button>
                         </div>
+                        {emailCheckMessage && (
+                            <p className={`mt-1 text-sm ${isEmailChecked ? 'text-green-600' : 'text-red-600'}`}>
+                                {emailCheckMessage}
+                            </p>
+                        )}
                     </div>
 
                     <div>
@@ -140,6 +233,10 @@ export default function SignupPage() {
                             onChange={handleChange}
                             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
                         />
+                        {passwordError && <p className="mt-1 text-sm text-red-600">{passwordError}</p>}
+                        <p className="mt-1 text-xs text-gray-500">
+                            영문, 숫자, 특수문자 중 2종류 이상을 포함하여 최소 10자리 이상으로 구성해주세요.
+                        </p>
                     </div>
 
                     <div>

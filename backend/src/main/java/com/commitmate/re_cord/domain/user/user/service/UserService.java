@@ -53,6 +53,12 @@ public class UserService {
         return "User registered successfully";
     }
 
+    // 이메일 중복 검사
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+
     // 일반 로그인
     @Transactional
     public String login(String email, String password) {
