@@ -9,6 +9,7 @@ module.exports = {
         extend: {
             fontFamily: {
                 sans: ['var(--font-noto-sans-kr)'],
+                roboto: ['var(--font-roboto)', 'sans-serif'],
             },
         },
     },
