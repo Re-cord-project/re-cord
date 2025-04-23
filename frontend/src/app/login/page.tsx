@@ -42,16 +42,14 @@ export default function LoginPage() {
 
     return (
         <div className="flex-1 flex justify-center items-center bg-gray-50 py-6">
-            <div className="w-full max-w-[448px] p-8 bg-white rounded-lg shadow-sm relative">
+            <div className="w-full max-w-[500px] p-8 bg-white rounded-lg shadow-sm relative">
                 <h1
-                    className="absolute left-[140.99px] top-[40px] w-[166px] h-[40px] text-[36px] font-extrabold leading-[40px] text-[#111827]"
+                    className="text-[32px] font-extrabold text-center mb-[60px] mt-[36px] text-[#111827]"
                     style={{ fontFeatureSettings: '"kern" on' }}
                 >
                     환영합니다
                 </h1>
-                <p className="text-gray-600 text-center text-sm mb-8 mt-[100px]">
-                    회고록 서비스를 이용하시려면 로그인해주세요.
-                </p>
+                <p className="text-gray-500 text-center text-sm mb-8">회고록 서비스를 이용하시려면 로그인해주세요.</p>
 
                 {error && <div className="mb-4 p-2 text-sm text-red-600 bg-red-50 rounded-md">{error}</div>}
 
