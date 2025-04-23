@@ -1,67 +1,65 @@
-'use client';
+'use client'; // 이 줄을 추가하세요!
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 interface Follower {
   id: string;
   name: string;
+  email: string;
   role: string;
   imageUrl: string;
 }
 
-// 더 많은 팔로워 데이터 생성
-const MOCK_FOLLOWERS: Follower[] = [
-  {
-    id: '1',
-    name: '이기술',
-    role: '시니어 백엔드 개발자',
-    imageUrl: '/images/default-profile.png',
-  },
-  {
-    id: '2',
-    name: '박코딩',
-    role: '프론트엔드 개발자',
-    imageUrl: '/images/default-profile.png',
-  },
-  {
-    id: '3',
-    name: '최데브',
-    role: '풀스택 개발자',
-    imageUrl: '/images/default-profile.png',
-  },
-  {
-    id: '4',
-    name: '정프로',
-    role: '모바일 앱 개발자',
-    imageUrl: '/images/default-profile.png',
-  },
-  {
-    id: '5',
-    name: '김인공',
-    role: 'AI 개발자',
-    imageUrl: '/images/default-profile.png',
-  },
-];
-
 export function FollowerList() {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [followers, setFollowers] = useState<Follower[]>([]); // 팔로워 목록 상태
+  const [currentPage, setCurrentPage] = useState(1); // 현재 페이지 상태
+
+  useEffect(() => {
+    const fetchFollowers = async () => {
+      try {
   
-  // 전체 팔로워 수
-  const totalFollowers = MOCK_FOLLOWERS.length;
-  // 한 페이지당 표시할 항목 수
+        // const res = await fetch('/api/users/follow', { //TODO : 배포 후 변경
+        const res = await fetch('http://localhost:8090/api/users/follow', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+
+          credentials: 'include', // 쿠키 포함
+
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setFollowers(data.map((follower: any) => ({
+            id: String(follower.userId),
+            name: follower.username,
+            email: follower.email,
+            role: 'Unknown', // 역할 정보는 제공되지 않아서 기본값 설정
+            imageUrl: '/images/default-profile.png', // 기본 이미지 URL 사용
+          })));
+        } else {
+          console.error('팔로워 목록을 가져오는 데 실패했습니다.');
+        }
+      } catch (error) {
+        console.error('API 호출 중 오류 발생:', error);
+      }
+    };
+
+    fetchFollowers(); // 컴포넌트가 처음 렌더링될 때 API 호출
+  }, []); // 빈 배열은 컴포넌트가 처음 마운트될 때 한 번만 호출되도록 설정
+
+  const totalFollowers = followers.length;
   const itemsPerPage = 5;
-  // 전체 페이지 수
   const totalPages = Math.ceil(totalFollowers / itemsPerPage);
-  
-  // 현재 페이지에 표시할 팔로워 계산
-  const currentFollowers = MOCK_FOLLOWERS.slice(
+
+  const currentFollowers = followers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // 페이지 변경 처리
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -115,28 +113,12 @@ export function FollowerList() {
           </button>
           {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
             let pageNum = 1;
-            
-            if (totalPages <= 5) {
-              // 전체 페이지가 5개 이하면 1부터 순차적으로
-              pageNum = i + 1;
-            } else if (currentPage <= 3) {
-              // 현재 페이지가 3 이하면 1~5 표시
-              pageNum = i + 1;
-            } else if (currentPage >= totalPages - 2) {
-              // 현재 페이지가 마지막에서 3번째 이내면 마지막 5개 표시
-              pageNum = totalPages - 4 + i;
-            } else {
-              // 그 외의 경우 현재 페이지 중심으로 앞뒤 2개씩 표시
-              pageNum = currentPage - 2 + i;
-            }
-            
+            if (totalPages <= 5) pageNum = i + 1;
             return (
               <button
                 key={pageNum}
                 onClick={() => handlePageChange(pageNum)}
-                className={`w-10 h-10 flex items-center justify-center rounded-full ${
-                  pageNum === currentPage ? 'bg-gray-200 text-gray-700' : 'hover:bg-gray-100 transition-colors'
-                }`}
+                className={`w-10 h-10 flex items-center justify-center rounded-full ${pageNum === currentPage ? 'bg-gray-200 text-gray-700' : 'hover:bg-gray-100 transition-colors'}`}
                 aria-label={`${pageNum} 페이지`}
                 aria-current={pageNum === currentPage ? 'page' : undefined}
               >
@@ -158,4 +140,4 @@ export function FollowerList() {
       )}
     </div>
   );
-} 
+}
