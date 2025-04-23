@@ -62,7 +62,7 @@ public class ApiV1UserController {
         if(dto.getPassword().equals(dto.getPasswordConfirm())){
             return ResponseEntity.status(200).body(userService.register(dto));
         } else {
-            return ResponseEntity.badRequest().body(Map.of("message", "Password and Confirm Password are not match"));
+            return ResponseEntity.badRequest().body(Map.of("message", "Password and Confirm Password are not matched"));
         }
     }
 
