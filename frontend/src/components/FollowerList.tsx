@@ -1,4 +1,4 @@
-'use client';
+'use client'; 
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -15,7 +15,6 @@ interface Follower {
 export function FollowerList() {
   const [followers, setFollowers] = useState<Follower[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
   // 팔로워 목록 가져오기
@@ -52,9 +51,19 @@ export function FollowerList() {
       }
     };
 
-    // 팔로워 목록 가져오기
     fetchFollowers();
-  }, [API_BASE]);
+  }, [API_BASE]); 
+
+  // 언팔로우 처리, UI에서 즉시 제거
+  const handleUnfollow = async (userId: string) => {
+    // DELETE 요청
+    await fetch(`${API_BASE}/api/users/follow/${userId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
+    // UI 업데이트, 해당 항목 제거
+    setFollowers((prev) => prev.filter((f) => f.id !== userId));
+  };
 
   // 팔로워 총 수
   const totalFollowers = followers.length;
@@ -74,87 +83,72 @@ export function FollowerList() {
     }
   };
 
+  // 팔로워 목록 렌더링
   return (
     <div>
       <div className="border border-gray-200 rounded-lg overflow-hidden">
-        {currentFollowers.map((follower, idx) => (
+        {currentFollowers.map((f, idx) => (
           <div
-            key={follower.id}
+            key={f.id}
             className={`flex items-center justify-between p-4 bg-white ${
               idx !== currentFollowers.length - 1 ? 'border-b border-gray-200' : ''
             }`}
           >
             <div className="flex items-center space-x-4">
-              <div className="relative w-12 h-12 rounded-full overflow-hidden">
-                <Link href={`/blog/${follower.id}`}>
-                  <Image
-                    src={follower.imageUrl}
-                    alt={`${follower.name}의 프로필 이미지`}
-                    fill
-                    className="object-cover cursor-pointer"
-                    priority
-                  />
-                </Link>
-              </div>
-              <div>
-                <Link href={`/blog/${follower.id}`}>
-                  <h3 className="font-medium text-gray-900 hover:text-[#78B3CE] transition-colors cursor-pointer">
-                    {follower.name}
-                  </h3>
-                </Link>
-              </div>
+              <Link href={`/blog/${f.id}`} className="relative w-12 h-12 rounded-full overflow-hidden">
+                <Image src={f.imageUrl} alt={`${f.name}의 프로필`} fill className="object-cover" priority />
+              </Link>
+              <Link href={`/blog/${f.id}`}>
+                <h3 className="font-medium text-gray-900 hover:text-[#78B3CE] transition-colors cursor-pointer">
+                  {f.name}
+                </h3>
+              </Link>
             </div>
-            <button className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-[#78B3CE] hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#78B3CE]">
+
+            {/* 언팔로우 버튼 */}
+            <button
+              onClick={() => handleUnfollow(f.id)} // 🎉 언팔로우 토글 버튼에 핸들러 추가
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-[#78B3CE] hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#78B3CE]"
+            >
               언팔로잉
             </button>
           </div>
         ))}
       </div>
 
+      {/* 페이징 */}   
       {totalPages > 1 && (
         <div className="flex justify-center space-x-2 mt-6">
           <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage <= 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
             className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
             aria-label="이전 페이지"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            &lt;
           </button>
 
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            let pageNum: number;
-            if (totalPages <= 5) pageNum = i + 1;
-            else if (currentPage <= 3) pageNum = i + 1;
-            else if (currentPage >= totalPages - 2) pageNum = totalPages - 4 + i;
-            else pageNum = currentPage - 2 + i;
-
-            return (
-              <button
-                key={pageNum}
-                onClick={() => handlePageChange(pageNum)}
-                className={`w-10 h-10 flex items-center justify-center rounded-full ${
-                  pageNum === currentPage ? 'bg-gray-200 text-gray-700' : 'hover:bg-gray-100'
-                }`}
-                aria-label={`${pageNum} 페이지`}
-                aria-current={pageNum === currentPage ? 'page' : undefined}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`w-10 h-10 flex items-center justify-center rounded-full ${
+                currentPage === i + 1 ? 'bg-gray-200 text-gray-700' : 'hover:bg-gray-100'
+              }`}
+              aria-label={`${i + 1} 페이지`}
+              aria-current={currentPage === i + 1 ? 'page' : undefined}
+            >
+              {i + 1}
+            </button>
+          ))}
 
           <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage >= totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
             className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
             aria-label="다음 페이지"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            &gt;
           </button>
         </div>
       )}
