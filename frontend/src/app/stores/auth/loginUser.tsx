@@ -1,7 +1,9 @@
+'use client'
+
 import { createContext, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 
-type User = {
+export type User = {
     id: number
     email: string
     username: string
@@ -10,41 +12,28 @@ type User = {
 }
 
 export const LoginUserContext = createContext<{
-    loginUser: User
+    loginUser: User | null
     setLoginUser: (user: User) => void
     isLoginUserPending: boolean
     isLogin: boolean
     logout: (callback: () => void) => void
     logoutAndHome: () => void
+    setNoLoginUser: () => void
 }>({
-    loginUser: createEmptyUser(),
+    loginUser: null,
     setLoginUser: () => {},
     isLoginUserPending: true,
     isLogin: false,
     logout: () => {},
     logoutAndHome: () => {},
+    setNoLoginUser: () => {},
 })
-
-function createEmptyUser(): User {
-    return {
-        id: 0,
-        email: '',
-        username: '',
-        bootcamp: '',
-        generation: 0,
-    }
-}
 
 export function useLoginUser() {
     const router = useRouter()
 
     const [isLoginUserPending, setLoginUserPending] = useState(true)
-    const [loginUser, _setLoginUser] = useState<User>(createEmptyUser())
-
-    const removeLoginUser = () => {
-        _setLoginUser(createEmptyUser())
-        setLoginUserPending(false)
-    }
+    const [loginUser, _setLoginUser] = useState<User | null>(null)
 
     const setLoginUser = (user: User) => {
         _setLoginUser(user)
@@ -52,17 +41,19 @@ export function useLoginUser() {
     }
 
     const setNoLoginUser = () => {
+        _setLoginUser(null)
         setLoginUserPending(false)
     }
 
-    const isLogin = loginUser.id !== 0
+    const isLogin = loginUser !== null
 
     const logout = (callback: () => void) => {
         fetch('http://localhost:8090/api/auth/logout', {
             method: 'DELETE',
             credentials: 'include',
         }).then(() => {
-            removeLoginUser()
+            _setLoginUser(null)
+            setLoginUserPending(false)
             callback()
         })
     }
@@ -77,7 +68,6 @@ export function useLoginUser() {
         isLoginUserPending,
         setNoLoginUser,
         isLogin,
-
         logout,
         logoutAndHome,
     }
