@@ -20,7 +20,7 @@ public class FollowService {
     private final FollowRepository followRepository;
     private final UserService userService;
 
-    //팔로우
+    // 팔로우
     @Transactional
     public void follow(Long followerId, Long followingId) {
         // follower / following 조회 (EntityNotFoundException 발생 시 404)
@@ -46,7 +46,7 @@ public class FollowService {
         followRepository.save(f);
     }
 
-   //언팔로우
+    // 언팔로우
     @Transactional
     public void unfollow(Long followerId, Long followingId) {
         // follower / following 조회
@@ -64,15 +64,16 @@ public class FollowService {
     // 내가 팔로우한 사람 목록
     @Transactional(readOnly = true)
     public List<FollowUserResponseDto> getFollowingList(Long followerId) {
-        User follower = userService.getUserById(followerId);
+        User me = userService.getUserById(followerId);
 
-        return followRepository.findAllByFollowerId(follower).stream()
+        return followRepository.findAllByFollowerId(me).stream()
                 .map(f -> {
                     User u = f.getFollowingId();
                     return FollowUserResponseDto.builder()
                             .userId(u.getId())
                             .username(u.getUsername())
                             .email(u.getEmail())
+                            .hasFollowed(true)    // 내가 팔로우한 사람은 항상 true
                             .build();
                 })
                 .toList();
@@ -81,15 +82,20 @@ public class FollowService {
     // 나를 팔로우한 사람 목록
     @Transactional(readOnly = true)
     public List<FollowUserResponseDto> getFollowerList(Long followingId) {
-        User following = userService.getUserById(followingId);
+        User me = userService.getUserById(followingId);
 
-        return followRepository.findAllByFollowingId(following).stream()
+        return followRepository.findAllByFollowingId(me).stream()
                 .map(f -> {
                     User u = f.getFollowerId();
+                    // 내가 이 사람을 팔로우했는지 여부 조회
+                    boolean hasFollowed = followRepository
+                            .existsByFollowerIdAndFollowingId(me, u);
+
                     return FollowUserResponseDto.builder()
                             .userId(u.getId())
                             .username(u.getUsername())
                             .email(u.getEmail())
+                            .hasFollowed(hasFollowed)
                             .build();
                 })
                 .toList();
