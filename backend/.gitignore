@@ -46,3 +46,5 @@ db_dev.*
 .mv.db
 .trace.db
 
+#MySQL
+.env
