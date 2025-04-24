@@ -11,11 +11,13 @@ import java.time.LocalDateTime;
 public class CommentDTO {
     private Long id;
     private Long userId;
+    private String writerName;
     private String content;
     private LocalDateTime createdAt;
     private Long postId;
     private String postTitle;
     private int likes;
+    private String WriterProfileImg;
 
 
 
@@ -23,11 +25,13 @@ public class CommentDTO {
         return new CommentDTO(
                 comment.getId(),
                 comment.getUser().getId(),
+                comment.getUser().getUsername(),
                 comment.getContent(),
                 comment.getCreatedAt(),
                 comment.getPost().getId(),
                 comment.getPost().getTitle(),
-                comment.getLikes()
+                comment.getLikes(),
+                comment.getPost().getUser().getProfileImageUrl()
         );
     }
 

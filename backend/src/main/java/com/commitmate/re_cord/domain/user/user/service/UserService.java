@@ -101,6 +101,12 @@ public class UserService {
 //        userRepository.save(user);  // 변경사항 저장
 //    }
 
+    // 회원가입
+    @Transactional
+    public void withdraw(Long userId) {
+        userRepository.deleteById(userId);
+    }
+
     // 소셜 로그인
     public long count() {
         return userRepository.count();
