@@ -23,32 +23,35 @@ export default function StatisticsPage() {
     const [monthlyViews, setMonthlyViews] = useState<{ month: string; totalViews: number }[]>([])
 
     useEffect(() => {
-        console.log('🔥 useEffect 실행됨') // 여기도 콘솔 추가
+        // ✅ 인기 게시글
         axios
-            .get('/api/mypage/posts/likes?type=ordered')
+            .get<{ content: Post[] }>('/api/mypage/posts/likes?type=ordered')
             .then((res) => setPosts(Array.isArray(res.data.content) ? res.data.content : []))
 
+        // ✅ 인기 댓글
         axios
-            .get('/api/mypage/comments/likes?type=ordered')
+            .get<{ content: Comment[] }>('/api/mypage/comments/likes?type=ordered')
             .then((res) => setComments(Array.isArray(res.data.content) ? res.data.content : []))
 
-        // 총 글
+        // ✅ 총 글 수
         axios
-            .get('/api/mypage/posts', { params: { page: 0, size: 1 } })
+            .get<{ totalElements: number }>('/api/mypage/posts', { params: { page: 0, size: 1 } })
             .then((res) => setPostCount(res.data.totalElements || 0))
             .catch(console.error)
 
-        // 총 댓글
+        // ✅ 총 댓글 수
         axios
-            .get('/api/mypage/comments', { params: { page: 0, size: 1 } })
+            .get<{ totalElements: number }>('/api/mypage/comments', { params: { page: 0, size: 1 } })
             .then((res) => setCommentCount(res.data.totalElements || 0))
             .catch(console.error)
 
-        // 총 조회수
+        // ✅ 총 조회수 (숫자 하나)
         axios.get<number>('/api/mypage/posts/views?type=total').then((res) => setTotalViews(res.data || 0))
 
-        // 월간 조회수
-        axios.get('/api/mypage/posts/views?type=monthly').then((res) => setMonthlyViews(res.data || []))
+        // ✅ 월간 조회수 (배열)
+        axios
+            .get<{ month: string; totalViews: number }[]>('/api/mypage/posts/views?type=monthly')
+            .then((res) => setMonthlyViews(res.data || []))
     }, [])
 
     const chartData = {
