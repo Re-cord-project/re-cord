@@ -29,7 +29,7 @@ export function MyPageSidebar() {
           }}
         >
           <Image
-            src="/images/default-profile.png"
+            src="/default-profile.png"
             alt="기본 프로필 이미지"
             fill
             className="object-cover"
