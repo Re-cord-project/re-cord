@@ -157,14 +157,14 @@ export function FollowingList() {
             {f.hasFollowed ? (
               <button
                 onClick={() => handleUnfollow(f.id)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-[#78B3CE] hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#78B3CE]"
+                className="px-4 py-2 min-w-[85px] text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-[#78B3CE] hover:text-white transition-colors focus:outline-none"
               >
                 언팔로잉
               </button>
             ) : (
               <button
                 onClick={() => handleFollow(f.id)}
-                className="px-4 py-2 text-sm font-medium text-white bg-[#78B3CE] rounded-md hover:bg-[#5c9bb8] transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#78B3CE]"
+                className="px-4 py-2 min-w-[85px] text-sm font-medium text-white bg-[#78B3CE] rounded-md hover:bg-[#5c9bb8] transition-colors focus:outline-none"
               >
                 팔로우
               </button>
@@ -179,7 +179,7 @@ export function FollowingList() {
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
+            className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 focus:outline-none"
             aria-label="이전 페이지"
           >
             &lt;
@@ -191,7 +191,7 @@ export function FollowingList() {
               <button
                 key={`page-button-${pageIndex}`}
                 onClick={() => handlePageChange(pageIndex)}
-                className={`w-10 h-10 flex items-center justify-center rounded-full ${
+                className={`w-10 h-10 flex items-center justify-center rounded-full focus:outline-none ${
                   currentPage === pageIndex ? 'bg-gray-200 text-gray-700' : 'hover:bg-gray-100'
                 }`}
                 aria-label={`${pageIndex} 페이지`}
@@ -205,7 +205,7 @@ export function FollowingList() {
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50"
+            className="p-2 rounded-full hover:bg-gray-100 disabled:opacity-50 focus:outline-none"
             aria-label="다음 페이지"
           >
             &gt;
