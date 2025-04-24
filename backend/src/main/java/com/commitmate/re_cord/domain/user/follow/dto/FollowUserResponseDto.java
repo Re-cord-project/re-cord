@@ -22,4 +22,5 @@ public class FollowUserResponseDto {
         this.email = email;
         this.hasFollowed  = hasFollowed;
     }
+
 }

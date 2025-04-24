@@ -20,4 +20,5 @@ public class FollowCountResponseDto {
         this.followingCount = followingCount;
         this.followerCount = followerCount;
     }
+
 }
