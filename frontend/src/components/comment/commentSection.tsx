@@ -26,57 +26,16 @@ export default function CommentSection({ postId }: { postId: number }) {
   const [totalComments, setTotalComments] = useState(0);
   const [replyingToId, setReplyingToId] = useState<number | null>(null);
   const [replyContent, setReplyContent] = useState('');
-  const [allComments, setAllComments] = useState<Comment[]>([]);
-  const COMMENTS_PER_PAGE = 5;
 
-  const fetchComments = () => {
-    fetch(`http://localhost:8090/api/posts/${postId}/comments?page=0&size=100&sort=createdAt,asc`, {
+  useEffect(() => {
+    fetch(`http://localhost:8090/api/posts/${postId}/comments?page=${page}&size=10&sort=createdAt,asc`, {
       credentials: 'include',
     })
       .then((res) => res.json())
-      .then((data) => {
-        setAllComments(data.content);
-        
-        // 전체 댓글 수 계산 (대댓글 포함)
-        const visibleCount = countVisibleComments(data.content);
-        setTotalComments(visibleCount);
-        
-        // 총 페이지 수 계산
-        setTotalPages(Math.ceil(visibleCount / COMMENTS_PER_PAGE));
+      .then(() => {
+        fetchComments();
       });
-  };
-
-  // 현재 페이지에 표시할 댓글들을 계산하는 함수
-  const getCurrentPageComments = () => {
-    let currentCount = 0;
-    let result: Comment[] = [];
-    
-    for (const comment of allComments) {
-      const commentWithRepliesCount = 1 + (comment.replies?.length || 0);
-      
-      // 현재 댓글과 그 대댓글들이 현재 페이지에 속하는지 확인
-      if (currentCount >= page * COMMENTS_PER_PAGE && 
-          currentCount < (page + 1) * COMMENTS_PER_PAGE) {
-        result.push(comment);
-      }
-      
-      currentCount += commentWithRepliesCount;
-    }
-    
-    return result;
-  };
-
-  // comments 상태를 현재 페이지의 댓글들로 업데이트
-  useEffect(() => {
-    if (allComments.length > 0) {
-      const currentPageComments = getCurrentPageComments();
-      setComments(currentPageComments);
-    }
-  }, [page, allComments]);
-
-  useEffect(() => {
-    fetchComments();
-  }, [postId]);
+  }, [postId, page]);
 
   const handleSubmit = async () => {
     if (!newComment.trim()) return;
@@ -97,22 +56,18 @@ export default function CommentSection({ postId }: { postId: number }) {
       alert('댓글 작성 실패!');
     }
   };
-  const countVisibleComments = (commentList: Comment[]): number => {
-    let count = 0;
-  
-    for (const comment of commentList) {
-      if (!comment.isDeleted && comment.content !== '삭제된 댓글입니다.') {
-        count++; // 삭제되지 않고, '삭제된 댓글입니다.'가 아닌 댓글만 카운트
-      }
-  
-      if (comment.replies && comment.replies.length > 0) {
-        count += countVisibleComments(comment.replies); // 대댓글은 재귀적으로 포함
-      }
-    }
-  
-    return count;
+
+  const fetchComments = () => {
+    fetch(`http://localhost:8090/api/posts/${postId}/comments?page=${page}&size=5&sort=createdAt,asc`, {
+      credentials: 'include',
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setComments(data.content);
+        setTotalPages(data.totalPages);
+        setTotalComments(data.totalElements);
+      });
   };
-  
 
   const handleDelete = async (commentId: number) => {
     const confirmDelete = confirm('정말 이 댓글을 삭제하시겠습니까?');
@@ -213,7 +168,7 @@ export default function CommentSection({ postId }: { postId: number }) {
         </div>
 
         <div className="flex gap-2 text-xs">
-          {!comment.isDeleted && comment.content !== '삭제된 댓글입니다.' && (
+          {!comment.isDeleted && (
             <>
               {/* 🔧 추천 버튼 추가 */}
               <button
