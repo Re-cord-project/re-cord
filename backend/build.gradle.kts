@@ -33,7 +33,7 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	runtimeOnly ("com.mysql:mysql-connector-j")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation ("com.mysql:mysql-connector-java:8.0.33")
+	implementation ("com.mysql:mysql-connector-j:8.0.33")
 
 
 	// jwt & json

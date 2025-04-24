@@ -1,24 +1,29 @@
-'use client';
+'use client'
 
-import { MyPageSidebar } from "@/components/mypage/MyPageSidebar";
+import React, { useEffect, useState } from 'react'
+import ProfileSidebar from '@/app/mypage/components/ProfileSidebar'
+import { usePathname } from 'next/navigation'
 
-export default function MyPageLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <div className="w-full mx-auto pt-[32px] px-20 bg-gray-50">
-      <div className="flex relative">
-        <div className="w-[256px] sticky top-20">
-          <MyPageSidebar />
+export default function MypageLayout({ children }: { children: React.ReactNode }) {
+    const pathname = usePathname() || ''
+    const [activePage, setActivePage] = useState('profile')
+
+    useEffect(() => {
+        let page = 'profile'
+        if (pathname.includes('/followers')) page = 'followers'
+        else if (pathname.includes('/following')) page = 'following'
+        else if (pathname.includes('/statistics')) page = 'statistics'
+        else if (pathname.includes('/settings')) page = 'settings'
+        else if (pathname.includes('/blocked')) page = 'blocked'
+        setActivePage(page)
+    }, [pathname])
+
+    return (
+        <div>
+            <div className="flex bg-[#f9fafb] min-h-screen">
+                <ProfileSidebar activePage={activePage} />
+                <div className="flex-1 p-8 overflow-auto">{children}</div>
+            </div>
         </div>
-        <div className="flex-1 ml-8">
-          <div className="pt-0 min-h-screen">
-            {children}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-} 
+    )
+}
