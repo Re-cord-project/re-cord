@@ -1,5 +1,5 @@
-import { SearchBar } from '@/components/mypage/SearchBar';
-import { FollowerList } from '@/components/mypage/follower/FollowerList';
+import { SearchBar } from '@/app/mypage/components/SearchBar';
+import { FollowerList } from '@/app/mypage/components/FollowerList';
 
 export default function FollowersPage() {
   return (
