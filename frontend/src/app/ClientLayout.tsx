@@ -20,7 +20,6 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         logout,
         logoutAndHome,
     }
-   
 
     useEffect(() => {
         setIsMounted(true)
@@ -61,7 +60,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                 loginUser,
                 setLoginUser,
                 isLoginUserPending,
-                setNoLoginUser,
+                // setNoLoginUser,
                 isLogin,
                 logout,
                 logoutAndHome,
