@@ -98,4 +98,7 @@ public class User extends BaseEntity {
 
         return authorities;
     }
-} 
+
+
+}
+
