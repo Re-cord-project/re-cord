@@ -1,5 +1,9 @@
 package com.commitmate.re_cord.domain.mypage.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import com.commitmate.re_cord.domain.mypage.dto.MonthlyViewDTO;
 import com.commitmate.re_cord.domain.post.post.dto.PostDTO;
 import com.commitmate.re_cord.domain.post.post.repository.PostRepository;
@@ -18,10 +22,9 @@ import java.util.stream.Collectors;
 public class MyPagePostService {
     private final PostRepository postRepository;
 
-    public List<PostDTO> getPostsByUserId(Long userId) {
-        return postRepository.findMyPost(userId).stream()
-                .map(PostDTO::getEntity)
-                .collect(Collectors.toList());
+    public Page<PostDTO> getPostsByUserIdByDesc(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return postRepository.findMyPost(userId, pageable).map(PostDTO::getEntity);
     }
 
     //게시글 조회수 총합
@@ -35,17 +38,16 @@ public class MyPagePostService {
     }
 
     //게시글 조회수 순 정렬
-    public List<PostDTO> getPostsOrderedByViews(Long userId){
-        return postRepository.orderPostsByViews(userId).stream()
-                .map(PostDTO::getEntity)
-                .collect(Collectors.toList());
+    public Page<PostDTO> getPostsOrderedByViews(Long userId,int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "views"));
+        return postRepository.orderPostsByViews(userId, pageable).map(PostDTO::getEntity);
     }
 
+
     //게시글 좋아요 순 정렬
-    public List<PostDTO> getPostsOrderedByLikes(Long userId){
-        return postRepository.orderPostsByLikes(userId).stream()
-                .map(PostDTO::getEntity)
-                .collect(Collectors.toList());
+    public Page<PostDTO> getPostsOrderedByLikes(Long userId,int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likes"));
+        return postRepository.orderPostsByLikes(userId, pageable).map(PostDTO::getEntity);
     }
 
     //월별 조회수 통계
