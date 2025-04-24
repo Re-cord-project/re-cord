@@ -16,8 +16,7 @@ import java.util.Optional;
 public interface PostRepository extends JpaRepository<Post,Long> {
 
     @Query("SELECT p FROM Post p WHERE p.user.id = :userId")
-    List<Post> findMyPost(@Param("userId") Long userId);
-
+    Page<Post> findMyPost(@Param("userId") Long userId, Pageable pageable);
 
     // 조회수 총합
     @Query("SELECT SUM(p.views) FROM Post p WHERE p.user.id = :userId")
@@ -27,18 +26,15 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     @Query("SELECT SUM(p.likes) FROM Post p WHERE p.user.id = :userId")
     Long totalPostLikes(@Param("userId")Long userId);
 
-
     //조회수 순 게시글 정렬
     @Query("SELECT p FROM Post p WHERE p.user.id =:userId ORDER BY p.views DESC")
-    List<Post> orderPostsByViews(@Param("userId")Long userId);
+    Page<Post> orderPostsByViews(@Param("userId")Long userId, Pageable pageable);
 
     //좋아요 순 게시글 정렬
     @Query("SELECT p FROM Post p WHERE p.user.id =:userId ORDER BY p.likes DESC")
-    List<Post> orderPostsByLikes(@Param("userId")Long userId);
-
+    Page<Post> orderPostsByLikes(@Param("userId")Long userId, Pageable pageable);
 
     //월별 조회수 통계
-
 
     // mysql 용
 //    @Query(value = "SELECT DATE_FORMAT(p.createdAt, '%Y-%m') AS month, SUM(p.views) AS totalViews " +
@@ -46,7 +42,6 @@ public interface PostRepository extends JpaRepository<Post,Long> {
 //            "GROUP BY DATE_FORMAT(p.createdAt, '%Y-%m') " +
 //            "ORDER BY DATE_FORMAT(p.createdAt, '%Y-%m')",
 //            nativeQuery = true)
-
 
     @Query(value = "SELECT FORMATDATETIME(p.created_at, 'yyyy-MM') AS \"month\", SUM(p.views) AS totalViews " +
             "FROM post p WHERE p.user_id = :userId " +
