@@ -1,4 +1,4 @@
-'use client'; 
+'use client';
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
@@ -15,7 +15,7 @@ interface Follower {
 export function FollowerList() {
   const [followers, setFollowers] = useState<Follower[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
   // 팔로워 목록 가져오기
   useEffect(() => {
@@ -43,7 +43,7 @@ export function FollowerList() {
             name: f.username,
             email: f.email,
             role: 'Unknown',
-            imageUrl: '/images/default-profile.png',
+            imageUrl: '/default-profile.png',
           }))
         );
       } catch (error) {
@@ -52,12 +52,28 @@ export function FollowerList() {
     };
 
     fetchFollowers();
-  }, [API_BASE]); 
+  }, [API_BASE]);
+
+  // ✨ handleFollow (나중에 필요하면)
+  const handleFollow = async (userId: string) => {
+    const res = await fetch(`${API_BASE}/api/users/follow`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ followingId: Number(userId) }),  // 🚀 ID는 body로
+    });
+    if (res.ok) {
+      // TODO: 성공 시 UI 업데이트 로직…
+      console.log(`팔로우 성공: ${userId}`);
+    } else {
+      console.error('팔로우 실패:', res.status);
+    }
+  };
 
   // 언팔로우 처리, UI에서 즉시 제거
   const handleUnfollow = async (userId: string) => {
     try {
-      // DELETE 요청, DTO body 방식으로 followingId 전송
+      // DELETE 요청, DTO body 방식으로 followingId 전송 🚀
       const res = await fetch(`${API_BASE}/api/users/follow`, {
         method: 'DELETE',
         credentials: 'include',
@@ -107,10 +123,19 @@ export function FollowerList() {
             }`}
           >
             <div className="flex items-center space-x-4">
+              {/* 프로필 이미지 */}
               <Link href={`/blog/${f.id}`} className="relative w-12 h-12 rounded-full overflow-hidden">
-                <Image src={f.imageUrl} alt={`${f.name}의 프로필`} fill sizes="(max-width: 768px) 100vw, 48px" className="object-cover" priority />
+                <Image
+                  src={f.imageUrl}
+                  alt={`${f.name}의 프로필`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 48px"
+                  className="object-cover"
+                  priority
+                />
               </Link>
-              <Link href={`/blog/${f.id}`}>
+
+              <Link href={`/blog/${f.id}`}>  {/* 유저 이름 클릭 시 상세 페이지로 이동 */}
                 <h3 className="font-medium text-gray-900 hover:text-[#78B3CE] transition-colors cursor-pointer">
                   {f.name}
                 </h3>
