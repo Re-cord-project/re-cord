@@ -25,6 +25,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> orderCommentsByLikes(@Param("userId")Long userId,Pageable pageable);
 
     Page<Comment> findByPostId(Long postId, Pageable pageable);
+    Page<Comment> findByPostIdAndParentIsNull(Long postId, Pageable pageable);
+    List<Comment> findByPostIdAndParentIsNotNull(Long postId);
+
 
 
 
