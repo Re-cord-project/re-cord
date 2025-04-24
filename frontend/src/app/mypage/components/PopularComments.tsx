@@ -3,18 +3,7 @@
 import React from 'react'
 import Link from 'next/link'
 import CommentCard from './CommentCardProps'
-
-type Comment = {
-    id: number
-    userId: number // Long
-    writerName: string
-    content: string
-    postId: number
-    postTitle: string
-    likes: number
-    date: string
-    WriterProfileImg: string
-}
+import { Comment } from '@/app/types/comment'
 
 type PopularCommentsProps = {
     comments: Comment[]
