@@ -1,6 +1,6 @@
 'use client';
 
-import { MyPageSidebar } from "@/components/MyPageSidebar";
+import { MyPageSidebar } from "@/components/mypage/MyPageSidebar";
 
 export default function MyPageLayout({
   children,

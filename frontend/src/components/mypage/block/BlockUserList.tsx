@@ -45,7 +45,7 @@ const MOCK_BLOCKED_USERS: BlockedUser[] = [
   },
 ];
 
-export function BlockedUserList() {
+export function BlockUserList() {
   const [currentPage, setCurrentPage] = useState(1);
   
   // 전체 차단 유저 수
@@ -85,6 +85,7 @@ export function BlockedUserList() {
                     src={user.imageUrl}
                     alt={`${user.name}의 프로필 이미지`}
                     fill
+                    sizes="(max-width: 768px) 100vw, 48px"
                     className="object-cover cursor-pointer"
                   />
                 </Link>
