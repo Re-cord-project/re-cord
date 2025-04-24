@@ -23,6 +23,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         logout,
         logoutAndHome,
     }
+    
 
     useEffect(() => {
         fetch('http://localhost:8090/api/auth/me', {
