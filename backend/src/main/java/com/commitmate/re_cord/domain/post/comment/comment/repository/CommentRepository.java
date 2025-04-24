@@ -14,7 +14,6 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-
     @Query("SELECT p FROM Comment p WHERE p.user.id = :userId")
     List<Comment> findMyComment(@Param("userId") Long userId);
 
@@ -27,8 +26,5 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByPostId(Long postId, Pageable pageable);
     Page<Comment> findByPostIdAndParentIsNull(Long postId, Pageable pageable);
     List<Comment> findByPostIdAndParentIsNotNull(Long postId);
-
-
-
 
 }

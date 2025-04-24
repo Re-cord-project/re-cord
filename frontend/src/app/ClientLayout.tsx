@@ -61,7 +61,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
                 loginUser,
                 setLoginUser,
                 isLoginUserPending,
-                setNoLoginUser,
+                // setNoLoginUser,
                 isLogin,
                 logout,
                 logoutAndHome,
