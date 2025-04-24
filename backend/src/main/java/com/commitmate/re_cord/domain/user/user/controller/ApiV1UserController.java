@@ -128,6 +128,8 @@ public class ApiV1UserController {
         if (dataDeleteAgreed) {
             userService.withdraw(userId);
         }
+        rq.deleteCookie("accessToken");
+        rq.deleteCookie("refreshToken");
         return ResponseEntity.ok("회원탈퇴가 정상적으로 처리되었습니다.");
     }
 }
