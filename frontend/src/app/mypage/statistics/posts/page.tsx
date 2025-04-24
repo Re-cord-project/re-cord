@@ -4,21 +4,12 @@ import React, { useState, useEffect } from 'react'
 
 import axios from 'axios'
 import PostCard from '@/app/mypage/components/PostCardProps'
+import { Post } from '@/app/types/post'
 
 interface PostResponse {
     content: Post[]
     totalPages: number
     totalElements: number // 추가
-}
-
-interface Post {
-    id: number // Long
-    userId: number // Long
-    title: string
-    content: string
-    views: number // int
-    likes: number // int
-    createdAt: string // LocalDateTime은 프론트에서 string으로 받음
 }
 
 export default function UserPostsPage() {

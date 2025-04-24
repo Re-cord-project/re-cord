@@ -1,18 +1,7 @@
 import React from 'react'
 import Link from 'next/link'
 import PostCard from './PostCardProps'
-
-type Post = {
-    id: number
-    title: string
-    content: string
-    createdAt: string
-    views: number
-    likes: number
-    comments: number
-    slug: string
-    date: string
-}
+import { Post } from '@/app/types/post'
 
 type PopularPostsProps = {
     posts: Post[]

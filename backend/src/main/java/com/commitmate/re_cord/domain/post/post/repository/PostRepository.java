@@ -37,18 +37,11 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     //월별 조회수 통계
 
     // mysql 용
-//    @Query(value = "SELECT DATE_FORMAT(p.createdAt, '%Y-%m') AS month, SUM(p.views) AS totalViews " +
-//            "FROM post p WHERE p.user_id = :userId " +
-//            "GROUP BY DATE_FORMAT(p.createdAt, '%Y-%m') " +
-//            "ORDER BY DATE_FORMAT(p.createdAt, '%Y-%m')",
-//            nativeQuery = true)
-
-    @Query(value = "SELECT FORMATDATETIME(p.created_at, 'yyyy-MM') AS \"month\", SUM(p.views) AS totalViews " +
-            "FROM post p WHERE p.user_id = :userId " +
-            "GROUP BY FORMATDATETIME(p.created_at, 'yyyy-MM') " +
-            "ORDER BY FORMATDATETIME(p.created_at, 'yyyy-MM')",
-            nativeQuery = true)
-
+        @Query(value = "SELECT DATE_FORMAT(p.created_at, '%Y-%m') AS month, SUM(p.views) AS totalViews " +
+                "FROM post p WHERE p.user_id = :userId " +
+                "GROUP BY DATE_FORMAT(p.created_at, '%Y-%m') " +
+                "ORDER BY DATE_FORMAT(p.created_at, '%Y-%m')",
+                nativeQuery = true)
     List<Object[]> getMonthlyViews(@Param("userId") Long userId);
 
     // 게시물의 상태중에서 updateAt이 가장 최신인 글을 가져오는 메서드
