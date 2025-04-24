@@ -79,15 +79,16 @@ public class CommentService {
         return new CommentResponseDTO(updatedComment.getId(),updatedComment.getContent(),updatedComment.getUser().getUsername(),updatedComment.getCreatedAt().toString());
     }
 
-    @Transactional
-    public Page<CommentResponseDTO> getCommentByPostId(Long postId, int page, int size){
-        Post post = postRepository.findById(postId)
-                .orElseThrow(()->new IllegalArgumentException("해당 게시물이 존재하지 않습니다."));
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Comment> commentPage = commentRepository.findByPostId(postId,pageable);
+     @Transactional
+     public Page<CommentResponseDTO> getCommentByPostId(Long postId, int page, int size){
+         Post post = postRepository.findById(postId)
+                 .orElseThrow(()->new IllegalArgumentException("해당 게시물이 존재하지 않습니다."));
+         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+         Page<Comment> commentPage = commentRepository.findByPostId(postId,pageable);
+
+         return commentPage.map(CommentResponseDTO::new);
+     }
 
 
-        return commentPage.map(CommentResponseDTO::new);
-    }
 }
 
