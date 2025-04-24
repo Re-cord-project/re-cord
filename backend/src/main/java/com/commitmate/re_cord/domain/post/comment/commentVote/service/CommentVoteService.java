@@ -26,7 +26,7 @@ public class CommentVoteService {
     private final CommentVoteRepository commentVoteRepository;
 
     @Transactional
-    public void toggleCommentLike(Long postId, Long commentId, Long userId){
+    public boolean toggleCommentLike(Long postId, Long commentId, Long userId){
         Post post = postRepository.findById(postId)
                 .orElseThrow(()->new IllegalArgumentException("존재하지 않는 게시글입니다."));
 
@@ -37,17 +37,22 @@ public class CommentVoteService {
                 .orElseThrow(()->new IllegalArgumentException("존재하지 않는 유저입니다."));
 
         Optional<CommentVote> isLike = commentVoteRepository.findByUserAndComment(user,comment);
+        boolean liked;
 
 
         if(isLike.isPresent()){
             commentVoteRepository.delete(isLike.get()); //좋아요 취소
             comment.decreaseLikeCount(); //추천 수 감소
+            liked=false;
         }else{
             CommentVote commentVote = new CommentVote(user, comment);
             commentVoteRepository.save(commentVote);
             comment.increaseLikeCount();
+            liked=true;
         }
         commentRepository.save(comment); //좋아요 수 저장
+
+        return liked;
 
 
     }

@@ -2,6 +2,7 @@ package com.commitmate.re_cord.domain.user.user.controller;
 
 
 import com.commitmate.re_cord.domain.user.user.dto.OAuth2SignupRequest;
+import com.commitmate.re_cord.domain.user.user.dto.SignupDto;
 import com.commitmate.re_cord.domain.user.user.dto.UserDto;
 import com.commitmate.re_cord.domain.user.user.dto.UserLoginResponseDto;
 import com.commitmate.re_cord.domain.user.user.entity.User;
@@ -54,13 +55,32 @@ public class ApiV1UserController {
             summary = "회원가입"
     )
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
-        if(user.getEmail()  == null || user.getEmail().isEmpty() || user.getPassword() == null || user.getPassword().isEmpty()){
+    public ResponseEntity<?> registerUser(@RequestBody SignupDto dto) {
+        if(dto.getEmail()  == null || dto.getEmail().isEmpty() || dto.getPassword() == null || dto.getPassword().isEmpty()){
             return ResponseEntity.badRequest().body("Email and Password are required");
         }
-        return ResponseEntity.status(200).body(userService.register(user.getOauthId(), user.getEmail(), user.getPassword(), user.getUsername(),
-                user.getBootcamp(), user.getGeneration()));
+        if(dto.getPassword().equals(dto.getPasswordConfirm())){
+            return ResponseEntity.status(200).body(userService.register(dto));
+        } else {
+            return ResponseEntity.badRequest().body(Map.of("message", "Password and Confirm Password are not matched"));
+        }
     }
+
+    // 이메일 중복검사
+    @GetMapping("/check-email")
+    public ResponseEntity<?> checkEmail(@RequestParam String email) {
+        boolean exists = userService.existsByEmail(email);
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+            return ResponseEntity.badRequest().body("유효하지 않은 이메일 형식입니다.");
+        }
+
+        if (exists) {
+            return ResponseEntity.status(409).body("이미 사용 중인 이메일입니다.");
+        }
+        return ResponseEntity.ok("사용 가능한 이메일입니다.");
+    }
+
 
     // 로그인
     @Operation(

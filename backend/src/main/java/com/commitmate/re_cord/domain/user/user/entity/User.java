@@ -35,8 +35,8 @@ public class User extends BaseEntity {
     private int generation;
     private String refreshToken;
 
-    @Column(columnDefinition = "TEXT DEFAULT ''")
-    private String introduction = ""; // 자기소개, 기본값 공백
+    @Column(nullable = true)
+    private String introduction; // 자기소개, 기본값 공백
 
     @Column(nullable = true)
     private String profileImageUrl; //프로필 이미지, 기본값 제공
@@ -47,23 +47,21 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-//    //내가 팔로잉하는
-//    @OneToMany(mappedBy = "followerId")
-//    private List<Follow> followingList = new ArrayList<>();
-//
-//    //나를 팔로우하는
-//    @OneToMany(mappedBy = "followingId")
-//    private List<Follow> followerList = new ArrayList<>();
-//
-//
-//    //내가 차단한
-//    @OneToMany(mappedBy = "blockedId")
-//    private List<Block> blockingList = new ArrayList<>();
+    // 내가 팔로우한 사용자들
+    @OneToMany(mappedBy = "followerId")
+    private List<Follow> followingList = new ArrayList<>();
 
-    //나를 차단한
+    // 나를 팔로우한 사용자들
+    @OneToMany(mappedBy = "followingId")
+    private List<Follow> followerList = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "blockingId")
-//    private List<Follow> blockedList = new ArrayList<>();
+    // 내가 차단한 사용자들
+    @OneToMany(mappedBy = "blockerId")
+    private List<Block> blockingList = new ArrayList<>();
+
+    // 나를 차단한 사용자들
+    @OneToMany(mappedBy = "blockedId")
+    private List<Block> blockedList = new ArrayList<>();
 
     public User(long id, String oauthId, String username) {
         this.setId(id);
@@ -100,6 +98,4 @@ public class User extends BaseEntity {
 
         return authorities;
     }
-
-
-}
+} 
