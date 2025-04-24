@@ -92,6 +92,12 @@ public class ApiV1UserController {
         User user = userService.findByEmail(userLoginDto.getEmail());
         String token = userService.login(userLoginDto.getEmail(), userLoginDto.getPassword());
 
+        String[] tokens = token.split(" ");
+        String refreshToken = tokens[0];
+        String accessToken = tokens[1];
+        rq.setCookie("refreshToken", refreshToken);
+        rq.setCookie("accessToken", accessToken);
+
         UserLoginResponseDto loginResponseDto = UserLoginResponseDto.builder()
                 .accessToken(token)
                 .userId(user.getId())
