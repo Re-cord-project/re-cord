@@ -25,6 +25,7 @@ import java.util.List;
 @Builder
 @ToString
 @Table(name="users") //user는 h2데이터베이스 기본 예약어
+
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User extends BaseEntity {
     private String oauthId;    // 카카오에서 받아올 oauthId -> 추가 필요
@@ -32,13 +33,11 @@ public class User extends BaseEntity {
     private String username;
     private String password;
     private String bootcamp;
-
-    private Integer generation;
-
+    private int generation;
     private String refreshToken;
 
-    @Column(columnDefinition = "TEXT DEFAULT ''")
-    private String introduction = ""; // 자기소개, 기본값 공백
+    @Column(nullable = true)
+    private String introduction; // 자기소개, 기본값 공백
 
     @Column(nullable = true)
     private String profileImageUrl; //프로필 이미지, 기본값 제공
@@ -102,6 +101,4 @@ public class User extends BaseEntity {
     }
 
 
-
-}
-
+} dev
