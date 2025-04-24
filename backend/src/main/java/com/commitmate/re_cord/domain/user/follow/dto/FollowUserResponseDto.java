@@ -8,14 +8,14 @@ import lombok.ToString;
 @Getter
 @NoArgsConstructor
 @ToString
-public class FollowUserResponse {
+public class FollowUserResponseDto {
 
     private Long userId;
     private String username;
     private String email;
 
     @Builder
-    public FollowUserResponse(Long userId, String username, String email) {
+    public FollowUserResponseDto(Long userId, String username, String email) {
         this.userId = userId;
         this.username = username;
         this.email = email;

@@ -1,6 +1,6 @@
 package com.commitmate.re_cord.domain.user.follow.service;
 
-import com.commitmate.re_cord.domain.user.follow.dto.FollowUserResponse;
+import com.commitmate.re_cord.domain.user.follow.dto.FollowUserResponseDto;
 import com.commitmate.re_cord.domain.user.follow.entity.Follow;
 import com.commitmate.re_cord.domain.user.follow.repository.FollowRepository;
 import com.commitmate.re_cord.domain.user.user.entity.User;
@@ -63,13 +63,13 @@ public class FollowService {
 
     // 내가 팔로우한 사람 목록
     @Transactional(readOnly = true)
-    public List<FollowUserResponse> getFollowingList(Long followerId) {
+    public List<FollowUserResponseDto> getFollowingList(Long followerId) {
         User follower = userService.getUserById(followerId);
 
         return followRepository.findAllByFollowerId(follower).stream()
                 .map(f -> {
                     User u = f.getFollowingId();
-                    return FollowUserResponse.builder()
+                    return FollowUserResponseDto.builder()
                             .userId(u.getId())
                             .username(u.getUsername())
                             .email(u.getEmail())
@@ -80,13 +80,13 @@ public class FollowService {
 
     // 나를 팔로우한 사람 목록
     @Transactional(readOnly = true)
-    public List<FollowUserResponse> getFollowerList(Long followingId) {
+    public List<FollowUserResponseDto> getFollowerList(Long followingId) {
         User following = userService.getUserById(followingId);
 
         return followRepository.findAllByFollowingId(following).stream()
                 .map(f -> {
                     User u = f.getFollowerId();
-                    return FollowUserResponse.builder()
+                    return FollowUserResponseDto.builder()
                             .userId(u.getId())
                             .username(u.getUsername())
                             .email(u.getEmail())

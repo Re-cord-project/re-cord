@@ -85,6 +85,7 @@ export function FollowingList() {
                     src={following.imageUrl}
                     alt={`${following.name}의 프로필 이미지`}
                     fill
+                    sizes="(max-width: 768px) 100vw, 48px"
                     className="object-cover cursor-pointer"
                   />
                 </Link>
