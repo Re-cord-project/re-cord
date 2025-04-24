@@ -24,17 +24,7 @@ public class ApiV1OAuth2SignupController {
         this.userService = userService;
     }
 
-//    @PostMapping("/signup")
-//    public ResponseEntity<String> completeSignup(@RequestBody OAuth2SignupRequest signupRequest) {
-//        // 새 유저 정보 처리
-//        try {
-//            userService.completeOAuth2Signup(signupRequest.getOauthId(), signupRequest.getEmail(), signupRequest.getBootcamp(), signupRequest.getGeneration());
-//            return ResponseEntity.ok("회원가입 완료");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("회원가입 실패");
-//        }
-//    }
-//
+
     // 소셜 회원가입 시 추가 정보 받기
     @PostMapping("/api/oauth2/complete-signup")
     public ResponseEntity<?> completeSignup(@RequestBody OAuth2SignupRequest dto) {
