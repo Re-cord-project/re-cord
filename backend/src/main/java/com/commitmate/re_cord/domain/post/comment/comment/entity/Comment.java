@@ -23,6 +23,10 @@ public class Comment extends BaseEntity {
     private int likes;
     private String content;
 
+    @Column(nullable = false)
+    private boolean deleted = false;
+
+
     @Enumerated(EnumType.STRING)
     private UpdateStatus updateStatus = UpdateStatus.NOT_EDITED;
 
@@ -38,6 +42,11 @@ public class Comment extends BaseEntity {
     @OneToMany(mappedBy = "comment",cascade = CascadeType.REMOVE)
     private List<CommentVote> commentVotes;
 
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    private Comment parent; //대댓글-부모댓글 필드 추가
+
+
     public void increaseLikeCount(){
         this.likes++;
     }
@@ -48,12 +57,13 @@ public class Comment extends BaseEntity {
         }
     }
 
-    public Comment(int likes, String content, UpdateStatus updateStatus, User user, Post post) {
+    public Comment(int likes, String content, UpdateStatus updateStatus, User user, Post post, Comment parent) {
         this.likes = likes;
         this.content = content;
         this.updateStatus = updateStatus;
         this.user = user;
         this.post = post;
+        this.parent = parent;
     }
 
 
