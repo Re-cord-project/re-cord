@@ -262,4 +262,3 @@ export default function ProfileSidebar({ activePage }: ProfileSidebarProps) {
       </div>
     </div>
   );
-}

@@ -105,7 +105,7 @@ export default function SignupPage() {
 
         // 필수값 검증
         if (!formData.email || !formData.username || !formData.password) {
-            setError('이메일, 이름, 비밀번호는 필수 입력값입니다.')
+            setError('이메일, 닉네임, 비밀번호는 필수 입력값입니다.')
             setIsSubmitting(false)
             return
         }
@@ -207,7 +207,7 @@ export default function SignupPage() {
 
                     <div>
                         <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                            이름 <span className="text-red-500">*</span>
+                            닉네임 <span className="text-red-500">*</span>
                         </label>
                         <input
                             id="username"

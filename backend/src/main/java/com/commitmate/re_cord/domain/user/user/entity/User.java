@@ -25,7 +25,6 @@ import java.util.List;
 @Builder
 @ToString
 @Table(name="users") //user는 h2데이터베이스 기본 예약어
-
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User extends BaseEntity {
     private String oauthId;    // 카카오에서 받아올 oauthId -> 추가 필요
@@ -99,6 +98,3 @@ public class User extends BaseEntity {
 
         return authorities;
     }
-
-
-}
