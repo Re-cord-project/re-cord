@@ -14,9 +14,14 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
+<<<<<<< HEAD
+    @Query("SELECT p FROM Comment p WHERE p.user.id = :userId")
+    List<Comment> findMyComment(@Param("userId") Long userId);
+=======
 
     @Query("SELECT c FROM Comment c JOIN FETCH c.post p JOIN FETCH p.user WHERE c.user.id = :userId")
     Page <Comment> findMyComment(@Param("userId") Long userId, Pageable pageable);
+>>>>>>> dev
 
     @Query("SELECT SUM(p.likes) FROM Comment p WHERE p.user.id = :userId")
     Long totalCommentLikes(@Param("userId")Long userId);
@@ -27,8 +32,5 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByPostId(Long postId, Pageable pageable);
     Page<Comment> findByPostIdAndParentIsNull(Long postId, Pageable pageable);
     List<Comment> findByPostIdAndParentIsNotNull(Long postId);
-
-
-
 
 }
