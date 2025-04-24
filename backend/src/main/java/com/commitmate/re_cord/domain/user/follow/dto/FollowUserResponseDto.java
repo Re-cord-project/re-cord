@@ -13,11 +13,13 @@ public class FollowUserResponseDto {
     private Long userId;
     private String username;
     private String email;
+    private boolean hasFollowed;
 
     @Builder
-    public FollowUserResponseDto(Long userId, String username, String email) {
+    public FollowUserResponseDto(Long userId, String username, String email, boolean hasFollowed) {
         this.userId = userId;
         this.username = username;
         this.email = email;
+        this.hasFollowed  = hasFollowed;
     }
 }
