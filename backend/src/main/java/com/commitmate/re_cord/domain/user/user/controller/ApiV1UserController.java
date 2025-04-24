@@ -56,10 +56,10 @@ public class ApiV1UserController {
     )
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody SignupDto dto) {
-        if(dto.getEmail()  == null || dto.getEmail().isEmpty() || dto.getPassword() == null || dto.getPassword().isEmpty()){
+        if (dto.getEmail() == null || dto.getEmail().isEmpty() || dto.getPassword() == null || dto.getPassword().isEmpty()) {
             return ResponseEntity.badRequest().body("Email and Password are required");
         }
-        if(dto.getPassword().equals(dto.getPasswordConfirm())){
+        if (dto.getPassword().equals(dto.getPasswordConfirm())) {
             return ResponseEntity.status(200).body(userService.register(dto));
         } else {
             return ResponseEntity.badRequest().body(Map.of("message", "Password and Confirm Password are not matched"));
@@ -92,12 +92,19 @@ public class ApiV1UserController {
         User user = userService.findByEmail(userLoginDto.getEmail());
         String token = userService.login(userLoginDto.getEmail(), userLoginDto.getPassword());
 
+        String[] tokens = token.split(" ");
+        String refreshToken = tokens[0];
+        String accessToken = tokens[1];
+        rq.setCookie("refreshToken", refreshToken);
+        rq.setCookie("accessToken", accessToken);
+
         UserLoginResponseDto loginResponseDto = UserLoginResponseDto.builder()
                 .accessToken(token)
                 .userId(user.getId())
                 .build();
         return ResponseEntity.ok(loginResponseDto);
     }
+
     // 로그아웃
     @Operation(
             summary = "로그아웃"
@@ -111,7 +118,16 @@ public class ApiV1UserController {
         return ResponseEntity.ok("로그아웃 되었습니다.");
     }
 
-
-
-
+    // 회원탈퇴
+    @Operation(
+            summary = "회원탈퇴"
+    )
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<?> withdraw(@RequestParam boolean dataDeleteAgreed) {
+        Long userId = rq.getActor().getId();
+        if (dataDeleteAgreed) {
+            userService.withdraw(userId);
+        }
+        return ResponseEntity.ok("회원탈퇴가 정상적으로 처리되었습니다.");
+    }
 }

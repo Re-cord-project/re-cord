@@ -34,6 +34,8 @@ dependencies {
 	implementation ("com.mysql:mysql-connector-j:8.0.33")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
+	implementation ("com.mysql:mysql-connector-j:8.0.33")
+
 
 	// jwt & json
 	// jwts
@@ -61,4 +63,9 @@ dependencies {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+//
+tasks.withType<JavaCompile> {
+	options.compilerArgs.add("-parameters")
 }
