@@ -25,12 +25,12 @@ export default function StatisticsPage() {
     useEffect(() => {
         console.log('🔥 useEffect 실행됨') // 여기도 콘솔 추가
         axios
-            .get('/api/mypage/posts/views?type=ordered')
+            .get('/api/mypage/posts/likes?type=ordered')
             .then((res) => setPosts(Array.isArray(res.data.content) ? res.data.content : []))
 
         axios
             .get('/api/mypage/comments/likes?type=ordered')
-            .then((res) => setComments(Array.isArray(res.data.content) ? res.data.content : [])) // ✅
+            .then((res) => setComments(Array.isArray(res.data.content) ? res.data.content : []))
 
         // 총 글
         axios
