@@ -20,19 +20,19 @@ export default function WithdrawPage() {
         }
 
         try {
-            const response = await fetch('http://localhost:8090/api/auth/withdraw', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
+            const response = await fetch(
+                `http://localhost:8090/api/auth/withdraw?dataDeleteAgreed=${dataDeleteAgreed}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
                 },
-                credentials: 'include',
-                body: JSON.stringify({
-                    dataDeleteAgreed,
-                }),
-            })
+            )
 
             if (response.ok) {
-                router.push('/login')
+                window.location.href = '/'
             } else {
                 const data = await response.json()
                 setError(data.message || '회원 탈퇴 처리 중 오류가 발생했습니다.')
