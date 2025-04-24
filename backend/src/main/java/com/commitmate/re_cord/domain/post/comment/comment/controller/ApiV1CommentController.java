@@ -14,6 +14,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("api/posts/{postId}/comments")
@@ -42,7 +44,7 @@ public class ApiV1CommentController {
             summary = "댓글 삭제"
     )
     @DeleteMapping("/{commentId}")
-    public void deleteComment(
+    public ResponseEntity<?> deleteComment(
             @PathVariable Long postId,
             @PathVariable Long commentId,
             @AuthenticationPrincipal SecurityUser userDetails
@@ -50,21 +52,26 @@ public class ApiV1CommentController {
         Long userId = userDetails.getId();
         commentService.deleteComment(commentId,userId);
 
+        return ResponseEntity.ok(Map.of("message","댓글이 삭제되었습니다."));
+
     }
 
     @Operation(
             summary = "댓글 좋아요 누르기"
     )
+
     @PostMapping("/{commentId}/likes")
-    public ResponseEntity<Void> toggleCommentLike(
+    public ResponseEntity<Map<String, Boolean>> toggleCommentLike(
             @PathVariable Long postId,
             @PathVariable Long commentId,
             @AuthenticationPrincipal SecurityUser userDetails
-    ){
+    ) {
         Long userId = userDetails.getId();
-        commentVoteService.toggleCommentLike(postId, commentId, userId);
-        return ResponseEntity.ok().build();
+
+        boolean liked = commentVoteService.toggleCommentLike(postId, commentId, userId);
+        return ResponseEntity.ok(Map.of("liked", liked));
     }
+
 
     @Operation(
             summary = "댓글 수정"
@@ -89,7 +96,7 @@ public class ApiV1CommentController {
     public Page<CommentResponseDTO> getComment(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "5") int size
     ){
 
 
