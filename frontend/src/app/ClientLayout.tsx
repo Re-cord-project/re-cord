@@ -10,6 +10,18 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     const { loginUser, setLoginUser, isLoginUserPending, setNoLoginUser, isLogin, logout, logoutAndHome } =
         useLoginUser()
 
+    // 전역관리를 위한 Store 등록
+    const loginUserContextValue = {
+        loginUser,
+        setLoginUser,
+        isLoginUserPending,
+        setNoLoginUser,
+        isLogin,
+        logout,
+        logoutAndHome,
+    }
+   
+
     useEffect(() => {
         setIsMounted(true)
 
