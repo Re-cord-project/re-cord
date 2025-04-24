@@ -33,11 +33,11 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final UserRepository userRepository;
 
-    public List<PostDTO> getPostsByUserId(Long userId) {
-        return postRepository.findMyPost(userId).stream()
-                .map(PostDTO::getEntity)
-                .collect(Collectors.toList());
-    }
+//    public List<PostDTO> getPostsByUserId(Long userId) {
+//        return postRepository.findMyPost(userId).stream()
+//                .map(PostDTO::getEntity)
+//                .collect(Collectors.toList());
+//    }
 
     //게시글 생성
     @Transactional

@@ -27,7 +27,7 @@ public class ApiV1MyPageUserController {
     @PutMapping("/users")
     public ResponseEntity<UpdateUserDTO> updateUser(
             @AuthenticationPrincipal SecurityUser userDetails,
-        @RequestBody UpdateUserDTO updateUserDTO) {
+         @RequestBody UpdateUserDTO updateUserDTO) {
         Long userId = userDetails.getId();
         UpdateUserDTO updatedUser = myPageUserService.updateUser(userId, updateUserDTO);
         return ResponseEntity.ok(updatedUser);
