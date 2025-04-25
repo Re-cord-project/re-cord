@@ -11,7 +11,7 @@ import Statistics from '@/components/post/Statistics'
 import SearchBar from '@/components/post/SearchBar'
 import SearchResultHeader from './components/SearchResultHeader'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
-import { getAuthHeaders } from '@/utils/auth'
+
 
 interface SearchResult {
     content: Array<{
@@ -53,10 +53,10 @@ const SearchPage: React.FC = () => {
                         keyword,
                     )}&page=${currentPage}&size=5`,
                     {
-                        headers: {
-                            ...getAuthHeaders(),
-                        },
-                        credentials: 'include',
+                        // headers: {
+                        //     ...getAuthHeaders(),
+                        // },
+                        credentials: 'include', // 쿠키 인증 방식은 credentials: 'include'만으로 충분
                     },
                 )
 

@@ -11,7 +11,6 @@ import PostComments from '@/components/comment/commentSection'
 import Banner from '@/components/post/Banner'
 import PostContent from '@/components/post/PostContent'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
-import { getAuthHeaders } from '@/utils/auth'
 
 interface Post {
     id: number
@@ -49,7 +48,7 @@ const PostDetail = () => {
                 // URL에 userId와 postId가 모두 포함됨
                 const response = await fetch(`http://localhost:8090/api/posts/${postId}`, {
                     headers: {
-                        ...getAuthHeaders(),
+                        // ...getAuthHeaders(),
                     },
                     credentials: 'include',
                 })
