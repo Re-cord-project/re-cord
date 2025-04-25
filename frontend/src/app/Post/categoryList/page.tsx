@@ -9,6 +9,7 @@ import CategoryMenu from '../../../components/post/CategoryMenu'
 import Statistics from '../../../components/post/Statistics'
 import SearchBar from '../../../components/post/SearchBar'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
+import { getAuthHeaders } from '@/utils/auth'
 
 interface Post {
     id: number
@@ -48,7 +49,9 @@ export default function CategoryListPage() {
                         headers: {
                             'Content-Type': 'application/json',
                             Accept: 'application/json',
+                            ...getAuthHeaders(),
                         },
+                        credentials: 'include',
                     },
                 )
 

@@ -24,6 +24,7 @@ const CategoryMenu: React.FC = () => {
                         'Content-Type': 'application/json',
                         Accept: 'application/json',
                     },
+                    credentials: 'include', // 쿠키를 주고받기 위해 필요
                 })
 
                 if (!response.ok) {

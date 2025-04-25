@@ -21,7 +21,14 @@ const CreatePostPage = () => {
     const { loginUser, isLogin, isLoginUserPending } = useGlobalLoginUser()
     const { categories, isLoading: isCategoriesLoading } = useCategories()
     const { publishPost, isSubmitting: isCreateSubmitting, error: createError } = useCreatePost()
-    const { updatePost, isSubmitting: isUpdateSubmitting, error: updateError } = useUpdatePost()
+    const {
+        updatePost,
+        getPost,
+        post,
+        isLoading: isLoadingPostData,
+        isSubmitting: isUpdateSubmitting,
+        error: updateError,
+    } = useUpdatePost()
     const [unsavedChanges, setUnsavedChanges] = useState(false)
     const [showConfirmLeave, setShowConfirmLeave] = useState(false)
     const [destination, setDestination] = useState('')
@@ -130,41 +137,45 @@ const CreatePostPage = () => {
         const isEdit = searchParams.get('edit') === 'true'
         const postId = searchParams.get('postId')
 
+        console.log('URL 파라미터 확인:', { isEdit, postId })
+
         if (isEdit && postId) {
+            console.log('수정 모드로 전환:', postId)
             setIsEditMode(true)
             setEditPostId(Number(postId))
             loadPostForEdit(Number(postId))
         }
     }, [])
 
-    // 수정을 위해 게시글 정보 불러오기
+    // 수정을 위해 게시글 정보 불러오기 (useUpdatePost 훅 활용)
     const loadPostForEdit = async (postId: number) => {
         if (!postId) return
 
+        console.log('게시글 데이터 로딩 시작:', postId)
         setIsLoadingPost(true)
         try {
-            const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8090'}/api/posts/${postId}`,
-                {
-                    credentials: 'include',
-                },
-            )
+            // useUpdatePost 훅의 getPost 함수 활용
+            const postData = await getPost(postId)
 
-            if (!response.ok) {
-                const errorText = await response.text()
-                console.error('게시글 로드 실패:', errorText)
-                alert('게시글을 불러o오는데 실패했습니다.')
+            console.log('불러온 게시글 데이터:', postData)
+
+            if (!postData) {
+                console.error('게시글 데이터가 없음')
+                alert('게시글을 불러오는데 실패했습니다.')
                 router.push('/post/postList')
                 return
             }
 
-            const postData = await response.json()
-
             // 게시글 정보 폼에 설정
+            console.log('폼에 게시글 데이터 설정:', {
+                title: postData.title,
+                content: postData.content,
+                categoryId: postData.categoryId,
+            })
+
             setValue('title', postData.title)
             setValue('content', postData.content)
             setValue('categoryId', postData.categoryId)
-            setEditPostId(postId) // 수정할 게시글 ID 저장
 
             // 작성자 확인 (보안 검사)
             if (postData.userId && loginUser && postData.userId !== loginUser.id) {
@@ -180,7 +191,17 @@ const CreatePostPage = () => {
         }
     }
 
-    if (isLoginUserPending || isCategoriesLoading || isLoadingPost) {
+    // 게시글 데이터가 로드되면 자동으로 폼에 채우기
+    useEffect(() => {
+        if (post && isEditMode) {
+            // 콘솔 로그 제거
+            setValue('title', post.title)
+            setValue('content', post.content)
+            setValue('categoryId', post.categoryId)
+        }
+    }, [post, isEditMode, setValue])
+
+    if (isLoginUserPending || isCategoriesLoading || isLoadingPost || isLoadingPostData) {
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>

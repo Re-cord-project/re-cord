@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { getAuthHeaders } from '@/utils/auth'
 
 export interface Post {
     id: number
@@ -70,7 +71,9 @@ export const usePosts = (userId?: number) => {
                     headers: {
                         'Content-Type': 'application/json',
                         Accept: 'application/json',
+                        ...getAuthHeaders(),
                     },
+                    credentials: 'include',
                 })
 
                 if (!response.ok) {

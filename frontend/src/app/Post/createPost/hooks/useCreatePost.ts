@@ -55,15 +55,15 @@ export const useCreatePost = () => {
 
             console.log('로그인 상태:', isLogin, '사용자 ID:', loginUser.id)
 
-            // 백엔드 API 요구사항에 맞는 페이로드 구성
-            const payload = {
+            // HTML 태그 제거하여 순수 텍스트만 전송
+            const processedData = {
                 title: postData.title,
-                content: postData.content, // 원본 HTML 컨텐츠 전송 (백엔드에서 처리)
+                content: stripHtmlTags(postData.content),
                 categoryId: postData.categoryId,
                 status: postData.status,
             }
 
-            console.log('백엔드 API 요청 페이로드:', payload)
+            console.log('백엔드 API 요청 페이로드(HTML 태그 제거):', processedData)
 
             const response = await fetch(`${API_BASE_URL}/api/posts`, {
                 method: 'POST',
@@ -71,7 +71,7 @@ export const useCreatePost = () => {
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include', // 쿠키 기반 인증을 사용
-                body: JSON.stringify(payload),
+                body: JSON.stringify(processedData),
             })
 
             if (!response.ok) {

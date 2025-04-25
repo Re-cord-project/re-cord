@@ -16,6 +16,7 @@ import {
 import { togglePostLike, checkPostLikeStatus } from '@/app/api/like'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 // API 기본 URL 설정
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8090'
@@ -25,7 +26,7 @@ interface Post {
     title: string
     content: string
     categoryName: string | null
-    categoryId: number // categoryId 추가
+    categoryId: number
     username: string | null
     userId: number
     views: number
@@ -35,6 +36,11 @@ interface Post {
     createdAt: string | null
     updatedAt: string | null
     imageUrls: string[]
+}
+
+// 사용자 정보 인터페이스 추가
+interface UserInfo {
+    profileImageUrl: string | null
 }
 
 interface PostContentProps {
@@ -51,6 +57,10 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
     const [isInitialized, setIsInitialized] = useState(false)
     const { isLogin, loginUser } = useGlobalLoginUser()
     const router = useRouter()
+
+    // 사용자 정보 상태 추가
+    const [userInfo, setUserInfo] = useState<UserInfo>({ profileImageUrl: null })
+    const [isLoadingUser, setIsLoadingUser] = useState(true)
 
     // 수정 모달 관련 상태
     const [showEditModal, setShowEditModal] = useState(false)
@@ -86,6 +96,72 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
 
         fetchLikeStatus()
     }, [post.id])
+
+    // 프로필 이미지 가져오기 - 인증 문제를 해결하기 위해 수정
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoadingUser(true)
+            try {
+                // 백엔드 컨트롤러에 맞게 경로 수정 (users로 변경)
+                const userProfileResponse = await fetch(`http://localhost:8090/api/auth/${post.userId}/profile-image`, {
+                    credentials: 'include', // 쿠키 인증을 위해 추가
+                })
+
+                if (userProfileResponse.ok) {
+                    const profileImageUrl = await userProfileResponse.text()
+
+                    // 유효한 URL 확인 (빈 문자열이 아니고 'null'이 아닌 경우)
+                    if (profileImageUrl && profileImageUrl.trim() !== '' && profileImageUrl.trim() !== 'null') {
+                        // URL 처리: 백엔드에서 받은 경로가 상대 경로일 경우 백엔드 기본 URL 추가
+                        if (profileImageUrl.startsWith('http')) {
+                            // 이미 절대 URL인 경우 그대로 사용
+                            setUserInfo({
+                                profileImageUrl: profileImageUrl,
+                            })
+                        } else if (profileImageUrl.startsWith('/')) {
+                            // 상대 경로인 경우 백엔드 URL에 추가
+                            // 로컬에 있는 이미지라면 그대로 사용
+                            if (profileImageUrl === '/profile.jpg' || profileImageUrl === '/default-profile.png') {
+                                setUserInfo({
+                                    profileImageUrl: profileImageUrl,
+                                })
+                            } else {
+                                // 백엔드 URL에 경로 추가
+                                setUserInfo({
+                                    profileImageUrl: `http://localhost:8090${profileImageUrl}`,
+                                })
+                            }
+                        } else {
+                            // 경로가 '/'로 시작하지 않는 경우 '/'를 추가
+                            setUserInfo({
+                                profileImageUrl: `http://localhost:8090/${profileImageUrl}`,
+                            })
+                        }
+                    } else {
+                        // 기본 프로필 이미지 사용
+                        setUserInfo({
+                            profileImageUrl: '/default-profile.png',
+                        })
+                    }
+                } else {
+                    // 401, 404 등의 에러는 정상적으로 처리 (이미지가 없는 상태로 간주)
+                    console.log(`프로필 이미지가 없거나 로드 실패: ${userProfileResponse.status}`)
+                    setUserInfo({
+                        profileImageUrl: '/default-profile.png',
+                    })
+                }
+            } catch (profileError) {
+                console.error('프로필 이미지 로드 오류:', profileError)
+                setUserInfo({
+                    profileImageUrl: '/default-profile.png',
+                })
+            } finally {
+                setIsLoadingUser(false)
+            }
+        }
+
+        fetchData()
+    }, [post.id, post.userId])
 
     // 내용에서 해시태그 추출 함수
     const extractTagsFromContent = (content: string): string[] => {
@@ -154,8 +230,14 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
             return
         }
 
-        // 수정 페이지로 이동
-        router.push(`/post/createPost?edit=true&postId=${post.id}`)
+        // 디버깅을 위한 로그 추가
+        console.log('수정할 게시글 ID:', post.id)
+        console.log('게시글 내용:', post.content)
+        
+        // 수정 페이지로 이동 - URL 파라미터 명확하게 전달
+        const editUrl = `/post/createPost?edit=true&postId=${post.id}`
+        console.log('이동할 URL:', editUrl)
+        router.push(editUrl)
     }
 
     // 게시글 수정 API 호출
@@ -180,12 +262,6 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
                     'Content-Type': 'application/json',
                 },
                 credentials: 'include',
-                body: JSON.stringify({
-                    title: editTitle,
-                    content: editContent,
-                    categoryId: Number(editCategoryId),
-                    status: 'PUBLISHED',
-                }),
             })
 
             if (response.ok) {
@@ -272,7 +348,20 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
 
                 <div className="flex items-center mb-4">
                     <div className="w-10 h-10 rounded-full bg-gray-200 mr-3 flex items-center justify-center overflow-hidden">
-                        <FontAwesomeIcon icon={faUser} className="text-gray-400" size="lg" />
+                        {userInfo.profileImageUrl ? (
+                            <img
+                                src={userInfo.profileImageUrl}
+                                alt={`${post.username}의 프로필`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    // 이미지 로드 실패 시 기본 이미지로 대체
+                                    e.currentTarget.onerror = null
+                                    e.currentTarget.src = '/default-profile.png'
+                                }}
+                            />
+                        ) : (
+                            <FontAwesomeIcon icon={faUser} className="text-gray-400" size="lg" />
+                        )}
                     </div>
                     <div>
                         <div className="font-medium text-blue-600">{post.username || '작성자'}</div>
@@ -339,7 +428,7 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
                         disabled={isLoading || !isInitialized}
                         className={`flex items-center space-x-1 px-3 py-1 rounded-full ${
                             isLiked ? 'bg-red-100 text-red-600' : 'bg-gray-100 hover:bg-gray-200'
-                        } transition-colors duration-200 ${
+                        } transition-colors duration-200 $(
                             isLoading || !isInitialized ? 'opacity-60 cursor-not-allowed' : ''
                         }`}
                     >

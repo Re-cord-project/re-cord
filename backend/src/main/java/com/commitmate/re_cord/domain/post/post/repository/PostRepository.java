@@ -59,12 +59,13 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     SELECT p FROM Post p
     WHERE p.status = 'PUBLISHED'
       AND (
-        LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-        LOWER(p.content) LIKE LOWER(CONCAT('%', :keyword, '%')) OR
-        LOWER(p.user.username) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        p.title LIKE CONCAT('%', :keyword, '%') OR
+        p.content LIKE CONCAT('%', :keyword, '%') OR
+        p.user.username LIKE CONCAT('%', :keyword, '%')
       )
 """)
     Page<Post> searchVisiblePosts(@Param("keyword") String keyword, Pageable pageable);
+
 
     // 상태가 EDITED 인 게시물만 가져오는 메서드
     Page<Post> findAllByStatus(PostStatus status, Pageable pageable);

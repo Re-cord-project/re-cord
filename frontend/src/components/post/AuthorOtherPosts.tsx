@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useParams, usePathname } from 'next/navigation'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
-import { fetchWithAuth } from '@/utils/auth'
 
 // API 기본 URL 환경 변수
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8090'
@@ -55,9 +54,10 @@ const AuthorOtherPosts: React.FC<AuthorOtherPostsProps> = ({ authorId, limit = 5
 
                 console.log('호출하는 API URL:', apiUrl) // API URL 로깅
 
-                // 인증된 요청 수행
-                const response = await fetchWithAuth(apiUrl, {
+                // fetch를 사용하고 쿠키 인증 방식 적용
+                const response = await fetch(apiUrl, {
                     method: 'GET',
+                    credentials: 'include', // 쿠키 인증을 위해 추가
                 })
 
                 // 401 Unauthorized 오류 처리

@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Post } from '../hooks/usePosts'
+import { Post } from '@/app/post/postList/hooks/usePosts'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faHeart, faCalendarAlt, faCircleCheck, faUser } from '@fortawesome/free-solid-svg-icons'
 import Image from 'next/image'
-import { fetchWithAuth } from '../../../../utils/auth'
 
 interface PostContentProps {
     post: Post
@@ -33,14 +32,18 @@ const PostContent: React.FC<PostContentProps> = ({ post }) => {
         const fetchData = async () => {
             try {
                 // 좋아요 수와 조회수 가져오기
-                const likesResponse = await fetchWithAuth(`http://localhost:8090/api/posts/${post.id}/likes`)
+                const likesResponse = await fetch(`http://localhost:8090/api/posts/${post.id}/likes`, {
+                    credentials: 'include', // 쿠키 인증을 위해 추가
+                })
                 if (!likesResponse.ok) {
                     throw new Error('Failed to fetch likes')
                 }
                 const likeCount = await likesResponse.json()
                 setLikes(likeCount)
 
-                const viewsResponse = await fetchWithAuth(`http://localhost:8090/api/posts/${post.id}/views`)
+                const viewsResponse = await fetch(`http://localhost:8090/api/posts/${post.id}/views`, {
+                    credentials: 'include', // 쿠키 인증을 위해 추가
+                })
                 if (!viewsResponse.ok) {
                     throw new Error('Failed to fetch views')
                 }
@@ -50,8 +53,11 @@ const PostContent: React.FC<PostContentProps> = ({ post }) => {
                 // 프로필 이미지 가져오기 - 인증 문제를 해결하기 위해 수정
                 try {
                     // 백엔드 컨트롤러에 맞게 경로 수정 (users로 변경)
-                    const userProfileResponse = await fetchWithAuth(
+                    const userProfileResponse = await fetch(
                         `http://localhost:8090/api/auth/${post.userId}/profile-image`,
+                        {
+                            credentials: 'include', // 쿠키 인증을 위해 추가
+                        },
                     )
 
                     if (userProfileResponse.ok) {

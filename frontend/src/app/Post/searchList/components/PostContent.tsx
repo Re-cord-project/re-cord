@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faHeart, faCalendarAlt, faUser } from '@fortawesome/free-solid-svg-icons'
+import { getAuthHeaders } from '@/utils/auth'
 
 interface SearchResult {
     content: Array<{
@@ -40,7 +41,12 @@ const PostContent: React.FC<PostContentProps> = ({ searchResults }) => {
             // 각 유저의 프로필 이미지 정보 가져오기
             const profilePromises = userIds.map(async (userId) => {
                 try {
-                    const response = await fetch(`http://localhost:8090/api/auth/${userId}`)
+                    const response = await fetch(`http://localhost:8090/api/auth/${userId}`, {
+                        headers: {
+                            ...getAuthHeaders(),
+                        },
+                        credentials: 'include',
+                    })
                     if (!response.ok) {
                         throw new Error(`Failed to fetch user ${userId}`)
                     }

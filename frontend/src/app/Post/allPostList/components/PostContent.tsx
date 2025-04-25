@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Post } from '../hooks/usePosts'
+import { Post } from '@/app/post/allPostList/hooks/usePosts'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faHeart, faCalendarAlt, faCircleCheck, faUser } from '@fortawesome/free-solid-svg-icons'
 import { fetchWithAuth } from '../../../../utils/auth' // fetchWithAuth 함수 import 추가

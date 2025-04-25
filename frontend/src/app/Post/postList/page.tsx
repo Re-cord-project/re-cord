@@ -4,14 +4,13 @@ import React from 'react'
 import Head from 'next/head'
 import { useSearchParams } from 'next/navigation'
 import Banner from '../../../components/post/Banner'
-import PostContent from './components/PostContent'
+import PostContent from '../../../components/post/PostContentList'
 import AuthorProfile from '../../../components/post/AuthorProfile'
 import CategoryMenu from '../../../components/post/CategoryMenu'
 import Statistics from '../../../components/post/Statistics'
 import SearchBar from '../../../components/post/SearchBar'
 import { usePosts } from './hooks/usePosts'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
-
 
 export default function PostListPage() {
     const searchParams = useSearchParams()

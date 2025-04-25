@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useGlobalLoginUser } from '../../app/stores/auth/loginUser'
-import { fetchWithAuth } from '@/utils/auth'
 
 interface AuthorStats {
     followers: number
@@ -70,8 +69,9 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                 }
 
                 // 인증된 요청으로 사용자 정보 가져오기
-                const response = await fetchWithAuth(`http://localhost:8090/api/auth/${targetUserId}`, {
+                const response = await fetch(`http://localhost:8090/api/auth/${targetUserId}`, {
                     method: 'GET',
+                    credentials: 'include', // 쿠키 인증을 위해 추가
                 })
 
                 if (!response.ok) {
@@ -90,7 +90,9 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
 
                 // 별도의 통계 API가 있는 경우 호출 (없으면 기본값 사용)
                 try {
-                    const statsResponse = await fetchWithAuth(`http://localhost:8090/api/users/${targetUserId}/stats`)
+                    const statsResponse = await fetch(`http://localhost:8090/api/users/${targetUserId}/stats`, {
+                        credentials: 'include', // 쿠키 인증을 위해 추가
+                    })
 
                     if (statsResponse.ok) {
                         const statsData = await statsResponse.json()
@@ -144,7 +146,9 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
         if (!isLogin) return
 
         try {
-            const response = await fetchWithAuth(`http://localhost:8090/api/follows/check/${loginUser.id}/${targetId}`)
+            const response = await fetch(`http://localhost:8090/api/follows/check/${loginUser.id}/${targetId}`, {
+                credentials: 'include', // 쿠키 인증을 위해 추가
+            })
 
             if (response.ok) {
                 const data = await response.json()
@@ -168,7 +172,10 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
 
             const method = isFollowing ? 'DELETE' : 'POST'
 
-            const response = await fetchWithAuth(endpoint, { method })
+            const response = await fetch(endpoint, {
+                method,
+                credentials: 'include', // 쿠키 인증을 위해 추가
+            })
 
             if (response.ok) {
                 // 팔로우 상태 및 통계 업데이트

@@ -31,8 +31,10 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Lob
+    @Column(columnDefinition = "TEXT", nullable = false) // MySQL, PostgreSQL 등에선 이거
     private String content;
+
 
     private int views = 0;
     private int likes = 0;
