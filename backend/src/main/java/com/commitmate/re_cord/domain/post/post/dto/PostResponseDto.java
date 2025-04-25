@@ -16,6 +16,7 @@ public class PostResponseDto {
     private String content;
     private String categoryName;
     private String username;
+    private Long userId;  // 작성자 ID 추가
     private int views;
     private int likes;
     private String status;
@@ -34,6 +35,9 @@ public class PostResponseDto {
         this.likes = post.getLikes();
         this.categoryName = post.getCategory() != null ? post.getCategory().getName() : null;
         this.username = post.getUser() != null ? post.getUser().getUsername() : null;
+
+        // 작성자 ID 추가
+        this.userId = post.getUser() != null ? post.getUser().getId() : null;
 
         this.status = getEnumName(post.getStatus());
         this.updateStatus = getEnumName(post.getUpdateStatus());

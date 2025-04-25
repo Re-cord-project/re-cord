@@ -233,4 +233,9 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public String getProfileImageUrl(Long userId) {
+        return userRepository.findById(userId)
+                .map(User::getProfileImageUrl)
+                .orElse(null); // 사용자가 없으면 null 반환 또는 예외 처리
+    }
 }

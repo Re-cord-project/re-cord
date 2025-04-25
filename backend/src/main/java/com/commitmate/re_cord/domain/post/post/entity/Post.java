@@ -48,6 +48,9 @@ public class Post extends BaseEntity {
     @ToString.Exclude // ToString 무한 루프 방지
     private List<Image> images = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<PostLike> postLikes = new ArrayList<>();
 
     // 좋아요 증가 메서드
     public void increaseLikeCount() {
@@ -69,4 +72,6 @@ public class Post extends BaseEntity {
             this.updateStatus = UpdateStatus.NOT_EDITED;
         }
     }
+
+
 }

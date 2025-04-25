@@ -4,12 +4,23 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import Link from 'next/link'
 import CommentCard from '@/app/mypage/components/CommentCardProps'
-import { Comment } from '@/app/types/comment'
 
 interface CommentResponse {
     content: Comment[]
     totalPages: number
     totalElements: number // 추가
+}
+
+interface Comment {
+    id: number
+    userId: number // Long
+    writerName: string
+    content: string
+    postId: number
+    postTitle: string
+    likes: number
+    date: string
+    WriterProfileImg: string
 }
 
 export default function UserCommentsPage() {
