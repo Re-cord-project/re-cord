@@ -5,6 +5,7 @@ import com.commitmate.re_cord.domain.post.category.repository.CategoryRepository
 import com.commitmate.re_cord.domain.post.post.dto.PostDTO;
 import com.commitmate.re_cord.domain.post.post.dto.PostRequestDto;
 import com.commitmate.re_cord.domain.post.post.dto.PostResponseDto;
+import com.commitmate.re_cord.domain.post.post.dto.UpdatePostStatusRequest;
 import com.commitmate.re_cord.domain.post.post.entity.Post;
 import com.commitmate.re_cord.domain.post.post.entity.PostLike;
 import com.commitmate.re_cord.domain.post.post.entity.PostStatus;
@@ -32,12 +33,6 @@ public class PostService {
     private final CategoryRepository categoryRepository;
     private final PostLikeRepository postLikeRepository;
     private final UserRepository userRepository;
-
-//    public List<PostDTO> getPostsByUserId(Long userId) {
-//        return postRepository.findMyPost(userId).stream()
-//                .map(PostDTO::getEntity)
-//                .collect(Collectors.toList());
-//    }
 
     //게시글 생성
     @Transactional
@@ -97,7 +92,7 @@ public class PostService {
     //게시글 작성중 임시저장된 글을 불러올 때
     @Transactional
     public Optional<Post> getLatestDraftByUser(User user) {
-        return postRepository.findTopByUserAndStatusOrderByUpdatedAtDesc(user, PostStatus.DRAFT);
+        return postRepository.findTopByUserAndStatusOrderByUpdatedAtDescWithImages(user, PostStatus.DRAFT);
     }
 
     // 게시글 전체 보기 (삭제된 글 제외)
@@ -221,5 +216,28 @@ public class PostService {
         return new PostResponseDto(post); // 여기서 getImages() 안전하게 접근 가능
     }
 
+    public List<PostResponseDto> getOtherPostsBySameUser(Long userId, Long excludePostId) {
+        // excludePostId가 null이어도 조회할 수 있는 메소드 사용
+        List<Post> otherPosts = postRepository.findByUserIdAndIdNotFetchImages(userId, excludePostId);
 
+        return otherPosts.stream()
+                .map(PostResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    // 작성자의 모든 게시글 조회 (userId 기준)
+    public List<PostResponseDto> getAllPostsByUser(Long userId) {
+        // 유저 존재 여부 확인 (옵션)
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다. id=" + userId));
+
+        List<Post> posts = postRepository.findAllByUserIdWithImages(userId);
+        return posts.stream()
+                .map(PostResponseDto::new)
+                .collect(Collectors.toList());
+    }
+
+    public boolean isPostLikedByUser(Long postId, Long userId) {
+        return postLikeRepository.existsByPostIdAndUserId(postId, userId);
+    }
 }

@@ -16,6 +16,7 @@ export const LoginUserContext = createContext<{
     isLogin: boolean
     logout: (callback: () => void) => void
     logoutAndHome: () => void
+    setAccessToken: (token: string) => void
 }>({
     loginUser: createEmptyUser(),
     setLoginUser: () => {},
@@ -23,6 +24,7 @@ export const LoginUserContext = createContext<{
     isLogin: false,
     logout: () => {},
     logoutAndHome: () => {},
+    setAccessToken: () => {},
 })
 
 function createEmptyUser(): User {
@@ -44,11 +46,21 @@ export function useLoginUser() {
     const removeLoginUser = () => {
         _setLoginUser(createEmptyUser())
         setLoginUserPending(false)
+        // 로그아웃 시 토큰 제거
+        if (typeof window !== 'undefined') {
+            sessionStorage.removeItem('accessToken')
+        }
     }
 
     const setLoginUser = (user: User) => {
         _setLoginUser(user)
         setLoginUserPending(false)
+    }
+
+    const setAccessToken = (token: string) => {
+        if (typeof window !== 'undefined') {
+            sessionStorage.setItem('accessToken', token)
+        }
     }
 
     const setNoLoginUser = () => {
@@ -77,9 +89,9 @@ export function useLoginUser() {
         isLoginUserPending,
         setNoLoginUser,
         isLogin,
-
         logout,
         logoutAndHome,
+        setAccessToken,
     }
 }
 

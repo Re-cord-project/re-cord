@@ -30,7 +30,7 @@ export default function Header() {
                                 홈
                             </Link>
                             <Link
-                                href="/myblog"
+                                href="/post/postHome"
                                 className={`relative h-[64px] flex items-center px-1 pt-1 text-sm whitespace-nowrap
                                     ${
                                         pathname === '/myblog'
@@ -45,14 +45,16 @@ export default function Header() {
                     <nav className="flex items-center">
                         {isLogin ? (
                             <div className="flex items-center space-x-2">
-                                <Image
-                                    src="/profile.png"
-                                    alt="프로필 이미지"
-                                    width={32}
-                                    height={32}
-                                    className="rounded-full"
-                                />
-                                <span className="text-sm text-gray-900">{loginUser.username}</span>
+                                <Link href="/mypage" className="flex items-center space-x-2">
+                                    <Image
+                                        src="/profile.png"
+                                        alt="프로필 이미지"
+                                        width={32}
+                                        height={32}
+                                        className="rounded-full"
+                                    />
+                                    <span className="text-sm text-gray-900">{loginUser.username}</span>
+                                </Link>
                                 <button onClick={logoutAndHome} className="text-gray-900 hover:text-gray-700">
                                     로그아웃
                                 </button>
