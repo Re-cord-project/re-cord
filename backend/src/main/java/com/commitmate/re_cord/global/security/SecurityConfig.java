@@ -7,6 +7,7 @@ import com.commitmate.re_cord.global.security.handler.OAuth2FailureHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -40,6 +41,8 @@ public class SecurityConfig {
                                 .requestMatchers("/api/auth/register", "/api/auth/login", "api/auth/logout")
                                 .permitAll()
                                 .requestMatchers("/register", "/login")
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/users/*/counts")
                                 .permitAll()
                                 .requestMatchers("/api/**")
                                 .permitAll()
@@ -108,7 +111,7 @@ public class SecurityConfig {
 
         // CORS 설정을 소스에 등록
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
 
         return source;
     }
