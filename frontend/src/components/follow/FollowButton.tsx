@@ -1,0 +1,95 @@
+'use client';
+
+import { useState } from 'react';
+
+interface FollowButtonProps {
+  userId: string;
+  initialHasFollowed: boolean;
+  onFollowStatusChange?: (hasFollowed: boolean) => void;
+}
+
+export function FollowButton({ userId, initialHasFollowed, onFollowStatusChange }: FollowButtonProps) {
+  const [hasFollowed, setHasFollowed] = useState(initialHasFollowed);
+  const [isLoading, setIsLoading] = useState(false);
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
+
+  // 팔로우 처리
+  const handleFollow = async () => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/users/follow`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ followingId: Number(userId) }),
+      });
+      
+      if (!res.ok) {
+        console.error('팔로우 실패:', res.status);
+        return;
+      }
+      
+      setHasFollowed(true);
+      if (onFollowStatusChange) {
+        onFollowStatusChange(true);
+      }
+    } catch (error) {
+      console.error('팔로우 중 오류 발생:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 언팔로우 처리
+  const handleUnfollow = async () => {
+    if (isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/users/follow`, {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ followingId: Number(userId) }),
+      });
+      
+      if (!res.ok) {
+        console.error('언팔로우 실패:', res.status);
+        return;
+      }
+      
+      setHasFollowed(false);
+      if (onFollowStatusChange) {
+        onFollowStatusChange(false);
+      }
+    } catch (error) {
+      console.error('언팔로우 중 오류 발생:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <>
+      {hasFollowed ? (
+        <button
+          onClick={handleUnfollow}
+          disabled={isLoading}
+          className="px-4 py-2 min-w-[85px] text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-[#78B3CE] hover:text-white transition-colors focus:outline-none disabled:opacity-50"
+        >
+          {isLoading ? '처리 중...' : '언팔로우'}
+        </button>
+      ) : (
+        <button
+          onClick={handleFollow}
+          disabled={isLoading}
+          className="px-4 py-2 min-w-[85px] text-sm font-medium text-white bg-[#78B3CE] rounded-md hover:bg-[#5c9bb8] transition-colors focus:outline-none disabled:opacity-50"
+        >
+          {isLoading ? '처리 중...' : '팔로우'}
+        </button>
+      )}
+    </>
+  );
+} 
