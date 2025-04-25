@@ -16,7 +16,7 @@ public class FollowCountResponseDto {
     @Builder
     public FollowCountResponseDto(long followingCount, long followerCount) {
         this.followingCount = followingCount;
-        this.followerCount  = followerCount;
+        this.followerCount = followerCount;
     }
 
 }
