@@ -132,4 +132,20 @@ public class ApiV1UserController {
         rq.deleteCookie("refreshToken");
         return ResponseEntity.ok("회원탈퇴가 정상적으로 처리되었습니다.");
     }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserResponseDto> getUser(@PathVariable Long userId) {
+        User user = userService.getUserById(userId);
+        return ResponseEntity.ok(new UserResponseDto(user));
+    }
+
+    @GetMapping("/{userId}/profile-image")
+    public ResponseEntity<String> getProfileImageUrl(@PathVariable Long userId) {
+        String profileImageUrl = userService.getProfileImageUrl(userId);
+        if (profileImageUrl != null) {
+            return ResponseEntity.ok(profileImageUrl);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
