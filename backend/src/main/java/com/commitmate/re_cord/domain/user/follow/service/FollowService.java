@@ -1,6 +1,6 @@
 package com.commitmate.re_cord.domain.user.follow.service;
 
-import com.commitmate.re_cord.domain.user.follow.dto.FollowUserResponse;
+import com.commitmate.re_cord.domain.user.follow.dto.FollowUserResponseDto;
 import com.commitmate.re_cord.domain.user.follow.entity.Follow;
 import com.commitmate.re_cord.domain.user.follow.repository.FollowRepository;
 import com.commitmate.re_cord.domain.user.user.entity.User;
@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 
 @Slf4j
@@ -20,7 +19,7 @@ public class FollowService {
     private final FollowRepository followRepository;
     private final UserService userService;
 
-    //팔로우
+    // 팔로우
     @Transactional
     public void follow(Long followerId, Long followingId) {
         // follower / following 조회 (EntityNotFoundException 발생 시 404)
@@ -46,7 +45,7 @@ public class FollowService {
         followRepository.save(f);
     }
 
-   //언팔로우
+    // 언팔로우
     @Transactional
     public void unfollow(Long followerId, Long followingId) {
         // follower / following 조회
@@ -63,16 +62,17 @@ public class FollowService {
 
     // 내가 팔로우한 사람 목록
     @Transactional(readOnly = true)
-    public List<FollowUserResponse> getFollowingList(Long followerId) {
-        User follower = userService.getUserById(followerId);
+    public List<FollowUserResponseDto> getFollowingList(Long followerId) {
+        User me = userService.getUserById(followerId);
 
-        return followRepository.findAllByFollowerId(follower).stream()
+        return followRepository.findAllByFollowerId(me).stream()
                 .map(f -> {
                     User u = f.getFollowingId();
-                    return FollowUserResponse.builder()
+                    return FollowUserResponseDto.builder()
                             .userId(u.getId())
                             .username(u.getUsername())
                             .email(u.getEmail())
+                            .hasFollowed(true)    // 내가 팔로우한 사람은 항상 true
                             .build();
                 })
                 .toList();
@@ -80,16 +80,21 @@ public class FollowService {
 
     // 나를 팔로우한 사람 목록
     @Transactional(readOnly = true)
-    public List<FollowUserResponse> getFollowerList(Long followingId) {
-        User following = userService.getUserById(followingId);
+    public List<FollowUserResponseDto> getFollowerList(Long followingId) {
+        User me = userService.getUserById(followingId);
 
-        return followRepository.findAllByFollowingId(following).stream()
+        return followRepository.findAllByFollowingId(me).stream()
                 .map(f -> {
                     User u = f.getFollowerId();
-                    return FollowUserResponse.builder()
+                    // 내가 이 사람을 팔로우했는지 여부 조회
+                    boolean hasFollowed = followRepository
+                            .existsByFollowerIdAndFollowingId(me, u);
+
+                    return FollowUserResponseDto.builder()
                             .userId(u.getId())
                             .username(u.getUsername())
                             .email(u.getEmail())
+                            .hasFollowed(hasFollowed)
                             .build();
                 })
                 .toList();

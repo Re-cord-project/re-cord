@@ -8,16 +8,17 @@ import lombok.ToString;
 @Getter
 @NoArgsConstructor
 @ToString
-public class FollowCountResponse {
+public class FollowCountResponseDto {
 
     private Long userId;
     private int followingCount;
     private int followerCount;
 
     @Builder
-    public FollowCountResponse(Long userId, int followingCount, int followerCount) {
+    public FollowCountResponseDto(Long userId, int followingCount, int followerCount) {
         this.userId = userId;
         this.followingCount = followingCount;
         this.followerCount = followerCount;
     }
+
 }
