@@ -2,29 +2,17 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useLoginUser } from '../stores/auth/loginUser'
 
 export default function WithdrawPage() {
     const router = useRouter()
-    const [password, setPassword] = useState('')
-    const [withdrawReason, setWithdrawReason] = useState('')
+    const { loginUser } = useLoginUser()
     const [dataDeleteAgreed, setDataDeleteAgreed] = useState(false)
     const [error, setError] = useState('')
-
-    const reasons = [
-        { id: 'service', label: '서비스 이용이 불편해요' },
-        { id: 'privacy', label: '사용빈도가 낮아요' },
-        { id: 'personal', label: '개인정보 보호를 위해' },
-        { id: 'other', label: '기타' },
-    ]
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError('')
-
-        if (!withdrawReason) {
-            setError('탈퇴 사유를 선택해주세요.')
-            return
-        }
 
         if (!dataDeleteAgreed) {
             setError('데이터 삭제 동의가 필요합니다.')
@@ -32,20 +20,19 @@ export default function WithdrawPage() {
         }
 
         try {
-            const response = await fetch('http://localhost:8090/api/auth/withdraw', {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
+            const response = await fetch(
+                `http://localhost:8090/api/auth/withdraw?dataDeleteAgreed=${dataDeleteAgreed}`,
+                {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
                 },
-                credentials: 'include',
-                body: JSON.stringify({
-                    password,
-                    withdrawReason,
-                }),
-            })
+            )
 
             if (response.ok) {
-                router.push('/login')
+                window.location.href = '/'
             } else {
                 const data = await response.json()
                 setError(data.message || '회원 탈퇴 처리 중 오류가 발생했습니다.')
@@ -89,36 +76,8 @@ export default function WithdrawPage() {
                     <div className="relative">
                         <label className="block text-base font-medium text-gray-700 mb-2">계정 정보</label>
                         <div className="w-full px-4 py-3 bg-gray-50 text-gray-700 text-sm font-bold">
-                            user@example.com
+                            {loginUser.email}
                         </div>
-                    </div>
-
-                    <div className="relative">
-                        <label className="block text-base font-medium text-gray-700 mb-2">탈퇴 사유</label>
-                        <div className="space-y-2">
-                            {reasons.map((reason) => (
-                                <div key={reason.id} className="flex items-center">
-                                    <input
-                                        type="radio"
-                                        id={reason.id}
-                                        name="withdrawReason"
-                                        value={reason.id}
-                                        onChange={(e) => setWithdrawReason(e.target.value)}
-                                        className="h-4 w-4 text-[#78B3CE] focus:ring-[#78B3CE] border-gray-300"
-                                    />
-                                    <label htmlFor={reason.id} className="ml-2 text-[13px] text-gray-700">
-                                        {reason.label}
-                                    </label>
-                                </div>
-                            ))}
-                        </div>
-                        {withdrawReason === 'other' && (
-                            <textarea
-                                className="mt-2 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 text-sm"
-                                rows={3}
-                                placeholder="기타 사유를 입력해주세요"
-                            />
-                        )}
                     </div>
 
                     <div className="relative">
@@ -138,18 +97,6 @@ export default function WithdrawPage() {
                         <p className="mt-1 text-[11px] text-gray-500">
                             회원 탈퇴 시 계정 정보 및 개인 데이터가 영구적으로 삭제됩니다.
                         </p>
-                    </div>
-
-                    <div className="relative">
-                        <label className="block text-base font-medium text-gray-700 mb-2">비밀번호 확인</label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            className="w-full h-[40px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 text-sm"
-                            placeholder="현재 비밀번호를 입력해주세요"
-                        />
                     </div>
 
                     <div className="flex gap-3 pt-4">

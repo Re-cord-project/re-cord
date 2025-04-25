@@ -3,13 +3,13 @@ package com.commitmate.re_cord.domain.mypage.controller;
 import com.commitmate.re_cord.domain.mypage.dto.MonthlyViewDTO;
 import com.commitmate.re_cord.domain.mypage.service.MyPagePostService;
 import com.commitmate.re_cord.domain.post.post.dto.PostDTO;
-import com.commitmate.re_cord.domain.post.post.service.PostService;
 import com.commitmate.re_cord.global.security.SecurityUser;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page; // Page import 추가
 
 import java.util.List;
 
@@ -22,13 +22,16 @@ public class ApiV1MyPagePostController {
     private final MyPagePostService myPagePostService;
 
     @Operation(
-            summary = "내 게시글 조회"
+            summary = "내 게시글 시간순 조회"
     )
     @GetMapping
-    public ResponseEntity<List<PostDTO>> getPostsByUser(
-            @AuthenticationPrincipal SecurityUser userDetails) {
+    public ResponseEntity<Page<PostDTO>> getPostsByUser(
+            @AuthenticationPrincipal SecurityUser userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
         Long userId = userDetails.getId();
-        List<PostDTO> posts = myPagePostService.getPostsByUserId(userId);
+        Page<PostDTO> posts = myPagePostService.getPostsByUserIdByDesc(userId,page,size);
         return ResponseEntity.ok(posts);
     }
 
@@ -36,14 +39,16 @@ public class ApiV1MyPagePostController {
     @GetMapping("/views")
     public ResponseEntity<?> getPostsViews(
             @AuthenticationPrincipal SecurityUser userDetails,
-            @RequestParam(required = false) String type) {
+            @RequestParam(required = false) String type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) { 
 
         Long userId = userDetails.getId();
         switch (type) {
             case "total":
                 return ResponseEntity.ok(myPagePostService.getTotalPostViews(userId));
             case "ordered":
-                List<PostDTO> posts = myPagePostService.getPostsOrderedByViews(userId);
+                Page<PostDTO> posts = myPagePostService.getPostsOrderedByViews(userId,page, size);
                 return ResponseEntity.ok(posts);
             case "monthly":
                 List<MonthlyViewDTO> stats = myPagePostService.getMonthlyViewStats(userId);
@@ -57,13 +62,16 @@ public class ApiV1MyPagePostController {
     @GetMapping("/likes")
     public ResponseEntity<?> getPostsLikes (
             @AuthenticationPrincipal SecurityUser userDetails,
-            @RequestParam(required = false) String type){
+            @RequestParam(required = false) String type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size){
         Long userId = userDetails.getId();
+
         switch (type) {
             case "total":
                 return ResponseEntity.ok(myPagePostService.getTotalPostLikes(userId));
             case "ordered":
-                List<PostDTO> posts = myPagePostService.getPostsOrderedByLikes(userId);
+                Page<PostDTO> posts = myPagePostService.getPostsOrderedByLikes(userId,page, size);
                 return ResponseEntity.ok(posts);
             default:
                 return ResponseEntity.badRequest().body("Invalid query parameter");
