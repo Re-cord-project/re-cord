@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useLoginUser } from '../stores/auth/loginUser'
+import { useGlobalLoginUser } from '../stores/auth/loginUser'
 
 export default function WithdrawPage() {
     const router = useRouter()
-    const { loginUser } = useLoginUser()
+    const { loginUser } = useGlobalLoginUser()
     const [dataDeleteAgreed, setDataDeleteAgreed] = useState(false)
     const [error, setError] = useState('')
 
@@ -76,7 +76,7 @@ export default function WithdrawPage() {
                     <div className="relative">
                         <label className="block text-base font-medium text-gray-700 mb-2">계정 정보</label>
                         <div className="w-full px-4 py-3 bg-gray-50 text-gray-700 text-sm font-bold">
-                            {loginUser.email}
+                            {loginUser?.email}
                         </div>
                     </div>
 

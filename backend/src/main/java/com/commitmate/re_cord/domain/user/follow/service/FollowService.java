@@ -99,4 +99,20 @@ public class FollowService {
                 })
                 .toList();
     }
+
+    // 내가 팔로우한 사람 수
+    @Transactional(readOnly = true)
+    public long countFollowing(Long followerId) {
+        User me = userService.getUserById(followerId);
+        return followRepository.countByFollowerId(me);
+    }
+
+    // 나를 팔로우한 사람 수
+    @Transactional(readOnly = true)
+    public long countFollowers(Long followingId) {
+        User me = userService.getUserById(followingId);
+        return followRepository.countByFollowingId(me);
+    }
+
+
 }
