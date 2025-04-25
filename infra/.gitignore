@@ -1,0 +1,9 @@
+.idea
+ .terrafrom
+
+
+ .terrafrom.lock.hcl
+ terrafrom.tfstate
+ terraform.tfstate.backup
+terraform.tfstate.lock.info
+secrets.tf
