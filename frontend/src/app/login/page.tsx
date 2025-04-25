@@ -3,11 +3,9 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useGlobalLoginUser } from '../stores/auth/loginUser'
 
 export default function LoginPage() {
     const router = useRouter()
-    const { setLoginUser, setAccessToken } = useGlobalLoginUser()
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
@@ -30,22 +28,8 @@ export default function LoginPage() {
             })
 
             if (response.ok) {
-                // 로그인 성공 시 응답 데이터 처리
-                const data = await response.json()
-
-                // 액세스 토큰을 Context API를 통해 저장
-                if (data.accessToken) {
-                    setAccessToken(data.accessToken)
-                    console.log('토큰이 저장되었습니다:', data.accessToken)
-                }
-
-                // 사용자 정보 저장
-                if (data.user) {
-                    setLoginUser(data.user)
-                }
-
-                // 홈페이지로 이동
-                router.push('/')
+                // 로그인 성공 시 홈페이지로 이동
+                window.location.href = '/'
             } else {
                 const data = await response.json()
                 setError(data.message || '로그인에 실패했습니다.')

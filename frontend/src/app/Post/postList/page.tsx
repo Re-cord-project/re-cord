@@ -12,25 +12,6 @@ import SearchBar from '../../../components/post/SearchBar'
 import { usePosts } from './hooks/usePosts'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 
-// 임시 작성자 데이터 (실제로는 API를 통해 가져와야 함)
-const authorData = {
-    id: 1,
-    name: '개발자',
-    username: 'developer',
-    email: 'developer@example.com',
-    role: '소프트웨어 엔지니어',
-    bootcamp: '코드캠프',
-    generation: 1,
-    introduction: '안녕하세요, 개발자입니다.',
-    profileImageUrl:
-        'https://readdy.ai/api/search-image?query=Professional%20headshot%20of%20a%20Korean%20male%20developer%20with%20glasses%2C%20neutral%20expression%2C%20simple%20background%2C%20high%20quality%20portrait%20for%20profile%20picture&width=200&height=200&seq=2&orientation=squarish',
-    provider: 'local',
-    stats: {
-        followers: 114,
-        following: 230,
-        posts: 45,
-    },
-}
 
 export default function PostListPage() {
     const searchParams = useSearchParams()

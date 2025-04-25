@@ -41,9 +41,10 @@ interface PostContentProps {
     post: Post
     categories?: Array<{ id: number; name: string }> // 카테고리 목록 추가
     refreshPost?: () => void // 게시글 새로고침 함수 추가
+    loginUserId?: number // 로그인한 사용자의 ID 추가
 }
 
-const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refreshPost }) => {
+const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refreshPost, loginUserId }) => {
     const [isLiked, setIsLiked] = useState(false)
     const [localLikes, setLocalLikes] = useState(post.likes)
     const [isLoading, setIsLoading] = useState(false)
@@ -58,8 +59,17 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
     const [editCategoryId, setEditCategoryId] = useState(post.categoryId || 1)
     const [editError, setEditError] = useState<string | null>(null)
 
-    // 현재 사용자가 게시글 작성자인지 확인
-    const isAuthor = isLogin && loginUser?.id === post.userId
+    // 현재 사용자가 게시글 작성자인지 확인 (loginUserId가 있으면 우선 사용)
+    const isAuthor = isLogin && (loginUserId !== undefined ? loginUserId : loginUser?.id) === post.userId
+
+    // 디버깅을 위한 로그
+    useEffect(() => {
+        console.log('로그인 상태:', isLogin)
+        console.log('로그인한 사용자 ID (props):', loginUserId)
+        console.log('로그인한 사용자 ID (context):', loginUser?.id)
+        console.log('게시글 작성자 ID (post.userId):', post.userId)
+        console.log('isAuthor 결과:', isAuthor)
+    }, [isLogin, loginUser, loginUserId, post.userId, isAuthor])
 
     // 컴포넌트 마운트 시 좋아요 상태 확인
     useEffect(() => {

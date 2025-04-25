@@ -40,7 +40,7 @@ const PostContent: React.FC<PostContentProps> = ({ searchResults }) => {
             // 각 유저의 프로필 이미지 정보 가져오기
             const profilePromises = userIds.map(async (userId) => {
                 try {
-                    const response = await fetch(`http://localhost:8090/api/users/${userId}`)
+                    const response = await fetch(`http://localhost:8090/api/auth/${userId}`)
                     if (!response.ok) {
                         throw new Error(`Failed to fetch user ${userId}`)
                     }

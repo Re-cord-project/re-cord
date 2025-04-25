@@ -20,11 +20,11 @@ export const useCategories = () => {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
                     },
-                    credentials: 'include',
+                    credentials: 'include', // 쿠키를 포함하여 요청
                 })
 
+                // 나머지 코드는 동일
                 if (!response.ok) {
                     throw new Error('카테고리를 불러오는데 실패했습니다.')
                 }

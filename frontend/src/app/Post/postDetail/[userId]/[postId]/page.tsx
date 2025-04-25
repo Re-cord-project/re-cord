@@ -10,14 +10,16 @@ import AuthorOtherPosts from '@/components/post/AuthorOtherPosts'
 import PostComments from '@/components/comment/commentSection'
 import Banner from '@/components/post/Banner'
 import PostContent from '@/components/post/PostContent'
+import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 
 interface Post {
     id: number
     title: string
     content: string
     categoryName: string | null
+    categoryId?: number // categoryId 필드를 옵셔널로 추가
     username: string | null
-    authorId: number
+    userId: number
     views: number
     likes: number
     status: string | null
@@ -32,8 +34,13 @@ const PostDetail = () => {
     const [post, setPost] = useState<Post | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const { loginUser, isLogin } = useGlobalLoginUser()
 
     useEffect(() => {
+        // URL 파라미터 및 로그인 사용자 정보 로깅
+        console.log('URL params:', { userId: params.userId, postId: params.postId })
+        console.log('로그인 사용자:', { id: loginUser?.id, isLogin })
+
         const fetchPost = async () => {
             try {
                 const postId = params.postId
@@ -52,7 +59,17 @@ const PostDetail = () => {
                 }
 
                 const data = await response.json()
+                console.log('서버에서 받아온 전체 데이터:', data)
                 setPost(data)
+
+                // 게시글 데이터 받아온 후 로그 추가
+                console.log('게시글 데이터:', {
+                    postId: data.id,
+                    authorId: data.authorId,
+                    userId: data.userId, // userId 필드도 확인
+                    loginUserId: loginUser?.id,
+                })
+                console.log('작성자 일치 여부:', loginUser?.id === data.authorId)
             } catch (err) {
                 setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.')
             } finally {
@@ -116,7 +133,17 @@ const PostDetail = () => {
                 {/* 메인 콘텐츠 영역 */}
                 <div className="flex-1 mt-6 md:mt-0">
                     {/* 게시물 내용 */}
-                    <PostContent post={post} />
+                    {post && (
+                        <PostContent
+                            post={{
+                                ...post,
+                                userId: Number(params.userId), // URL의 userId 파라미터 사용
+                                categoryId: post.categoryId || 1,
+                                imageUrls: post.imageUrls || [],
+                            }}
+                            loginUserId={loginUser?.id}
+                        />
+                    )}
 
                     {/* 댓글 섹션 */}
                     <PostComments postId={Number(params.postId)} />
