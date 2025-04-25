@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { FollowButton } from './FollowButton';
 
 interface Following {
   id: string;
@@ -56,52 +57,11 @@ export function FollowingList() {
     fetchFollowings();
   }, [API_BASE]);
 
-  // 팔로우 처리
-  const handleFollow = async (userId: string) => {
-    try {
-      const res = await fetch(`${API_BASE}/api/users/follow`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ followingId: Number(userId) }),
-      });
-      
-      if (!res.ok) {
-        console.error('팔로우 실패:', res.status);
-        return;
-      }
-      
-      // UI 업데이트, 해당 항목의 hasFollowed를 true로 변경
-      setFollowings(prev => 
-        prev.map(user => user.id === userId ? {...user, hasFollowed: true} : user)
-      );
-    } catch (error) {
-      console.error('팔로우 중 오류 발생:', error);
-    }
-  };
-
-  // 언팔로우 처리
-  const handleUnfollow = async (userId: string) => {
-    try {
-      const res = await fetch(`${API_BASE}/api/users/follow`, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ followingId: Number(userId) }),
-      });
-      
-      if (!res.ok) {
-        console.error('언팔로우 실패:', res.status);
-        return;
-      }
-      
-      // UI 업데이트, 해당 항목의 hasFollowed를 false로 변경
-      setFollowings(prev => 
-        prev.map(user => user.id === userId ? {...user, hasFollowed: false} : user)
-      );
-    } catch (error) {
-      console.error('언팔로우 중 오류 발생:', error);
-    }
+  // 팔로우 상태 변경 핸들러
+  const handleFollowStatusChange = (userId: string, isFollowing: boolean) => {
+    setFollowings(prev => 
+      prev.map(user => user.id === userId ? {...user, hasFollowed: isFollowing} : user)
+    );
   };
 
   // 팔로잉 총 수
@@ -153,22 +113,12 @@ export function FollowingList() {
               </Link>
             </div>
 
-            {/* 팔로우/언팔로우 버튼 */}
-            {f.hasFollowed ? (
-              <button
-                onClick={() => handleUnfollow(f.id)}
-                className="px-4 py-2 min-w-[85px] text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-[#78B3CE] hover:text-white transition-colors focus:outline-none"
-              >
-                언팔로잉
-              </button>
-            ) : (
-              <button
-                onClick={() => handleFollow(f.id)}
-                className="px-4 py-2 min-w-[85px] text-sm font-medium text-white bg-[#78B3CE] rounded-md hover:bg-[#5c9bb8] transition-colors focus:outline-none"
-              >
-                팔로우
-              </button>
-            )}
+            {/* 팔로우 버튼 컴포넌트 */}
+            <FollowButton 
+              userId={f.id} 
+              initialHasFollowed={f.hasFollowed}
+              onFollowStatusChange={(hasFollowed) => handleFollowStatusChange(f.id, hasFollowed)}
+            />
           </div>
         ))}
       </div>
