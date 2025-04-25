@@ -1,5 +1,3 @@
-"use client";
-
 import React, { useState } from "react";
 
 interface Comment {
@@ -10,7 +8,7 @@ interface Comment {
   replies: Comment[];
 }
 
-const PostComments: React.FC = () => {
+const CommentSection: React.FC = () => {
   const [commentText, setCommentText] = useState<string>("");
   const comments: Comment[] = [
     {
@@ -84,4 +82,4 @@ const PostComments: React.FC = () => {
   );
 };
 
-export default PostComments;
+export default CommentSection;

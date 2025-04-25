@@ -1,5 +1,6 @@
 import { createContext, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
+import { setAccessToken as setToken, removeAccessToken } from '@/utils/auth'
 
 type User = {
     id: number
@@ -16,6 +17,7 @@ export const LoginUserContext = createContext<{
     isLogin: boolean
     logout: (callback: () => void) => void
     logoutAndHome: () => void
+    setAccessToken: (token: string) => void
 }>({
     loginUser: createEmptyUser(),
     setLoginUser: () => {},
@@ -23,6 +25,7 @@ export const LoginUserContext = createContext<{
     isLogin: false,
     logout: () => {},
     logoutAndHome: () => {},
+    setAccessToken: () => {},
 })
 
 function createEmptyUser(): User {
@@ -44,6 +47,7 @@ export function useLoginUser() {
     const removeLoginUser = () => {
         _setLoginUser(createEmptyUser())
         setLoginUserPending(false)
+        removeAccessToken() // 로그아웃 시 토큰도 함께 제거
     }
 
     const setLoginUser = (user: User) => {
@@ -71,15 +75,20 @@ export function useLoginUser() {
         logout(() => router.replace('/'))
     }
 
+    // 토큰을 저장하는 함수
+    const setAccessToken = (token: string) => {
+        setToken(token)
+    }
+
     return {
         loginUser,
         setLoginUser,
         isLoginUserPending,
         setNoLoginUser,
         isLogin,
-
         logout,
         logoutAndHome,
+        setAccessToken,
     }
 }
 

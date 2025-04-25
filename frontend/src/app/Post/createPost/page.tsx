@@ -1,153 +1,318 @@
-"use client";
+'use client'
 
-import React, { useState } from 'react';
-import PostHeader from '../../components/PostHeader';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBold, faItalic, faUnderline, faAlignLeft, faAlignCenter, faAlignRight, faLink, faImage } from '@fortawesome/free-solid-svg-icons';
-import { faClock } from '@fortawesome/free-regular-svg-icons';
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useForm, Controller } from 'react-hook-form'
+import ContentEditor from './components/ContentEditor'
+import { useCreatePost } from './hooks/useCreatePost'
+import { useUpdatePost } from './hooks/useUpdatePost'
+import { useCategories } from './hooks/useCategories'
+import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 
-// 임시 게시글 목록 데이터
-const myPosts = [
-  { id: 1, title: "Next.js와 TypeScript로 블로그 만들기", date: "2025-04-17" },
-  { id: 2, title: "리액트 커스텀 훅 활용하기", date: "2025-04-16" },
-  { id: 3, title: "테일윈드 CSS 실전 가이드", date: "2025-04-15" },
-];
+interface FormValues {
+    title: string
+    content: string
+    categoryId: number
+    userId?: number | null
+}
 
 const CreatePostPage = () => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('카테고리');
-  const [tags, setTags] = useState<string[]>([]);
-  const [currentTag, setCurrentTag] = useState('');
+    const router = useRouter()
+    const { loginUser, isLogin, isLoginUserPending } = useGlobalLoginUser()
+    const { categories, isLoading: isCategoriesLoading } = useCategories()
+    const { publishPost, isSubmitting: isCreateSubmitting, error: createError } = useCreatePost()
+    const { updatePost, isSubmitting: isUpdateSubmitting, error: updateError } = useUpdatePost()
+    const [unsavedChanges, setUnsavedChanges] = useState(false)
+    const [showConfirmLeave, setShowConfirmLeave] = useState(false)
+    const [destination, setDestination] = useState('')
+    const [isEditMode, setIsEditMode] = useState(false)
+    const [editPostId, setEditPostId] = useState<number | null>(null)
+    const [isLoadingPost, setIsLoadingPost] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // 게시글 등록 로직
-  };
+    // 통합된 submitting과 error 상태
+    const isSubmitting = isCreateSubmitting || isUpdateSubmitting
+    const error = createError || updateError
 
-  const handleAddTag = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && currentTag.trim() !== '') {
-      setTags([...tags, currentTag.trim()]);
-      setCurrentTag('');
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+        reset,
+        watch,
+        setValue,
+    } = useForm<FormValues>({
+        defaultValues: {
+            title: '',
+            content: '',
+            categoryId: 1,
+        },
+    })
+
+    // 로그인 상태 확인
+    useEffect(() => {
+        if (!isLoginUserPending && !isLogin) {
+            alert('로그인이 필요합니다.')
+            router.push('/login')
+        }
+    }, [isLogin, isLoginUserPending, router])
+
+    // 변경사항 감지
+    const watchAllFields = watch()
+    useEffect(() => {
+        setUnsavedChanges(!!watchAllFields.title || !!watchAllFields.content)
+    }, [watchAllFields])
+
+    // 페이지 벗어남 감지
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (unsavedChanges) {
+                e.preventDefault()
+                e.returnValue = ''
+                return ''
+            }
+        }
+
+        window.addEventListener('beforeunload', handleBeforeUnload)
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload)
+        }
+    }, [unsavedChanges])
+
+    const onSubmit = async (data: FormValues) => {
+        let result: { success: boolean; error?: string; post?: any }
+
+        // 수정 모드일 경우 updatePost 훅 사용
+        if (isEditMode && editPostId) {
+            console.log(`게시글(ID: ${editPostId})을 수정합니다.`)
+            result = await updatePost(editPostId, {
+                ...data,
+                userId: loginUser?.id,
+            })
+        }
+        // 새 글 작성의 경우 create API 사용
+        else {
+            console.log('새 글을 작성하여 게시합니다.')
+            result = await publishPost(data)
+        }
+
+        if (result.success) {
+            setUnsavedChanges(false)
+            alert(isEditMode ? '게시물이 수정되었습니다.' : '게시물이 등록되었습니다.')
+            router.push('/post/postList')
+        } else {
+            alert(result.error || (isEditMode ? '게시물 수정에 실패했습니다.' : '게시물 등록에 실패했습니다.'))
+        }
     }
-  };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <PostHeader />
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* 왼쪽 사이드바 - 게시글 목록 */}
-          <div className="md:w-64 flex-shrink-0">
-            <div className="bg-white rounded-lg shadow p-4">
-              <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                <FontAwesomeIcon icon={faClock} className="text-gray-500" />
-                최근 게시글
-              </h2>
-              <div className="space-y-3">
-                {myPosts.map(post => (
-                  <div key={post.id} className="group cursor-pointer">
-                    <h3 className="text-sm text-gray-700 group-hover:text-blue-500 truncate">
-                      {post.title}
-                    </h3>
-                    <p className="text-xs text-gray-500">{post.date}</p>
-                  </div>
-                ))}
-              </div>
+    const handleCancel = () => {
+        if (unsavedChanges) {
+            setShowConfirmLeave(true)
+            setDestination('/post/postList')
+        } else {
+            router.push('/post/postList')
+        }
+    }
+
+    const handleConfirmLeave = () => {
+        setUnsavedChanges(false)
+        setShowConfirmLeave(false)
+        router.push(destination)
+    }
+
+    // 유저 인터페이스에 넘겨줄 페이지 제목
+    const pageTitle = isEditMode ? '게시글 수정' : '새 게시글 작성'
+
+    // URL 쿼리 파라미터 처리
+    useEffect(() => {
+        // useSearchParams는 클라이언트 컴포넌트에서만 사용 가능함
+        // Next.js에서는 페이지 로드 후 클라이언트 측에서 URL 파라미터 처리
+        const searchParams = new URLSearchParams(window.location.search)
+        const isEdit = searchParams.get('edit') === 'true'
+        const postId = searchParams.get('postId')
+
+        if (isEdit && postId) {
+            setIsEditMode(true)
+            setEditPostId(Number(postId))
+            loadPostForEdit(Number(postId))
+        }
+    }, [])
+
+    // 수정을 위해 게시글 정보 불러오기
+    const loadPostForEdit = async (postId: number) => {
+        if (!postId) return
+
+        setIsLoadingPost(true)
+        try {
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8090'}/api/posts/${postId}`,
+                {
+                    credentials: 'include',
+                },
+            )
+
+            if (!response.ok) {
+                const errorText = await response.text()
+                console.error('게시글 로드 실패:', errorText)
+                alert('게시글을 불러o오는데 실패했습니다.')
+                router.push('/post/postList')
+                return
+            }
+
+            const postData = await response.json()
+
+            // 게시글 정보 폼에 설정
+            setValue('title', postData.title)
+            setValue('content', postData.content)
+            setValue('categoryId', postData.categoryId)
+            setEditPostId(postId) // 수정할 게시글 ID 저장
+
+            // 작성자 확인 (보안 검사)
+            if (postData.userId && loginUser && postData.userId !== loginUser.id) {
+                alert('본인이 작성한 게시글만 수정할 수 있습니다.')
+                router.push('/post/postList')
+            }
+        } catch (error) {
+            console.error('게시글 로드 중 오류:', error)
+            alert('게시글을 불러오는 중 오류가 발생했습니다.')
+            router.push('/post/postList')
+        } finally {
+            setIsLoadingPost(false)
+        }
+    }
+
+    if (isLoginUserPending || isCategoriesLoading || isLoadingPost) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
             </div>
-          </div>
+        )
+    }
 
-          {/* 기존 에디터 영역 */}
-          <div className="flex-1">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="mb-6">
-                <select
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="block w-40 px-3 py-2 text-gray-700 border rounded-md focus:outline-none focus:border-blue-500 text-sm"
-                >
-                  <option disabled>카테고리</option>
-                  <option value="tech">기술</option>
-                  <option value="life">일상</option>
-                  <option value="dev">개발</option>
-                </select>
-              </div>
+    return (
+        <div className="bg-gray-50 min-h-screen pb-10">
+            {/* 메인 컨텐츠 */}
+            <div className="max-w-7xl mx-auto px-4 mt-6">
+                <h1 className="text-2xl font-bold text-gray-800 mb-6">
+                    {isEditMode ? '게시글 수정' : '새 게시글 작성'}
+                </h1>
+                <div className="bg-white rounded-lg shadow-sm p-6">
+                    <form onSubmit={(e) => e.preventDefault()}>
+                        <div className="mb-6">
+                            <Controller
+                                name="title"
+                                control={control}
+                                rules={{ required: '제목을 입력해주세요' }}
+                                render={({ field }) => (
+                                    <input
+                                        {...field}
+                                        placeholder="제목을 입력하세요"
+                                        className="w-full px-4 py-3 text-xl font-medium border-0 border-b border-gray-200 focus:border-blue-500 focus:ring-0"
+                                    />
+                                )}
+                            />
+                            {errors.title && <p className="mt-1 text-red-500 text-sm">{errors.title.message}</p>}
+                        </div>
 
-              <input
-                type="text"
-                placeholder="제목을 입력하세요"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="w-full mb-4 text-2xl font-bold border-none focus:outline-none"
-              />
+                        <div className="mb-6">
+                            <div className="flex items-center mb-4">
+                                <label className="mr-3 font-medium text-gray-700">카테고리:</label>
+                                <Controller
+                                    name="categoryId"
+                                    control={control}
+                                    render={({ field }) => (
+                                        <select
+                                            {...field}
+                                            value={field.value}
+                                            onChange={(e) => field.onChange(Number(e.target.value))}
+                                            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            {categories.map((category) => (
+                                                <option key={category.id} value={category.id}>
+                                                    {category.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                />
+                            </div>
+                        </div>
 
-              <div className="border-b mb-4">
-                <div className="flex items-center space-x-4 mb-2">
-                  <select className="text-sm px-2 py-1 border rounded">
-                    <option>16px</option>
-                    <option>18px</option>
-                    <option>20px</option>
-                  </select>
-                  
-                  <button className="p-1 hover:bg-gray-100 rounded">
-                    <FontAwesomeIcon icon={faBold} className="w-4 h-4" />
-                  </button>
-                  <button className="p-1 hover:bg-gray-100 rounded">
-                    <FontAwesomeIcon icon={faItalic} className="w-4 h-4" />
-                  </button>
-                  <button className="p-1 hover:bg-gray-100 rounded">
-                    <FontAwesomeIcon icon={faUnderline} className="w-4 h-4" />
-                  </button>
-                  <button className="p-1 hover:bg-gray-100 rounded">
-                    <FontAwesomeIcon icon={faAlignLeft} className="w-4 h-4" />
-                  </button>
-                  <button className="p-1 hover:bg-gray-100 rounded">
-                    <FontAwesomeIcon icon={faAlignCenter} className="w-4 h-4" />
-                  </button>
-                  <button className="p-1 hover:bg-gray-100 rounded">
-                    <FontAwesomeIcon icon={faAlignRight} className="w-4 h-4" />
-                  </button>
-                  <button className="p-1 hover:bg-gray-100 rounded">
-                    <FontAwesomeIcon icon={faLink} className="w-4 h-4" />
-                  </button>
-                  <button className="p-1 hover:bg-gray-100 rounded">
-                    <FontAwesomeIcon icon={faImage} className="w-4 h-4" />
-                  </button>
+                        <div className="mb-0">
+                            <Controller
+                                name="content"
+                                control={control}
+                                rules={{ required: '내용을 입력해주세요' }}
+                                render={({ field }) => (
+                                    <ContentEditor
+                                        value={field.value}
+                                        onChange={field.onChange}
+                                        height={600}
+                                        plainTextMode={true}
+                                        actions={
+                                            <div className="flex space-x-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={handleCancel}
+                                                    className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition"
+                                                >
+                                                    취소
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={handleSubmit(onSubmit)}
+                                                    disabled={isSubmitting}
+                                                    className="px-4 py-2 bg-[#78B3CE] hover:bg-[#6aa0b9] text-white rounded-md transition disabled:opacity-50"
+                                                >
+                                                    {isSubmitting
+                                                        ? isEditMode
+                                                            ? '수정 중...'
+                                                            : '게시 중...'
+                                                        : isEditMode
+                                                        ? '수정하기'
+                                                        : '게시하기'}
+                                                </button>
+                                            </div>
+                                        }
+                                    />
+                                )}
+                            />
+                            {errors.content && <p className="mt-1 text-red-500 text-sm">{errors.content.message}</p>}
+                        </div>
+                    </form>
                 </div>
-              </div>
 
-              <textarea
-                placeholder="내용을 입력하세요"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                className="w-full h-96 resize-none border-none focus:outline-none text-sm"
-              />
-
-              <div className="mt-4">
-                <input
-                  type="text"
-                  placeholder="태그를 입력하세요"
-                  value={currentTag}
-                  onChange={(e) => setCurrentTag(e.target.value)}
-                  onKeyPress={handleAddTag}
-                  className="w-full p-2 border-b focus:outline-none text-sm"
-                />
-              </div>
-
-              <div className="flex justify-end mt-6">
-                <button
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
-                  onClick={handleSubmit}
-                >
-                  발행하기
-                </button>
-              </div>
+                <div className="mt-6 text-center text-sm text-gray-500">
+                    <p>모든 게시물은 커뮤니티 규칙을 준수해야 합니다</p>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
 
-export default CreatePostPage;
+            {/* 페이지 이탈 확인 모달 */}
+            {showConfirmLeave && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+                        <h3 className="text-lg font-semibold mb-3">작성 중인 내용이 있습니다</h3>
+                        <p className="text-gray-600 mb-5">
+                            저장하지 않은 변경사항이 있습니다. 정말로 페이지를 떠나시겠습니까?
+                        </p>
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setShowConfirmLeave(false)}
+                                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded"
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={handleConfirmLeave}
+                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
+                            >
+                                나가기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    )
+}
+
+export default CreatePostPage
