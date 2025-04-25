@@ -10,13 +10,11 @@ import lombok.ToString;
 @ToString
 public class FollowCountResponseDto {
 
-    private Long userId;
-    private int followingCount;
-    private int followerCount;
+    private long followingCount;
+    private long followerCount;
 
     @Builder
-    public FollowCountResponseDto(Long userId, int followingCount, int followerCount) {
-        this.userId = userId;
+    public FollowCountResponseDto(long followingCount, long followerCount) {
         this.followingCount = followingCount;
         this.followerCount = followerCount;
     }

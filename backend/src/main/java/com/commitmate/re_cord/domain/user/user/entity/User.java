@@ -34,6 +34,7 @@ public class User extends BaseEntity {
     private String bootcamp;
     private int generation;
     private String refreshToken;
+    private String blogName;
 
     @Column(nullable = true)
     private String introduction; // 자기소개, 기본값 공백
