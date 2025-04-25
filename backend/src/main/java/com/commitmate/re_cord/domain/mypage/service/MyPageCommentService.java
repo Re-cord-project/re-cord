@@ -1,16 +1,18 @@
 package com.commitmate.re_cord.domain.mypage.service;
 
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
 import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentDTO;
-import com.commitmate.re_cord.domain.post.comment.comment.entity.Comment;
 import com.commitmate.re_cord.domain.post.comment.comment.repository.CommentRepository;
-import com.commitmate.re_cord.domain.post.post.dto.PostDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,10 +22,9 @@ public class MyPageCommentService {
     private final CommentRepository commentRepository;
 
 
-    public List<CommentDTO> getCommentsByUserId(Long userId) {
-        return commentRepository.findMyComment(userId).stream()
-                .map(CommentDTO::getEntity)
-                .collect(Collectors.toList());
+    public Page<CommentDTO> getCommentsByUserIdByDesc(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return commentRepository.findMyComment(userId, pageable).map(CommentDTO::getEntity);
     }
 
     // 댓글 좋아요 총합
@@ -32,9 +33,8 @@ public class MyPageCommentService {
     }
 
     // 댓글 좋아요 순 정렬
-    public List<CommentDTO> getCommentsOrderedByLikes(Long userId){
-        return commentRepository.orderCommentsByLikes(userId).stream()
-                .map(CommentDTO::getEntity)
-                .collect(Collectors.toList());
+    public Page<CommentDTO> getCommentsOrderedByLikes(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "likes"));
+        return commentRepository.orderCommentsByLikes(userId, pageable).map(CommentDTO::getEntity);
     }
 }

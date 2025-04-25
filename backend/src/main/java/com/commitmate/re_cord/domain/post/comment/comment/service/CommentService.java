@@ -133,7 +133,5 @@ public class CommentService {
         return new PageImpl<>(commentDTOs, pageable, parentComments.getTotalElements());
     }
 
-
-
 }
 

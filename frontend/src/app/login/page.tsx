@@ -29,7 +29,7 @@ export default function LoginPage() {
 
             if (response.ok) {
                 // 로그인 성공 시 홈페이지로 이동
-                router.push('/')
+                window.location.href = '/'
             } else {
                 const data = await response.json()
                 setError(data.message || '로그인에 실패했습니다.')
