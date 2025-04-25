@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { FollowButton } from './FollowButton';
 
 interface Follower {
   id: string;
@@ -10,6 +11,7 @@ interface Follower {
   email: string;
   role: string;
   imageUrl: string;
+  hasFollowed: boolean; // 팔로우 상태 추가
 }
 
 export function FollowerList() {
@@ -44,6 +46,7 @@ export function FollowerList() {
             email: f.email,
             role: 'Unknown',
             imageUrl: '/default-profile.png',
+            hasFollowed: true, // 팔로워는 기본적으로 팔로우 중
           }))
         );
       } catch (error) {
@@ -54,42 +57,11 @@ export function FollowerList() {
     fetchFollowers();
   }, [API_BASE]);
 
-  // ✨ handleFollow (나중에 필요하면)
-  const handleFollow = async (userId: string) => {
-    const res = await fetch(`${API_BASE}/api/users/follow`, {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ followingId: Number(userId) }),  // 🚀 ID는 body로
-    });
-    if (res.ok) {
-      // TODO: 성공 시 UI 업데이트 로직…
-      console.log(`팔로우 성공: ${userId}`);
-    } else {
-      console.error('팔로우 실패:', res.status);
-    }
-  };
-
-  // 언팔로우 처리, UI에서 즉시 제거
-  const handleUnfollow = async (userId: string) => {
-    try {
-      // DELETE 요청, DTO body 방식으로 followingId 전송 🚀
-      const res = await fetch(`${API_BASE}/api/users/follow`, {
-        method: 'DELETE',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ followingId: Number(userId) }),   // body에 followingId
-      });
-      
-      if (!res.ok) {
-        console.error('언팔로우 실패:', res.status);
-        return;
-      }
-      
-      // UI 업데이트, 해당 항목 제거
+  // 팔로우 상태 변경 핸들러
+  const handleFollowStatusChange = (userId: string, isFollowing: boolean) => {
+    // 언팔로우 시 목록에서 제거
+    if (!isFollowing) {
       setFollowers((prev) => prev.filter((f) => f.id !== userId));
-    } catch (error) {
-      console.error('언팔로우 중 오류 발생:', error);
     }
   };
 
@@ -142,13 +114,12 @@ export function FollowerList() {
               </Link>
             </div>
 
-            {/* 언팔로우 버튼 */}
-            <button
-              onClick={() => handleUnfollow(f.id)} // 언팔로우 토글 버튼에 핸들러 추가
-              className="px-4 py-2 min-w-[85px] text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-[#78B3CE] hover:text-white transition-colors focus:outline-none"
-            >
-              언팔로잉
-            </button>
+            {/* 팔로우 버튼 컴포넌트 */}
+            <FollowButton 
+              userId={f.id} 
+              initialHasFollowed={f.hasFollowed}
+              onFollowStatusChange={(hasFollowed) => handleFollowStatusChange(f.id, hasFollowed)}
+            />
           </div>
         ))}
       </div>
