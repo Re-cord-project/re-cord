@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { getAuthHeaders } from '@/utils/auth'
 
 export interface Post {
     id: number
@@ -71,9 +70,8 @@ export const usePosts = (userId?: number) => {
                     headers: {
                         'Content-Type': 'application/json',
                         Accept: 'application/json',
-                        ...getAuthHeaders(),
                     },
-                    credentials: 'include',
+                    credentials: 'include', // 쿠키 인증 방식은 credentials: 'include'만으로 충분
                 })
 
                 if (!response.ok) {

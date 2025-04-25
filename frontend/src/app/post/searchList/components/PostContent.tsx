@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faHeart, faCalendarAlt, faUser } from '@fortawesome/free-solid-svg-icons'
-import { getAuthHeaders } from '@/utils/auth'
 
 interface SearchResult {
     content: Array<{
@@ -42,10 +41,7 @@ const PostContent: React.FC<PostContentProps> = ({ searchResults }) => {
             const profilePromises = userIds.map(async (userId) => {
                 try {
                     const response = await fetch(`http://localhost:8090/api/auth/${userId}`, {
-                        headers: {
-                            ...getAuthHeaders(),
-                        },
-                        credentials: 'include',
+                        credentials: 'include', // 쿠키 인증 방식은 credentials: 'include'만으로 충분
                     })
                     if (!response.ok) {
                         throw new Error(`Failed to fetch user ${userId}`)
