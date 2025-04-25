@@ -27,4 +27,10 @@ public interface FollowRepository extends JpaRepository<Follow, Long> {
 
     // 조회, 두 사람 간의 팔로우 관계를 직접 조회하고 싶을 때 (예: 상세 정보 확인)
     Optional<Follow> findByFollowerIdAndFollowingId(User follower, User following);
+
+    //조회, 내가 팔로우 하는 사람 수
+    long countByFollowerId(User follower);
+
+    //조회, 나를 팔로우 하는 사람 수
+    long countByFollowingId(User following);
 }
