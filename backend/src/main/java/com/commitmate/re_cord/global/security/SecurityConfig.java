@@ -98,7 +98,7 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(Arrays.asList("https://cdpn.io", AppConfig.getSiteFrontUrl()));
 
         // 허용할 HTTP 메서드 설정
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE","PATCH"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE","PATCH","OPTIONS"));
 
         // 자격 증명 허용 설정
         configuration.setAllowCredentials(true);
@@ -112,7 +112,4 @@ public class SecurityConfig {
 
         return source;
     }
-
-
-
 }
