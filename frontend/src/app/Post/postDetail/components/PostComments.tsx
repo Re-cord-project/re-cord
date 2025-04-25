@@ -73,7 +73,7 @@ const PostComments: React.FC = () => {
         ></textarea>
         <div className="flex justify-end mt-2">
           <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm font-medium hover:bg-blue-600 transition-colors cursor-pointer !rounded-button whitespace-nowrap"
+            className="px-4 py-2 bg-[#78B3CE] text-white rounded-md text-sm font-medium hover:bg-opacity-90 transition-colors cursor-pointer !rounded-button whitespace-nowrap"
             onClick={handleCommentSubmit}
           >
             댓글 작성

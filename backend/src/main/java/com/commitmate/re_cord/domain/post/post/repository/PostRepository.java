@@ -44,8 +44,12 @@ public interface PostRepository extends JpaRepository<Post,Long> {
                 nativeQuery = true)
     List<Object[]> getMonthlyViews(@Param("userId") Long userId);
 
-    // 게시물의 상태중에서 updateAt이 가장 최신인 글을 가져오는 메서드
-    Optional<Post> findTopByUserAndStatusOrderByUpdatedAtDesc(User user, PostStatus status);
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user = :user AND p.status = :status ORDER BY p.updatedAt DESC")
+    Optional<Post> findTopByUserAndStatusOrderByUpdatedAtDescWithImages(
+            @Param("user") User user,
+            @Param("status") PostStatus status
+    );
+
 
     // 카테고리와 PUBLISHED 인 게시글만 보는 메서드
     Page<Post> findAllByCategoryIdAndStatus(Long categoryId, PostStatus status, Pageable pageable);
@@ -91,5 +95,11 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     )
     """)
     Optional<Post> findTopByUserIdWithImages(@Param("userId") Long userId);
+
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId AND p.id <> :excludedPostId")
+    List<Post> findByUserIdAndIdNotFetchImages(Long userId, Long excludedPostId);
+
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId")
+    List<Post> findAllByUserIdWithImages(@Param("userId") Long userId);
 
 }

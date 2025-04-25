@@ -7,10 +7,27 @@ const SearchBar: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: 실제 검색 기능 구현
-    console.log("검색어:", searchTerm);
+    if (!searchTerm.trim()) return;
+
+    try {
+      const response = await fetch(
+        `http://localhost:8090/api/posts/search?keyword=${encodeURIComponent(
+          searchTerm
+        )}&page=0&size=10`
+      );
+
+      if (!response.ok) {
+        throw new Error("검색 중 오류가 발생했습니다.");
+      }
+
+      // 검색 결과 페이지로 이동
+      router.push(`/post/searchList?keyword=${encodeURIComponent(searchTerm)}`);
+    } catch (error) {
+      console.error("검색 오류:", error);
+      alert("검색 중 오류가 발생했습니다.");
+    }
   };
 
   return (
