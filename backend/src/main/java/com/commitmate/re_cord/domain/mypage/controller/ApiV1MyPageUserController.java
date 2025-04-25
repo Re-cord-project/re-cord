@@ -20,14 +20,23 @@ public class ApiV1MyPageUserController {
 
     private final MyPageUserService myPageUserService;
 
+
+    @GetMapping("/users")
+    public ResponseEntity<UpdateUserDTO> getUserInfo(@AuthenticationPrincipal SecurityUser userDetails) {
+        Long userId = userDetails.getId();
+        UpdateUserDTO userInfo = myPageUserService.getUserInfo(userId);
+        return ResponseEntity.ok(userInfo);
+    }
+
     @Operation(
             summary = "유저 정보 변경"
     )
     //유저의 세부 정보 변경
-    @PutMapping("/users")
+    @PutMapping("/updateUsers")
     public ResponseEntity<UpdateUserDTO> updateUser(
-            @AuthenticationPrincipal SecurityUser userDetails,
+        @AuthenticationPrincipal SecurityUser userDetails,
          @RequestBody UpdateUserDTO updateUserDTO) {
+
         Long userId = userDetails.getId();
         UpdateUserDTO updatedUser = myPageUserService.updateUser(userId, updateUserDTO);
         return ResponseEntity.ok(updatedUser);
