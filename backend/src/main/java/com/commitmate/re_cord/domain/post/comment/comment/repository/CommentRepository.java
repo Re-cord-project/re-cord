@@ -14,10 +14,8 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-
     @Query("SELECT c FROM Comment c JOIN FETCH c.post p JOIN FETCH p.user WHERE c.user.id = :userId")
     Page <Comment> findMyComment(@Param("userId") Long userId, Pageable pageable);
-
 
     @Query("SELECT SUM(p.likes) FROM Comment p WHERE p.user.id = :userId")
     Long totalCommentLikes(@Param("userId")Long userId);
