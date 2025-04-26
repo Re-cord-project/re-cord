@@ -67,7 +67,6 @@ public class ApiV1PostCUDController {
         return ResponseEntity.ok("게시글 삭제 완료");
     }
 
-    // 게시글 수정
     @PutMapping("/{postId}")
     public ResponseEntity<String> updatePost(
             @PathVariable Long postId,

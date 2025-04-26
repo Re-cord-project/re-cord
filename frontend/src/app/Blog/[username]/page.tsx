@@ -1,42 +1,72 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Head from 'next/head'
+import { useParams } from 'next/navigation'
 import Banner from '@/components/post/Banner'
 import AuthorProfile from '@/components/post/AuthorProfile'
 import CategoryMenu from '@/components/post/CategoryMenu'
 import Statistics from '@/components/post/Statistics'
 import SearchBar from '@/components/post/SearchBar'
-import { useLatestPost } from './hooks/useLatestPost'
+import { useLatestPost } from '../hooks/useLatestPost'
 import PostContent from '@/components/post/PostContent'
-import PostComments from '@/components/comment/commentSection'
 import AuthorOtherPosts from '@/components/post/AuthorOtherPosts'
-import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
+import CommentSection from '@/components/comment/commentSection'
 
-// PostContent에서 필요한 Post 타입 정의
-interface Post {
-    id: number
-    title: string
-    content: string
-    categoryName: string | null
-    username: string | null
-    authorId: number
-    views: number
-    likes: number
-    status: string | null
-    updateStatus: string | null
-    createdAt: string | null
-    updatedAt: string | null
-    imageUrls: string[]
+// username으로 userId를 조회하는 함수
+const fetchUserIdByUsername = async (username: string): Promise<number | null> => {
+    try {
+        // 사용자 이름으로 userId를 조회하는 API 호출
+        // 실제 API 엔드포인트로 대체해야 합니다
+        const response = await fetch(`/api/user/by-username/${username}`)
+
+        if (!response.ok) {
+            throw new Error('사용자를 찾을 수 없습니다')
+        }
+
+        const data = await response.json()
+        return data.userId
+    } catch (error) {
+        console.error('Error fetching userId:', error)
+        return null
+    }
 }
 
-const HomePage: React.FC = () => {
-    const { loginUser, isLogin, isLoginUserPending } = useGlobalLoginUser()
-    const userId = isLogin ? loginUser.id : 0
-    const { post: latestPost, isLoading, error } = useLatestPost(userId)
+const OtherBlogHomePage: React.FC = () => {
+    // URL 경로에서 username 파라미터 가져오기
+    const params = useParams<{ username: string }>()
+    const username = params?.username as string
 
-    // 로그인 상태 확인 중
-    if (isLoginUserPending) {
+    const [userId, setUserId] = useState<number | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState<string | null>(null)
+
+    // username으로 userId 조회
+    useEffect(() => {
+        const getUserId = async () => {
+            if (username) {
+                try {
+                    const id = await fetchUserIdByUsername(username)
+                    if (id !== null) {
+                        setUserId(id)
+                    } else {
+                        setError('사용자를 찾을 수 없습니다')
+                    }
+                } catch (err) {
+                    setError('사용자 정보를 불러오는 중 오류가 발생했습니다')
+                } finally {
+                    setLoading(false)
+                }
+            }
+        }
+
+        getUserId()
+    }, [username])
+
+    const { post, isLoading: postLoading, error: postError, author } = useLatestPost(userId || 0)
+
+    // 사용자 ID를 가져오는 중이면 로딩 표시
+    if (loading) {
         return (
             <div className="min-h-screen bg-white">
                 <div className="h-6" />
@@ -47,19 +77,20 @@ const HomePage: React.FC = () => {
         )
     }
 
-    // 로그인하지 않은 경우
-    if (!isLogin) {
+    // username으로 사용자를 찾지 못한 경우
+    if (error || !userId) {
         return (
             <div className="min-h-screen bg-white">
                 <div className="h-6" />
                 <div className="max-w-7xl mx-auto px-4">
-                    <div className="text-center py-8">로그인이 필요합니다.</div>
+                    <div className="text-center py-8 text-red-500">{error || '존재하지 않는 사용자입니다'}</div>
                 </div>
             </div>
         )
     }
 
-    if (isLoading) {
+    // 게시글을 불러오는 중일 때
+    if (postLoading) {
         return (
             <div className="min-h-screen bg-white">
                 <div className="h-6" />
@@ -70,35 +101,35 @@ const HomePage: React.FC = () => {
         )
     }
 
-    if (error) {
+    // 게시글 불러오기에 실패한 경우
+    if (postError) {
         return (
             <div className="min-h-screen bg-white">
                 <div className="h-6" />
                 <div className="max-w-7xl mx-auto px-4">
-                    <div className="text-center py-8 text-red-500">{error}</div>
+                    <div className="text-center py-8 text-red-500">{postError}</div>
                 </div>
             </div>
         )
     }
 
-    // 받아온 데이터를 PostContent에서 기대하는 형식으로 변환
-    const post: Post | null = latestPost
-        ? {
-              ...latestPost,
-              categoryName: latestPost.categoryName || null,
-              username: latestPost.username || null,
-              authorId: userId, // 현재 로그인한 사용자 ID 사용
-              status: null,
-              updateStatus: null,
-              updatedAt: null,
-              imageUrls: latestPost.imageUrls || [],
-          }
-        : null
+    // 사용자는 존재하지만 게시글이 없는 경우
+    if (!post || !author) {
+        return (
+            <div className="min-h-screen bg-white">
+                <div className="h-6" />
+                <div className="max-w-7xl mx-auto px-4">
+                    <div className="text-center py-8">존재하지 않는 블로그입니다.</div>
+                </div>
+            </div>
+        )
+    }
 
+    // 정상적인 렌더링
     return (
         <div className="min-h-screen bg-white">
             <Head>
-                <title>{post?.title || '개발자 블로그'}</title>
+                <title>{author?.username || '사용자'} 블로그</title>
                 <link rel="icon" href="/favicon.ico" />
             </Head>
 
@@ -109,7 +140,7 @@ const HomePage: React.FC = () => {
             <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row">
                 {/* 좌측 사이드바 */}
                 <div className="w-full md:w-56 md:mr-8">
-                    <AuthorProfile userId={loginUser.id} />
+                    <AuthorProfile userId={userId} />
                     <SearchBar />
                     <CategoryMenu />
                     <Statistics />
@@ -132,14 +163,14 @@ const HomePage: React.FC = () => {
                                         <path
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
-                                            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                                            d="M7.864 4.243A7.5 7.5 0 0119.5 10.5c0 2.92-.556 5.709-1.568 8.268M5.742 6.364A7.5 7.5 0 0017.5 12.5a9.24 9.24 0 01-1.553 4.268m-3.679-2.796a3 3 0 00-1.88 1.698A3 3 0 0112 21a3 3 0 01-3.472-2.254 3 3 0 00-1.88-1.698"
                                         />
                                     </svg>
                                 </div>
                                 <div>
                                     <p className="text-sm text-gray-500 font-medium">자신을 개발하는 개발자의 기록</p>
                                     <h2 className="text-2xl font-bold text-gray-800">
-                                        <span className="text-[#78B3CE]">{loginUser.username}</span>님의 회고 블로그
+                                        <span className="text-[#78B3CE]">{author.username}</span>님의 회고 블로그
                                     </h2>
                                 </div>
                             </div>
@@ -168,43 +199,42 @@ const HomePage: React.FC = () => {
                     </div>
                     {post ? (
                         <>
-                            <PostContent post={post} />
-                            <PostComments postId={post.id} />
-                            <AuthorOtherPosts authorId={loginUser.id} />
+                            <PostContent
+                                post={{
+                                    id: post.id,
+                                    title: post.title,
+                                    content: post.content,
+                                    categoryName: post.categoryName,
+                                    categoryId: post.categoryId || 1, // categoryId 추가
+                                    username: post.username,
+                                    userId: userId,
+                                    views: post.views,
+                                    likes: post.likes,
+                                    status: null,
+                                    updateStatus: null,
+                                    createdAt: post.createdAt,
+                                    updatedAt: null,
+                                    imageUrls: post.imageUrls || [],
+                                }}
+                            />
+                            <CommentSection postId={post.id} />
+                            <AuthorOtherPosts authorId={userId} />
                         </>
                     ) : (
                         <div className="bg-white rounded-lg shadow-sm p-8 text-center">
                             <div className="mb-6">
-                                <img src="/file.svg" alt="새 글 작성" className="w-24 h-24 mx-auto opacity-70" />
+                                <img src="/globe.svg" alt="콘텐츠 없음" className="w-24 h-24 mx-auto opacity-70" />
                             </div>
-                            <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                                글 작성으로 당신의 미래를 완성하세요
-                            </h3>
+                            <h3 className="text-xl font-semibold text-gray-800 mb-2">아직 작성된 글이 없습니다</h3>
                             <p className="text-gray-600 mb-6">
-                                첫 글을 작성하여 모두에게 당신의 지식과 경험을 공유해보세요.
+                                이 사용자가 첫 글을 작성하면 여기에 표시됩니다.
                                 <br />
-                                지금 바로 시작하세요!
+                                그동안 다른 흥미로운 글을 확인해보세요!
                             </p>
                             <div className="flex flex-col md:flex-row gap-4 justify-center">
                                 <a
-                                    href="/post/createPost"
-                                    className="px-6 py-3 bg-[#78B3CE] text-white rounded-md text-sm font-medium hover:bg-[#5C9CB9] transition-colors flex items-center justify-center"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        strokeWidth={1.5}
-                                        stroke="currentColor"
-                                        className="w-5 h-5 mr-2"
-                                    >
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                                    </svg>
-                                    첫 글 작성하기
-                                </a>
-                                <a
                                     href="/post/allPostList"
-                                    className="px-6 py-3 border border-[#78B3CE] text-[#78B3CE] rounded-md text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
+                                    className="px-6 py-3 bg-[#78B3CE] text-white rounded-md text-sm font-medium hover:bg-[#5C9CB9] transition-colors flex items-center justify-center"
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -217,31 +247,47 @@ const HomePage: React.FC = () => {
                                         <path
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
-                                            d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+                                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
                                         />
                                     </svg>
                                     다른 글 둘러보기
                                 </a>
+                                <a
+                                    href="/post/createPost"
+                                    className="px-6 py-3 border border-[#78B3CE] text-[#78B3CE] rounded-md text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth={1.5}
+                                        stroke="currentColor"
+                                        className="w-5 h-5 mr-2"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                    </svg>
+                                    내 글 작성하기
+                                </a>
                             </div>
                             <div className="mt-8 border-t border-gray-100 pt-6">
-                                <h4 className="font-medium text-gray-700 mb-4">블로그 글 작성 팁</h4>
+                                <h4 className="font-medium text-gray-700 mb-4">인기 있는 글 주제</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
                                     <div className="p-4 bg-gray-50 rounded-lg">
-                                        <div className="text-[#78B3CE] font-semibold mb-2">기술적 지식 공유</div>
+                                        <div className="text-[#78B3CE] font-semibold mb-2">프론트엔드</div>
                                         <p className="text-sm text-gray-600">
-                                            학습한 기술이나 해결한 문제에 대한 경험을 공유해보세요.
+                                            React, Vue, Angular 등 프론트엔드 기술에 대한 다양한 게시글
                                         </p>
                                     </div>
                                     <div className="p-4 bg-gray-50 rounded-lg">
-                                        <div className="text-[#78B3CE] font-semibold mb-2">프로젝트 소개</div>
+                                        <div className="text-[#78B3CE] font-semibold mb-2">백엔드</div>
                                         <p className="text-sm text-gray-600">
-                                            진행 중이거나 완료한 프로젝트의 과정과 결과를 소개해보세요.
+                                            Spring, Node.js, Django 등 서버 기술에 대한 인사이트
                                         </p>
                                     </div>
                                     <div className="p-4 bg-gray-50 rounded-lg">
-                                        <div className="text-[#78B3CE] font-semibold mb-2">개발 일지</div>
+                                        <div className="text-[#78B3CE] font-semibold mb-2">개발 문화</div>
                                         <p className="text-sm text-gray-600">
-                                            개발자로서의 성장 과정과 일상적인 고민을 기록해보세요.
+                                            애자일, 코드 리뷰, 협업 등 개발 문화에 대한 경험과 조언
                                         </p>
                                     </div>
                                 </div>
@@ -254,4 +300,4 @@ const HomePage: React.FC = () => {
     )
 }
 
-export default HomePage
+export default OtherBlogHomePage
