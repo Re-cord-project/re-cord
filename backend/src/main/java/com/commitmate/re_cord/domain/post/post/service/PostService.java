@@ -188,8 +188,9 @@ public class PostService {
             throw new SecurityException("작성자 본인만 삭제할 수 있습니다.");
         }
 
-        post.setStatus(PostStatus.DELETED);
-        postRepository.save(post);
+        // 게시글 상태를 DELETED로 변경하고 postCount를 업데이트하는 메서드 호출
+        post.updateStatus(PostStatus.DELETED);
+        postRepository.save(post); // 변경된 상태를 저장
     }
 
     @Transactional
