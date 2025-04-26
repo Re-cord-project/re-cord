@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import ContentEditor from './components/ContentEditor'
@@ -9,6 +9,7 @@ import { useUpdatePost } from './hooks/useUpdatePost'
 import { useCategories } from './hooks/useCategories'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 import ImageUploader from './components/ImageUploader'
+import { useImageUpload } from './hooks/useImageUpload'
 
 interface FormValues {
     title: string
@@ -37,14 +38,21 @@ const CreatePostPage = () => {
     const [editPostId, setEditPostId] = useState<number | null>(null)
     const [isLoadingPost, setIsLoadingPost] = useState(false)
 
+    // 이미지 업로드 훅 추가
+    const { uploadImageToS3, isUploading, uploadError } = useImageUpload()
+
+    // 에디터 참조 추가
+    const contentEditorRef = useRef<any>(null)
+
     // 이미지 업로드를 위한 상태 추가
     const [showImageUploader, setShowImageUploader] = useState(false)
     const [uploadedImages, setUploadedImages] = useState<File[]>([])
     const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([])
+    const [isProcessingImages, setIsProcessingImages] = useState(false)
 
     // 통합된 submitting과 error 상태
-    const isSubmitting = isCreateSubmitting || isUpdateSubmitting
-    const error = createError || updateError
+    const isSubmitting = isCreateSubmitting || isUpdateSubmitting || isUploading || isProcessingImages
+    const error = createError || updateError || uploadError
 
     const {
         control,
@@ -114,8 +122,6 @@ const CreatePostPage = () => {
     // submit 핸들러 최적화
     const onSubmit = useCallback(
         async (data: FormValues) => {
-            let result: { success: boolean; error?: string; post?: any }
-
             // 로그인 상태 재확인
             if (!isLogin || !loginUser) {
                 alert('로그인이 필요합니다.')
@@ -123,12 +129,27 @@ const CreatePostPage = () => {
                 return
             }
 
+            // 제출 전 이미지 처리 상태 설정
+            setIsProcessingImages(true)
+
             try {
+                let finalContent = data.content
+
+                // 에디터에서 blob 이미지 처리 (S3 업로드 후 URL 치환)
+                if (contentEditorRef.current?.processContentBeforeSubmit) {
+                    console.log('본문 이미지 처리 시작...')
+                    finalContent = await contentEditorRef.current.processContentBeforeSubmit(uploadImageToS3)
+                    console.log('본문 이미지 처리 완료')
+                }
+
+                let result: { success: boolean; error?: string; post?: any }
+
                 // 수정 모드일 경우 updatePost 훅 사용
                 if (isEditMode && editPostId) {
                     console.log(`게시글(ID: ${editPostId})을 수정합니다.`)
                     result = await updatePost(editPostId, {
                         ...data,
+                        content: finalContent, // 이미지가 S3 URL로 치환된 최종 콘텐츠
                         userId: loginUser.id, // 명시적으로 사용자 ID 지정
                     })
                 }
@@ -137,8 +158,8 @@ const CreatePostPage = () => {
                     console.log('새 글을 작성하여 게시합니다.')
                     result = await publishPost({
                         ...data,
+                        content: finalContent, // 이미지가 S3 URL로 치환된 최종 콘텐츠
                         userId: loginUser.id, // 명시적으로 사용자 ID 지정
-                        images: uploadedImages, // 업로드된 이미지 파일 리스트 추가
                     })
                 }
 
@@ -152,9 +173,11 @@ const CreatePostPage = () => {
             } catch (error) {
                 console.error('게시글 저장 중 오류:', error)
                 alert('게시글 저장 중 오류가 발생했습니다.')
+            } finally {
+                setIsProcessingImages(false)
             }
         },
-        [isLogin, loginUser, router, isEditMode, editPostId, updatePost, publishPost, uploadedImages],
+        [isLogin, loginUser, router, isEditMode, editPostId, updatePost, publishPost, uploadImageToS3],
     )
 
     const handleCancel = () => {
@@ -171,9 +194,6 @@ const CreatePostPage = () => {
         setShowConfirmLeave(false)
         router.push(destination)
     }
-
-    // 유저 인터페이스에 넘겨줄 페이지 제목
-    const pageTitle = isEditMode ? '게시글 수정' : '새 게시글 작성'
 
     // URL 쿼리 파라미터 처리
     useEffect(() => {
@@ -304,59 +324,6 @@ const CreatePostPage = () => {
                             </div>
                         </div>
 
-                        {/* 이미지 업로드 UI - 게시글 작성 시에만 표시 */}
-                        {!isEditMode && (
-                            <div className="mb-6">
-                                <label className="block mb-2 font-medium text-gray-700">이미지 첨부:</label>
-                                <div className="flex flex-wrap gap-2">
-                                    {/* 이미지 미리보기 */}
-                                    {imagePreviewUrls.map((imageUrl, index) => (
-                                        <div key={index} className="relative">
-                                            <img
-                                                src={imageUrl}
-                                                alt={`업로드된 이미지 ${index + 1}`}
-                                                className="w-20 h-20 object-cover rounded-md"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveImage(index)}
-                                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center"
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    ))}
-
-                                    {/* 이미지 추가 버튼 */}
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowImageUploader(true)}
-                                        className="w-20 h-20 border-2 border-dashed border-gray-300 rounded-md flex items-center justify-center text-gray-400 hover:text-gray-600 hover:border-gray-400"
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            className="h-8 w-8"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke="currentColor"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M12 4v16m8-8H4"
-                                            />
-                                        </svg>
-                                    </button>
-                                </div>
-                                {uploadedImages.length > 0 && (
-                                    <p className="mt-1 text-sm text-gray-500">
-                                        {uploadedImages.length}개의 이미지가 첨부됨
-                                    </p>
-                                )}
-                            </div>
-                        )}
-
                         <div className="mb-0">
                             <Controller
                                 name="content"
@@ -364,12 +331,15 @@ const CreatePostPage = () => {
                                 rules={{ required: '내용을 입력해주세요' }}
                                 render={({ field }) => (
                                     <ContentEditor
+                                        ref={contentEditorRef}
                                         value={field.value}
                                         onChange={field.onChange}
                                         height={600}
-                                        plainTextMode={true}
-                                        // onImageDrop 핸들러 추가 - 에디터에 드래그된 이미지를 업로드 목록에 추가
+                                        plainTextMode={false}
+                                        // 이미지 드롭 핸들러 연결
                                         onImageDrop={handleEditorImageDrop}
+                                        // S3 업로드 함수 전달
+                                        uploadImageToS3={uploadImageToS3}
                                         actions={
                                             <div className="flex space-x-3">
                                                 <button
@@ -388,6 +358,8 @@ const CreatePostPage = () => {
                                                     {isSubmitting
                                                         ? isEditMode
                                                             ? '수정 중...'
+                                                            : isProcessingImages
+                                                            ? '이미지 처리 중...'
                                                             : '게시 중...'
                                                         : isEditMode
                                                         ? '수정하기'
@@ -434,7 +406,7 @@ const CreatePostPage = () => {
                 </div>
             )}
 
-            {/* 이미지 업로더 모달 - 명시적 키 추가 및 메모리 최적화 */}
+            {/* 이미지 업로더 모달 */}
             {showImageUploader && (
                 <ImageUploader
                     key={`image-uploader-${Date.now()}`}

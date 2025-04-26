@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8090'
 
-// HTML 태그를 제거하는 함수
+// HTML 태그를 제거하는 함수 - 요약본 생성 등의 용도로만 사용
+// 주의: 본문 저장 시에는 사용하지 않음
 const stripHtmlTags = (html: string): string => {
     // 브라우저 환경이라면 DOMParser 사용
     if (typeof window !== 'undefined' && window.DOMParser) {
@@ -128,7 +129,7 @@ export const useUpdatePost = (postId?: number) => {
             // 모든 데이터를 JSON으로 변환하여 'dto' 필드에 추가
             const dtoData = {
                 title: postData.title,
-                content: stripHtmlTags(postData.content),
+                content: postData.content, // HTML 태그 제거하지 않고 원본 HTML을 그대로 전송
                 categoryId: postData.categoryId,
                 userId: postData.userId,
             }
