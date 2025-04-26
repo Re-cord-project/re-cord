@@ -1,5 +1,6 @@
 package com.commitmate.re_cord.domain.post.post.controller;
 
+import com.commitmate.re_cord.domain.mypage.service.MyPagePostService;
 import com.commitmate.re_cord.domain.post.post.dto.PostResponseDto;
 import com.commitmate.re_cord.domain.post.post.service.PostService;
 import com.commitmate.re_cord.global.security.SecurityUser;
@@ -16,7 +17,7 @@ import java.util.List;
 @RequestMapping("/api/posts")
 public class ApiV1PostReadController {
     private final PostService postService;
-
+    private final MyPagePostService myPagePostService;
     // 게시글 전체 목록 보기
     @GetMapping
     public Page<PostResponseDto> getAllPosts(
@@ -96,4 +97,25 @@ public class ApiV1PostReadController {
         boolean isLiked = postService.isPostLikedByUser(postId, userId);
         return ResponseEntity.ok(isLiked);
     }
+
+    // 특정 사용자의 게시글 조회수 총합
+    @GetMapping("/views/{userId}")
+    public Long getTotalPostViews(@PathVariable Long userId) {
+        return myPagePostService.getTotalPostViews(userId);
+    }
+
+    // 특정 사용자의 게시글 좋아요 총합
+    @GetMapping("/likes/{userId}")
+    public Long getTotalPostLikes(@PathVariable Long userId) {
+        return myPagePostService.getTotalPostLikes(userId);
+    }
+
+    // 특정 사용자의 게시글 총합
+    @GetMapping("/count/{userId}")
+    public Long getTotalPostCount(@PathVariable Long userId) {
+        return postService.getTotalPostCount(userId);
+    }
+
+
+
 }

@@ -4,6 +4,7 @@ import com.commitmate.re_cord.domain.post.category.entity.Category;
 import com.commitmate.re_cord.domain.post.category.repository.CategoryRepository;
 import com.commitmate.re_cord.domain.post.post.dto.PostRequestDto;
 import com.commitmate.re_cord.domain.post.post.dto.PostResponseDto;
+import com.commitmate.re_cord.domain.post.post.entity.Image;
 import com.commitmate.re_cord.domain.post.post.entity.Post;
 import com.commitmate.re_cord.domain.post.post.entity.PostLike;
 import com.commitmate.re_cord.domain.post.post.entity.PostStatus;
@@ -11,6 +12,7 @@ import com.commitmate.re_cord.domain.post.post.repository.PostLikeRepository;
 import com.commitmate.re_cord.domain.post.post.repository.PostRepository;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
+import com.commitmate.re_cord.global.config.S3Service;
 import com.commitmate.re_cord.global.jpa.UpdateStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,7 +21,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,14 +36,16 @@ public class PostService {
     private final CategoryRepository categoryRepository;
     private final PostLikeRepository postLikeRepository;
     private final UserRepository userRepository;
-
+    private final S3Service s3Service;
     //게시글 생성
     @Transactional
-    public void createPost(PostRequestDto postRequestDto, long userId) {
+    public void createPost(PostRequestDto postRequestDto, List<MultipartFile> images, long userId) {
 
+        // 카테고리 검증
         Category category = categoryRepository.findById(postRequestDto.getCategoryId())
                 .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다"));
 
+        // 게시글 상태 검증
         PostStatus status = postRequestDto.getStatus();
         if (status == null) {
             throw new IllegalArgumentException("게시글 상태는 필수입니다.");
@@ -62,6 +69,7 @@ public class PostService {
             postRepository.deleteByUserAndStatus(user, PostStatus.DRAFT);
         }
 
+        // 게시글 생성
         Post post = Post.builder()
                 .title(postRequestDto.getTitle())
                 .content(postRequestDto.getContent())
@@ -73,8 +81,28 @@ public class PostService {
                 .updateStatus(getUpdateStatusByPostStatus(status))
                 .build();
 
+        // 이미지 업로드 처리 (S3에 이미지 업로드하고 URL 반환)
+        if (images != null && !images.isEmpty()) {
+            List<Image> uploadedImages = new ArrayList<>();
+            for (MultipartFile image : images) {
+                try {
+                    String imageUrl = s3Service.uploadImage(image, userId);  // userId 추가!
+                    // S3 서비스에서 이미지 업로드
+                    Image postImage = new Image();
+                    postImage.setUrl(imageUrl);  // 이미지 URL 설정
+                    postImage.setPost(post);  // 게시글과 연결
+                    uploadedImages.add(postImage);
+                } catch (IOException e) {
+                    throw new RuntimeException("이미지 업로드 실패: " + e.getMessage());
+                }
+            }
+            post.setImages(uploadedImages);  // 업로드된 이미지를 게시글에 추가
+        }
+
+        // 게시글 저장
         postRepository.save(post);
     }
+
 
     // PostStatus에 따라 UpdateStatus를 설정하는 메서드
     private UpdateStatus getUpdateStatusByPostStatus(PostStatus status) {
@@ -244,4 +272,42 @@ public class PostService {
     public boolean isPostLikedByUser(Long postId, Long userId) {
         return postLikeRepository.existsByPostIdAndUserId(postId, userId);
     }
+
+    public Long getTotalPostCount(Long userId) {
+        return postRepository.totalPostCount(userId);
+    }
+
+    @Transactional
+    public void uploadPostImages(Long postId, List<MultipartFile> files, Long userId) throws IOException {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        for (MultipartFile file : files) {
+            String fileKey = s3Service.uploadImage(file, userId);
+            String imageUrl = s3Service.getFileUrl(fileKey);
+
+            Image image = Image.builder()
+                    .fileKey(fileKey)
+                    .imageUrl(imageUrl)
+                    .post(post)
+                    .build();
+
+            post.getImages().add(image);
+        }
+
+        postRepository.save(post);
+    }
+
+    @Transactional
+    public void deletePost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        for (Image image : post.getImages()) {
+            s3Service.delete(image.getFileKey());
+        }
+
+        postRepository.delete(post);
+    }
+
 }
