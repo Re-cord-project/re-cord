@@ -11,6 +11,7 @@ interface ContentEditorProps {
     height?: number
     actions?: ReactNode
     plainTextMode?: boolean
+    onImageDrop?: (file: File, dataUrl: string) => void // 이미지 드롭 이벤트 핸들러 추가
 }
 
 const ContentEditor: React.FC<ContentEditorProps> = ({
@@ -19,6 +20,7 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
     height = 500,
     actions,
     plainTextMode = false,
+    onImageDrop,
 }) => {
     // 환경 변수에서 API 키 가져오기
     const apiKey = process.env.NEXT_PUBLIC_TINYMCE_API_KEY
@@ -40,19 +42,53 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
         onChange(content)
     }
 
-    // 더 단순한 에디터 설정으로 수정
+    // 파일 드롭 이벤트 핸들러
+    const handleFileDrop = (file: File) => {
+        if (onImageDrop && file.type.startsWith('image/')) {
+            const reader = new FileReader()
+            reader.onload = () => {
+                const dataUrl = reader.result as string
+                // 이미지 드롭 이벤트 핸들러 호출
+                onImageDrop(file, dataUrl)
+            }
+            reader.readAsDataURL(file)
+        }
+    }
+
+    // 기본 에디터 설정
     const editorOptions: IAllProps['init'] = {
         height,
-        menubar: false,
-        toolbar: plainTextMode ? 'undo redo' : 'undo redo | formatselect | bold italic | bullist numlist',
-        plugins: ['lists'],
-        statusbar: false,
+        menubar: true,
+        toolbar: plainTextMode
+            ? 'undo redo'
+            : 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link image media | forecolor backcolor emoticons',
+        plugins: [
+            'advlist',
+            'autolink',
+            'lists',
+            'link',
+            'image',
+            'charmap',
+            'preview',
+            'anchor',
+            'searchreplace',
+            'visualblocks',
+            'code',
+            'fullscreen',
+            'insertdatetime',
+            'media',
+            'table',
+            'code',
+            'help',
+            'wordcount',
+        ],
+        statusbar: true,
         content_style: `
             body { 
                 font-family: Arial, sans-serif; 
                 font-size: 14px; 
                 line-height: 1.5;
-                padding: 0px 10px 10px 10px; /* 상단 패딩 제거 */
+                padding: 10px; 
             }
             p {
                 margin-top: 0;
@@ -60,6 +96,40 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
             }
         `,
         entity_encoding: 'raw',
+
+        // 이미지 처리 옵션
+        images_upload_handler: (blobInfo, progress) => {
+            return new Promise((resolve, reject) => {
+                // 이미지 파일 생성
+                const file = new File([blobInfo.blob()], blobInfo.filename(), {
+                    type: blobInfo.blob().type,
+                })
+
+                // 이미지 드롭 이벤트 핸들러 호출
+                if (onImageDrop) {
+                    const reader = new FileReader()
+                    reader.onload = () => {
+                        const dataUrl = reader.result as string
+                        onImageDrop(file, dataUrl)
+                        resolve(dataUrl) // 에디터에 이미지 표시
+                    }
+                    reader.onerror = () => {
+                        reject('이미지 파일을 읽는 중 오류가 발생했습니다.')
+                    }
+                    reader.readAsDataURL(file)
+                } else {
+                    // 이미지 핸들러가 없는 경우, 기본적으로 Base64로 처리
+                    const reader = new FileReader()
+                    reader.onload = () => {
+                        resolve(reader.result as string)
+                    }
+                    reader.onerror = () => {
+                        reject('이미지 파일을 읽는 중 오류가 발생했습니다.')
+                    }
+                    reader.readAsDataURL(file)
+                }
+            })
+        },
 
         // 커서 이동을 위한 중요 설정들
         forced_root_block: 'p',
@@ -83,6 +153,15 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
         setup: function (editor: TinyMCEEditor) {
             editor.on('init', function () {
                 editor.setContent(value || '')
+            })
+
+            // 파일 드롭 이벤트 감지
+            editor.on('drop', function (e) {
+                const dataTransfer = e.dataTransfer
+                if (dataTransfer && dataTransfer.files.length > 0) {
+                    const file = dataTransfer.files[0]
+                    handleFileDrop(file)
+                }
             })
         },
     }
