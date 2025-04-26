@@ -19,23 +19,24 @@ interface PostData {
     images?: File[] // 이미지 파일 리스트 추가
 }
 
-// HTML 태그를 제거하는 함수
-const stripHtmlTags = (html: string): string => {
-    // 브라우저 환경이라면 DOMParser 사용
-    if (typeof window !== 'undefined' && typeof DOMParser !== 'undefined') {
-        try {
-            const doc = new DOMParser().parseFromString(html, 'text/html')
-            return doc.body.textContent || ''
-        } catch (e) {
-            console.error('DOMParser 파싱 에러:', e)
-            // 파싱 실패 시 정규식으로 대체
-            return html.replace(/<[^>]*>/g, '')
-        }
-    }
+// HTML 태그를 제거하는 함수 (사용하지 않음 - 주석으로 남김)
+// content를 저장할 때는 HTML을 그대로 보존해야 이미지 태그가 유지됨
+// const stripHtmlTags = (html: string): string => {
+//     // 브라우저 환경이라면 DOMParser 사용
+//     if (typeof window !== 'undefined' && typeof DOMParser !== 'undefined') {
+//         try {
+//             const doc = new DOMParser().parseFromString(html, 'text/html')
+//             return doc.body.textContent || ''
+//         } catch (e) {
+//             console.error('DOMParser 파싱 에러:', e)
+//             // 파싱 실패 시 정규식으로 대체
+//             return html.replace(/<[^>]*>/g, '')
+//         }
+//     }
 
-    // 서버 사이드나 DOMParser를 사용할 수 없는 환경에서는 정규식 사용
-    return html.replace(/<[^>]*>/g, '')
-}
+//     // 서버 사이드나 DOMParser를 사용할 수 없는 환경에서는 정규식 사용
+//     return html.replace(/<[^>]*>/g, '')
+// }
 
 export const useCreatePost = () => {
     const router = useRouter()
@@ -63,7 +64,7 @@ export const useCreatePost = () => {
             // 모든 데이터를 JSON으로 변환하여 'dto' 필드에 추가
             const dtoData = {
                 title: postData.title,
-                content: stripHtmlTags(postData.content),
+                content: postData.content, // HTML 태그 제거하지 않고 그대로 사용
                 categoryId: postData.categoryId,
                 status: postData.status,
                 userId: postData.userId || loginUser.id,
