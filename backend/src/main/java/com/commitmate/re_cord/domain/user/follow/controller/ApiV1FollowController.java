@@ -63,6 +63,7 @@ public class ApiV1FollowController {
         return ResponseEntity.ok(followers);
     }
 
+    //팔로우, 팔로잉 수 조회
     @Operation(summary = "특정 유저의 팔로우/팔로잉 수 조회", description = "path variable 로 넘어온 userId 에 대한 팔로워·팔로잉 수를 반환합니다.")
     @GetMapping("/{userId}/counts")
     public ResponseEntity<FollowCountResponseDto> getUserCounts(
