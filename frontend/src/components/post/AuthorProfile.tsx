@@ -50,25 +50,6 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
             try {
                 setIsLoading(true)
 
-                // 로그인한 사용자 정보를 사용하는 경우 API 호출 없이 바로 사용
-                if (isLogin && targetUserId === loginUser.id) {
-                    // 임시로 통계 정보 추가 (실제 데이터가 없는 경우)
-                    setAuthor({
-                        ...loginUser,
-                        introduction: loginUser.bootcamp ? `${loginUser.bootcamp} ${loginUser.generation}기` : '',
-                        profileImageUrl: '/profile.png',
-                        provider: 'local',
-                        role: loginUser.bootcamp || '개발자',
-                        stats: {
-                            followers: 0,
-                            following: 0,
-                            posts: 0,
-                        },
-                    })
-                    setIsLoading(false)
-                    return
-                }
-
                 // 인증된 요청으로 사용자 정보 가져오기
                 const response = await fetch(`http://localhost:8090/api/auth/${targetUserId}`, {
                     method: 'GET',
@@ -89,18 +70,59 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                 // 기본 통계 정보 설정
                 let stats = { followers: 0, following: 0, posts: 0 }
 
-                // 별도의 통계 API가 있는 경우 호출 (없으면 기본값 사용)
+                // 각각의 통계 데이터를 개별 API에서 가져오기
                 try {
-                    const statsResponse = await fetch(`http://localhost:8090/api/users/${targetUserId}/stats`, {
-                        credentials: 'include', // 쿠키 인증을 위해 추가
+                    console.log('통계 정보 가져오기 시작, targetUserId:', targetUserId)
+
+                    // 팔로워 수 가져오기
+                    const followersResponse = await fetch(
+                        `http://localhost:8090/api/users/${targetUserId}/followers/count`,
+                        {
+                            credentials: 'include',
+                        },
+                    )
+
+                    if (followersResponse.ok) {
+                        const followersData = await followersResponse.json()
+                        stats.followers = followersData
+                        console.log('가져온 팔로워 수:', followersData)
+                    } else {
+                        console.warn('팔로워 수 API 응답 실패:', followersResponse.status)
+                    }
+
+                    // 팔로잉 수 가져오기
+                    const followingResponse = await fetch(
+                        `http://localhost:8090/api/users/${targetUserId}/following/count`,
+                        {
+                            credentials: 'include',
+                        },
+                    )
+
+                    if (followingResponse.ok) {
+                        const followingData = await followingResponse.json()
+                        stats.following = followingData
+                        console.log('가져온 팔로잉 수:', followingData)
+                    } else {
+                        console.warn('팔로잉 수 API 응답 실패:', followingResponse.status)
+                    }
+
+                    // 게시글 수 가져오기
+                    // Statistics 컴포넌트와 동일한 엔드포인트 사용
+                    const postsResponse = await fetch(`http://localhost:8090/api/posts/count/${targetUserId}`, {
+                        credentials: 'include',
                     })
 
-                    if (statsResponse.ok) {
-                        const statsData = await statsResponse.json()
-                        stats = statsData
+                    if (postsResponse.ok) {
+                        const postsData = await postsResponse.json()
+                        stats.posts = postsData
+                        console.log('가져온 게시글 수:', postsData)
+                    } else {
+                        console.warn('게시글 수 API 응답 실패:', postsResponse.status)
                     }
+
+                    console.log('최종 통계 정보:', stats)
                 } catch (statsErr) {
-                    console.warn('통계 정보 로드 실패 (기본값 사용):', statsErr)
+                    console.error('통계 정보 로드 실패 (기본값 사용):', statsErr)
                 }
 
                 setAuthor({
@@ -117,20 +139,37 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
             } catch (err) {
                 console.error('사용자 정보 로드 오류:', err)
 
-                // 오류가 발생하면 로그인 사용자 정보를 사용하는 대체 데이터 표시
+                // 오류가 발생하면 기본 데이터 표시
+                const defaultAuthor = {
+                    ...loginUser,
+                    introduction: loginUser.bootcamp ? `${loginUser.bootcamp} ${loginUser.generation}기` : '',
+                    profileImageUrl: '/profile.png',
+                    provider: 'local',
+                    role: loginUser.bootcamp || '개발자',
+                    stats: {
+                        followers: 0,
+                        following: 0,
+                        posts: 0,
+                    },
+                }
+
+                // 로그인 사용자라도 통계 정보는 API로 가져오기 시도
                 if (isLogin) {
-                    setAuthor({
-                        ...loginUser,
-                        introduction: loginUser.bootcamp ? `${loginUser.bootcamp} ${loginUser.generation}기` : '',
-                        profileImageUrl: '/profile.png',
-                        provider: 'local',
-                        role: loginUser.bootcamp || '개발자',
-                        stats: {
-                            followers: 0,
-                            following: 0,
-                            posts: 0,
-                        },
-                    })
+                    try {
+                        const postsResponse = await fetch(`http://localhost:8090/api/posts/count/${loginUser.id}`, {
+                            credentials: 'include',
+                        })
+
+                        if (postsResponse.ok) {
+                            const postsData = await postsResponse.json()
+                            defaultAuthor.stats.posts = postsData
+                            console.log('로그인 사용자 게시글 수:', postsData)
+                        }
+                    } catch (statsErr) {
+                        console.error('로그인 사용자 통계 정보 로드 실패:', statsErr)
+                    }
+
+                    setAuthor(defaultAuthor)
                 } else {
                     setError(err instanceof Error ? err.message : '사용자 정보를 불러오는 데 문제가 발생했습니다.')
                 }
