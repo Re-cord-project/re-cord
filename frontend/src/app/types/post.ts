@@ -2,6 +2,7 @@ export interface Post {
     id: number // Long
     userId: number // Long
     title: string
+    categoryId: number
     content: string
     views: number // int
     likes: number // int
