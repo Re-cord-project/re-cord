@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import ContentEditor from './components/ContentEditor'
@@ -8,6 +8,8 @@ import { useCreatePost } from './hooks/useCreatePost'
 import { useUpdatePost } from './hooks/useUpdatePost'
 import { useCategories } from './hooks/useCategories'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
+import ImageUploader from './components/ImageUploader'
+import { useImageUpload } from './hooks/useImageUpload'
 
 interface FormValues {
     title: string
@@ -36,9 +38,21 @@ const CreatePostPage = () => {
     const [editPostId, setEditPostId] = useState<number | null>(null)
     const [isLoadingPost, setIsLoadingPost] = useState(false)
 
+    // 이미지 업로드 훅 추가
+    const { uploadImageToS3, isUploading, uploadError } = useImageUpload()
+
+    // 에디터 참조 추가
+    const contentEditorRef = useRef<any>(null)
+
+    // 이미지 업로드를 위한 상태 추가
+    const [showImageUploader, setShowImageUploader] = useState(false)
+    const [uploadedImages, setUploadedImages] = useState<File[]>([])
+    const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([])
+    const [isProcessingImages, setIsProcessingImages] = useState(false)
+
     // 통합된 submitting과 error 상태
-    const isSubmitting = isCreateSubmitting || isUpdateSubmitting
-    const error = createError || updateError
+    const isSubmitting = isCreateSubmitting || isUpdateSubmitting || isUploading || isProcessingImages
+    const error = createError || updateError || uploadError
 
     const {
         control,
@@ -85,31 +99,86 @@ const CreatePostPage = () => {
         }
     }, [unsavedChanges])
 
-    const onSubmit = async (data: FormValues) => {
-        let result: { success: boolean; error?: string; post?: any }
+    // 이미지 업로드 핸들러 (useCallback으로 최적화)
+    const handleImageUpload = useCallback((file: File, previewUrl: string) => {
+        setUploadedImages((prev) => [...prev, file])
+        setImagePreviewUrls((prev) => [...prev, previewUrl])
+        setShowImageUploader(false)
+    }, [])
 
-        // 수정 모드일 경우 updatePost 훅 사용
-        if (isEditMode && editPostId) {
-            console.log(`게시글(ID: ${editPostId})을 수정합니다.`)
-            result = await updatePost(editPostId, {
-                ...data,
-                userId: loginUser?.id,
-            })
-        }
-        // 새 글 작성의 경우 create API 사용
-        else {
-            console.log('새 글을 작성하여 게시합니다.')
-            result = await publishPost(data)
-        }
+    // 이미지 제거 핸들러 (useCallback으로 최적화)
+    const handleRemoveImage = useCallback((index: number) => {
+        setUploadedImages((prev) => prev.filter((_, i) => i !== index))
+        setImagePreviewUrls((prev) => prev.filter((_, i) => i !== index))
+    }, [])
 
-        if (result.success) {
-            setUnsavedChanges(false)
-            alert(isEditMode ? '게시물이 수정되었습니다.' : '게시물이 등록되었습니다.')
-            router.push('/post/postList')
-        } else {
-            alert(result.error || (isEditMode ? '게시물 수정에 실패했습니다.' : '게시물 등록에 실패했습니다.'))
-        }
-    }
+    // 에디터에 드래그된 이미지 처리 핸들러 (useCallback으로 최적화)
+    const handleEditorImageDrop = useCallback((file: File, previewUrl: string) => {
+        console.log('에디터에서 이미지 감지됨:', file.name)
+        setUploadedImages((prev) => [...prev, file])
+        setImagePreviewUrls((prev) => [...prev, previewUrl])
+    }, [])
+
+    // submit 핸들러 최적화
+    const onSubmit = useCallback(
+        async (data: FormValues) => {
+            // 로그인 상태 재확인
+            if (!isLogin || !loginUser) {
+                alert('로그인이 필요합니다.')
+                router.push('/login')
+                return
+            }
+
+            // 제출 전 이미지 처리 상태 설정
+            setIsProcessingImages(true)
+
+            try {
+                let finalContent = data.content
+
+                // 에디터에서 blob 이미지 처리 (S3 업로드 후 URL 치환)
+                if (contentEditorRef.current?.processContentBeforeSubmit) {
+                    console.log('본문 이미지 처리 시작...')
+                    finalContent = await contentEditorRef.current.processContentBeforeSubmit(uploadImageToS3)
+                    console.log('본문 이미지 처리 완료')
+                }
+
+                let result: { success: boolean; error?: string; post?: any }
+
+                // 수정 모드일 경우 updatePost 훅 사용
+                if (isEditMode && editPostId) {
+                    console.log(`게시글(ID: ${editPostId})을 수정합니다.`)
+                    result = await updatePost(editPostId, {
+                        ...data,
+                        content: finalContent, // 이미지가 S3 URL로 치환된 최종 콘텐츠
+                        userId: loginUser.id, // 명시적으로 사용자 ID 지정
+                    })
+                }
+                // 새 글 작성의 경우 create API 사용
+                else {
+                    console.log('새 글을 작성하여 게시합니다.')
+                    result = await publishPost({
+                        ...data,
+                        content: finalContent, // 이미지가 S3 URL로 치환된 최종 콘텐츠
+                        userId: loginUser.id, // 명시적으로 사용자 ID 지정
+                    })
+                }
+
+                if (result.success) {
+                    setUnsavedChanges(false)
+                    alert(isEditMode ? '게시물이 수정되었습니다.' : '게시물이 등록되었습니다.')
+                    router.push('/post/postList')
+                } else {
+                    alert(result.error || (isEditMode ? '게시물 수정에 실패했습니다.' : '게시물 등록에 실패했습니다.'))
+                }
+            } catch (error) {
+                console.error('게시글 저장 중 오류:', error)
+                alert('게시글 저장 중 오류가 발생했습니다.')
+            } finally {
+                setIsProcessingImages(false)
+            }
+        },
+        [isLogin, loginUser, router, isEditMode, editPostId, updatePost, publishPost, uploadImageToS3],
+    )
 
     const handleCancel = () => {
         if (unsavedChanges) {
@@ -125,9 +194,6 @@ const CreatePostPage = () => {
         setShowConfirmLeave(false)
         router.push(destination)
     }
-
-    // 유저 인터페이스에 넘겨줄 페이지 제목
-    const pageTitle = isEditMode ? '게시글 수정' : '새 게시글 작성'
 
     // URL 쿼리 파라미터 처리
     useEffect(() => {
@@ -265,10 +331,15 @@ const CreatePostPage = () => {
                                 rules={{ required: '내용을 입력해주세요' }}
                                 render={({ field }) => (
                                     <ContentEditor
+                                        ref={contentEditorRef}
                                         value={field.value}
                                         onChange={field.onChange}
                                         height={600}
-                                        plainTextMode={true}
+                                        plainTextMode={false}
+                                        // 이미지 드롭 핸들러 연결
+                                        onImageDrop={handleEditorImageDrop}
+                                        // S3 업로드 함수 전달
+                                        uploadImageToS3={uploadImageToS3}
                                         actions={
                                             <div className="flex space-x-3">
                                                 <button
@@ -287,6 +358,8 @@ const CreatePostPage = () => {
                                                     {isSubmitting
                                                         ? isEditMode
                                                             ? '수정 중...'
+                                                            : isProcessingImages
+                                                            ? '이미지 처리 중...'
                                                             : '게시 중...'
                                                         : isEditMode
                                                         ? '수정하기'
@@ -332,8 +405,17 @@ const CreatePostPage = () => {
                     </div>
                 </div>
             )}
+
+            {/* 이미지 업로더 모달 */}
+            {showImageUploader && (
+                <ImageUploader
+                    key={`image-uploader-${Date.now()}`}
+                    onImageUpload={handleImageUpload}
+                    onClose={() => setShowImageUploader(false)}
+                />
+            )}
         </div>
     )
 }
 
-export default CreatePostPage
+export default React.memo(CreatePostPage)
