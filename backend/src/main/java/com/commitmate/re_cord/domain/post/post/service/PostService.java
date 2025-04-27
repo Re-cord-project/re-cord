@@ -106,6 +106,7 @@ public class PostService {
         postRepository.save(post);
     }
 
+    //게시글 수정
     @Transactional
     public void updatePost(Long postId, PostUpdateRequestDto postUpdateRequestDto, User user) {
         // 1. 수정할 게시글 존재 여부 확인
@@ -117,27 +118,39 @@ public class PostService {
             throw new SecurityException("작성자 본인만 수정할 수 있습니다.");
         }
 
-        // 3. 카테고리 존재 여부 확인
-        Category category = categoryRepository.findById(postUpdateRequestDto.getCategoryId())
+        // 3. 기존 카테고리 가져오기
+        Category oldCategory = post.getCategory();
+
+        // 4. 새 카테고리 조회
+        Category newCategory = categoryRepository.findById(postUpdateRequestDto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다. ID: " + postUpdateRequestDto.getCategoryId()));
 
-        // 4. 게시글 내용 업데이트
+        // 5. 게시글 상태 (기존 or 새 값)
+        PostStatus newStatus = postUpdateRequestDto.getStatus() != null ? postUpdateRequestDto.getStatus() : post.getStatus();
+
+        // 6. 카테고리가 바뀌었고, 게시글 상태가 PUBLISHED인 경우 postCount 업데이트
+        if (!oldCategory.getId().equals(newCategory.getId()) && post.getStatus() == PostStatus.PUBLISHED) {
+            oldCategory.setPostCount(oldCategory.getPostCount() - 1);
+            newCategory.setPostCount(newCategory.getPostCount() + 1);
+        }
+
+        // 7. 게시글 내용 업데이트
         post.setTitle(postUpdateRequestDto.getTitle());
         post.setContent(postUpdateRequestDto.getContent());
-        post.setStatus(postUpdateRequestDto.getStatus() != null ? postUpdateRequestDto.getStatus() : post.getStatus());
-        post.setCategory(category);
+        post.setStatus(newStatus);
+        post.setCategory(newCategory);
         post.setUpdateStatus(UpdateStatus.UPDATED);
 
-        // 5. 기존 이미지 삭제
+        // 8. 기존 이미지 삭제
         List<String> imageUrlsToDelete = postUpdateRequestDto.getImageUrlsToDelete();
         if (imageUrlsToDelete != null && !imageUrlsToDelete.isEmpty()) {
             for (String imageUrl : imageUrlsToDelete) {
-                s3Service.delete(imageUrl);  // S3에서 이미지 삭제
+                s3Service.delete(imageUrl);  // S3에서 삭제
             }
             imageRepository.deleteAll(post.getImages());  // DB에서 삭제
         }
 
-        // 6. 새 이미지 업로드 처리
+        // 9. 새 이미지 업로드
         List<MultipartFile> newImages = postUpdateRequestDto.getNewImages();
         if (newImages != null && !newImages.isEmpty()) {
             List<Image> uploadedImages = new ArrayList<>();
@@ -152,13 +165,11 @@ public class PostService {
                     throw new RuntimeException("새 이미지 업로드 실패: " + e.getMessage());
                 }
             }
-            post.setImages(uploadedImages);  // 새 이미지를 게시글에 추가
+            post.setImages(uploadedImages);
         }
 
-        // DB 업데이트는 트랜잭션 종료 시 자동 처리됩니다.
+        // 트랜잭션 종료 시 변경사항 자동 반영
     }
-
-
 
 
     // PostStatus에 따라 UpdateStatus를 설정하는 메서드

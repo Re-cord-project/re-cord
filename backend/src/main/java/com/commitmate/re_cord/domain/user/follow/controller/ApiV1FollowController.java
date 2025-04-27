@@ -79,21 +79,4 @@ public class ApiV1FollowController {
         return ResponseEntity.ok(dto);
     }
 
-    @GetMapping("/{userId}/followers/count")
-    public ResponseEntity<Long> getUserFollowerCount(
-            @PathVariable Long userId
-    ) {
-        long followerCount = followService.countFollowers(userId);  // 팔로워 수만 조회
-
-        return ResponseEntity.ok(followerCount);  // 팔로워 수를 그대로 반환
-    }
-
-    @GetMapping("/{userId}/following/count")
-    public ResponseEntity<Long> getUserFollowingCount(
-            @PathVariable Long userId
-    ) {
-        long followerCount = followService.countFollowing(userId);  // 팔로워 수만 조회
-
-        return ResponseEntity.ok(followerCount);  // 팔로워 수를 그대로 반환
-    }
 }

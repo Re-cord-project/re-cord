@@ -153,6 +153,12 @@ const ContentEditor = forwardRef<ContentEditorRef, ContentEditorProps>(
                 margin-top: 0;
                 margin-bottom: 10px;
             }
+            img {
+                display: block;
+                margin: 10px 0;
+                max-width: 100%;
+                height: auto;
+            }
         `,
             entity_encoding: 'raw',
 

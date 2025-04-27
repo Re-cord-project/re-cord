@@ -4,13 +4,13 @@ import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 interface StatisticsProps {
     userId?: number
 }
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 const Statistics: React.FC<StatisticsProps> = ({ userId }) => {
     const { isLogin, loginUser } = useGlobalLoginUser()
     const [totalLikes, setTotalLikes] = useState<number>(0)
     const [totalViews, setTotalViews] = useState<number>(0)
     const [totalPosts, setTotalPosts] = useState<number>(0)
-    const [totalFollowers, setTotalFollowers] = useState<number>(0)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -28,46 +28,51 @@ const Statistics: React.FC<StatisticsProps> = ({ userId }) => {
 
             try {
                 // 총 좋아요 수 가져오기
-                const likesResponse = await fetch(`http://localhost:8090/api/posts/likes/${targetUserId}`, {
-                    credentials: 'include',
-                })
+                try {
+                    const likesResponse = await fetch(`${API_BASE_URL}/api/posts/public/likes/${targetUserId}`, {})
 
-                if (likesResponse.ok) {
-                    const likesData = await likesResponse.json()
-                    setTotalLikes(likesData)
+                    if (likesResponse.ok) {
+                        const likesData = await likesResponse.json()
+                        setTotalLikes(likesData || 0) // 데이터가 없으면 0으로 설정
+                    } else {
+                        console.log('좋아요 수를 가져오는데 실패했습니다:', await likesResponse.text())
+                        setTotalLikes(0)
+                    }
+                } catch (err) {
+                    console.error('좋아요 수 가져오기 오류:', err)
+                    setTotalLikes(0) // 오류 발생 시 기본값 0 설정
                 }
 
                 // 총 조회수 가져오기
-                const viewsResponse = await fetch(`http://localhost:8090/api/posts/views/${targetUserId}`, {
-                    credentials: 'include',
-                })
+                try {
+                    const viewsResponse = await fetch(`${API_BASE_URL}/api/posts/public/views/${targetUserId}`, {})
 
-                if (viewsResponse.ok) {
-                    const viewsData = await viewsResponse.json()
-                    setTotalViews(viewsData)
+                    if (viewsResponse.ok) {
+                        const viewsData = await viewsResponse.json()
+                        setTotalViews(viewsData || 0) // 데이터가 없으면 0으로 설정
+                    } else {
+                        console.log('조회수를 가져오는데 실패했습니다:', await viewsResponse.text())
+                        setTotalViews(0)
+                    }
+                } catch (err) {
+                    console.error('조회수 가져오기 오류:', err)
+                    setTotalViews(0) // 오류 발생 시 기본값 0 설정
                 }
 
                 // 총 게시글 수 가져오기
-                const postsResponse = await fetch(`http://localhost:8090/api/posts/count/${targetUserId}`, {
-                    credentials: 'include',
-                })
+                try {
+                    const postsResponse = await fetch(`${API_BASE_URL}/api/posts/public/count/${targetUserId}`, {})
 
-                if (postsResponse.ok) {
-                    const postsData = await postsResponse.json()
-                    setTotalPosts(postsData)
-                }
-
-                // 총 팔로워 수 가져오기
-                const followersResponse = await fetch(
-                    `http://localhost:8090/api/users/${targetUserId}/followers/count`,
-                    {
-                        credentials: 'include',
-                    },
-                )
-
-                if (followersResponse.ok) {
-                    const followersData = await followersResponse.json()
-                    setTotalFollowers(followersData)
+                    if (postsResponse.ok) {
+                        const postsData = await postsResponse.json()
+                        setTotalPosts(postsData || 0) // 데이터가 없으면 0으로 설정
+                    } else {
+                        console.log('게시글 수를 가져오는데 실패했습니다:', await postsResponse.text())
+                        setTotalPosts(0)
+                    }
+                } catch (err) {
+                    console.error('게시글 수 가져오기 오류:', err)
+                    setTotalPosts(0) // 오류 발생 시 기본값 0 설정
                 }
             } catch (err) {
                 console.error('통계 정보 가져오기 오류:', err)
@@ -113,10 +118,6 @@ const Statistics: React.FC<StatisticsProps> = ({ userId }) => {
                 <li className="py-1.5 flex justify-between">
                     <span className="text-gray-700">총 게시글</span>
                     <span className="text-gray-500">{totalPosts.toLocaleString()}</span>
-                </li>
-                <li className="py-1.5 flex justify-between">
-                    <span className="text-gray-700">총 팔로워 수</span>
-                    <span className="text-gray-500">{totalFollowers.toLocaleString()}</span>
                 </li>
             </ul>
         </div>

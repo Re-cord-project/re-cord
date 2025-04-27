@@ -13,6 +13,7 @@ interface Category {
 interface CategoryRequest {
     name: string
 }
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 const CategoryMenu: React.FC = () => {
     const router = useRouter()
@@ -51,7 +52,7 @@ const CategoryMenu: React.FC = () => {
             // 디버깅용 쿠키 확인
             console.log('쿠키 정보:', document.cookie)
 
-            const response = await fetch('http://localhost:8090/api/categories', {
+            const response = await fetch(`${API_BASE_URL}/api/categories`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -131,7 +132,7 @@ const CategoryMenu: React.FC = () => {
         try {
             console.log('카테고리 생성 요청 시작, 이름:', newCategoryName)
 
-            const response = await fetch('http://localhost:8090/api/categories', {
+            const response = await fetch(`${API_BASE_URL}/api/categories`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -237,7 +238,7 @@ const CategoryMenu: React.FC = () => {
             setDeleteError(null)
 
             try {
-                const response = await fetch(`http://localhost:8090/api/categories/${categoryId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

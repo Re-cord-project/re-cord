@@ -100,4 +100,14 @@ public class ApiV1PostCUDController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/{postId}/like/status")
+    public ResponseEntity<Boolean> checkLikeStatus(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal SecurityUser securityUser
+    ) {
+        long userId = securityUser.getId(); // ✅ SecurityUser에서 직접 ID 추출
+        boolean isLiked = postService.isPostLikedByUser(postId, userId);
+        return ResponseEntity.ok(isLiked);
+    }
+
 }

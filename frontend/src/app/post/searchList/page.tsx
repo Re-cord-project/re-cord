@@ -13,6 +13,8 @@ import SearchResultHeader from './components/SearchResultHeader'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 interface SearchResult {
     content: Array<{
         id: number
@@ -49,14 +51,14 @@ const SearchPage: React.FC = () => {
             try {
                 setIsLoading(true)
                 const response = await fetch(
-                    `http://localhost:8090/api/posts/search?keyword=${encodeURIComponent(
+                    `${API_BASE_URL}/api/posts/public/search?keyword=${encodeURIComponent(
                         keyword,
                     )}&page=${currentPage}&size=5`,
                     {
                         // headers: {
                         //     ...getAuthHeaders(),
                         // },
-                        credentials: 'include', // 쿠키 인증 방식은 credentials: 'include'만으로 충분
+                        
                     },
                 )
 

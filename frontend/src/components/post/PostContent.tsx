@@ -19,7 +19,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 
 // API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8090'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 interface Post {
     id: number
@@ -103,7 +103,7 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
             setIsLoadingUser(true)
             try {
                 // 백엔드 컨트롤러에 맞게 경로 수정 (users로 변경)
-                const userProfileResponse = await fetch(`http://localhost:8090/api/auth/${post.userId}/profile-image`, {
+                const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/${post.userId}/profile-image`, {
                     credentials: 'include', // 쿠키 인증을 위해 추가
                 })
 
@@ -128,13 +128,13 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
                             } else {
                                 // 백엔드 URL에 경로 추가
                                 setUserInfo({
-                                    profileImageUrl: `http://localhost:8090${profileImageUrl}`,
+                                    profileImageUrl: `${API_BASE_URL}${profileImageUrl}`,
                                 })
                             }
                         } else {
                             // 경로가 '/'로 시작하지 않는 경우 '/'를 추가
                             setUserInfo({
-                                profileImageUrl: `http://localhost:8090/${profileImageUrl}`,
+                                profileImageUrl: `${API_BASE_URL}/${profileImageUrl}`,
                             })
                         }
                     } else {

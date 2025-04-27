@@ -11,6 +11,7 @@ interface AuthorStats {
     following: number
     posts: number
 }
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 interface Author {
     id: number
@@ -72,7 +73,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                 // }
 
                 // 인증된 요청으로 사용자 정보 가져오기
-                const response = await fetch(`http://localhost:8090/api/auth/${targetUserId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/auth/${targetUserId}`, {
                     method: 'GET',
                     credentials: 'include', // 쿠키 인증을 위해 추가
                 })

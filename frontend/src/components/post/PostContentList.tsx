@@ -14,6 +14,7 @@ interface PostContentProps {
 interface UserInfo {
     profileImageUrl: string | null
 }
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 const PostContent: React.FC<PostContentProps> = ({ post }) => {
     const router = useRouter()
@@ -32,8 +33,8 @@ const PostContent: React.FC<PostContentProps> = ({ post }) => {
         const fetchData = async () => {
             try {
                 // 좋아요 수와 조회수 가져오기
-                const likesResponse = await fetch(`http://localhost:8090/api/posts/${post.id}/likes`, {
-                    credentials: 'include', // 쿠키 인증을 위해 추가
+                const likesResponse = await fetch(`${API_BASE_URL}/api/posts/public/${post.id}/likes`, {
+        
                 })
                 if (!likesResponse.ok) {
                     throw new Error('Failed to fetch likes')
@@ -41,8 +42,8 @@ const PostContent: React.FC<PostContentProps> = ({ post }) => {
                 const likeCount = await likesResponse.json()
                 setLikes(likeCount)
 
-                const viewsResponse = await fetch(`http://localhost:8090/api/posts/${post.id}/views`, {
-                    credentials: 'include', // 쿠키 인증을 위해 추가
+                const viewsResponse = await fetch(`${API_BASE_URL}/api/posts/public/${post.id}/views`, {
+                    
                 })
                 if (!viewsResponse.ok) {
                     throw new Error('Failed to fetch views')
@@ -53,12 +54,9 @@ const PostContent: React.FC<PostContentProps> = ({ post }) => {
                 // 프로필 이미지 가져오기 - 인증 문제를 해결하기 위해 수정
                 try {
                     // 백엔드 컨트롤러에 맞게 경로 수정 (users로 변경)
-                    const userProfileResponse = await fetch(
-                        `http://localhost:8090/api/auth/${post.userId}/profile-image`,
-                        {
-                            credentials: 'include', // 쿠키 인증을 위해 추가
-                        },
-                    )
+                    const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/${post.userId}/profile-image`, {
+                        credentials: 'include', // 쿠키 인증을 위해 추가
+                    })
 
                     if (userProfileResponse.ok) {
                         const profileImageUrl = await userProfileResponse.text()

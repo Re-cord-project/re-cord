@@ -29,6 +29,8 @@ interface Post {
     imageUrls: string[]
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 const PostDetail = () => {
     const params = useParams()
     const [post, setPost] = useState<Post | null>(null)
@@ -46,11 +48,10 @@ const PostDetail = () => {
                 const postId = params.postId
                 const userId = params.userId
                 // URL에 userId와 postId가 모두 포함됨
-                const response = await fetch(`http://localhost:8090/api/posts/${postId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/posts/public/${postId}`, {
                     headers: {
                         // ...getAuthHeaders(),
                     },
-                    credentials: 'include',
                 })
 
                 if (!response.ok) {
