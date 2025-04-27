@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8090'
 
-// HTML 태그를 제거하는 함수
+// HTML 태그를 제거하는 함수 - 요약본 생성 등의 용도로만 사용
+// 주의: 본문 저장 시에는 사용하지 않음
 const stripHtmlTags = (html: string): string => {
     // 브라우저 환경이라면 DOMParser 사용
     if (typeof window !== 'undefined' && window.DOMParser) {
@@ -122,21 +123,36 @@ export const useUpdatePost = (postId?: number) => {
         setError(null)
 
         try {
-            // HTML 태그 제거하여 순수 텍스트만 전송
-            const processedData = {
-                ...postData,
-                content: stripHtmlTags(postData.content),
+            // FormData 객체 생성
+            const formData = new FormData()
+
+            // 모든 데이터를 JSON으로 변환하여 'dto' 필드에 추가
+            const dtoData = {
+                title: postData.title,
+                content: postData.content, // HTML 태그 제거하지 않고 원본 HTML을 그대로 전송
+                categoryId: postData.categoryId,
+                userId: postData.userId,
             }
 
-            console.log('전송할 데이터(HTML 태그 제거):', processedData)
+            // JSON 문자열로 변환하여 'dto' 필드로 추가
+            const dtoBlob = new Blob([JSON.stringify(dtoData)], { type: 'application/json' })
+            formData.append('dto', dtoBlob)
+
+            console.log('전송할 데이터(dto):', dtoData)
+
+            // 이미지 파일이 있으면 추가
+            if (postData.images && postData.images.length > 0) {
+                postData.images.forEach((file: File, index: number) => {
+                    // 'images' 이름으로 파일들을 추가 (백엔드 API 스펙에 맞게 조정 필요)
+                    formData.append('images', file)
+                    console.log(`이미지 파일 ${index + 1} 추가:`, file.name)
+                })
+            }
 
             const response = await fetch(`${API_BASE_URL}/api/posts/${postId}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 credentials: 'include', // 쿠키 포함
-                body: JSON.stringify(processedData),
+                body: formData,
             })
 
             if (!response.ok) {
