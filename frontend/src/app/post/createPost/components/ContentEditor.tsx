@@ -96,6 +96,7 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
                 }}
                 value={editorContent}
                 onEditorChange={handleEditorChange}
+                disabled = {false}
                 init={editorOptions}
             />
 

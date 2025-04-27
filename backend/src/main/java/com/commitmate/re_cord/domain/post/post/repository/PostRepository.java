@@ -103,5 +103,48 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId")
     List<Post> findAllByUserIdWithImages(@Param("userId") Long userId);
 
+    // 최근 사진 있는 포스트 4개
+    @Query("""
+    SELECT p FROM Post p
+    LEFT JOIN p.images i
+    WHERE SIZE(p.images) > 0
+    ORDER BY p.createdAt DESC
+""")
+    Page<Post> findRecentPostsWithImages(Pageable pageable);
+
+
+    // 최근 일주일간 추천순 4개
+    @Query("""
+    SELECT p FROM Post p
+    WHERE p.createdAt >= :thisMonday
+    ORDER BY p.likes DESC
+""")
+    Page<Post> findWeeklyPopularPosts(@Param("thisMonday") LocalDateTime thisMonday, Pageable pageable);
+
+    // 가장 핫한 부트캠프 이름 찾기
+    @Query("""
+    SELECT p.user.bootcamp
+    FROM Post p
+    GROUP BY p.user.bootcamp
+    ORDER BY COUNT(p) DESC
+""")
+    Page<String> findHottestBootcamp(Pageable pageable);
+
+
+    // 핫한 부트캠프의 글 4개
+    @Query(
+            value = """
+        SELECT p FROM Post p
+        WHERE p.user.bootcamp = :bootcampName
+        ORDER BY p.createdAt DESC
+    """,
+            countQuery = """
+        SELECT COUNT(p.id) FROM Post p
+        WHERE p.user.bootcamp = :bootcampName
+    """
+    )
+    Page<Post> findTop4ByBootcamp(@Param("bootcampName") String bootcampName, Pageable pageable);
+
+
 
 }
