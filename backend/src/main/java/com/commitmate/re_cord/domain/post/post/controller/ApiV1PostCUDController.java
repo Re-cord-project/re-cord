@@ -2,6 +2,7 @@ package com.commitmate.re_cord.domain.post.post.controller;
 
 import com.commitmate.re_cord.domain.post.post.dto.PostRequestDto;
 import com.commitmate.re_cord.domain.post.post.dto.PostResponseDto;
+import com.commitmate.re_cord.domain.post.post.dto.PostUpdateRequestDto;
 import com.commitmate.re_cord.domain.post.post.entity.Post;
 import com.commitmate.re_cord.domain.post.post.service.PostService;
 import com.commitmate.re_cord.domain.user.user.entity.User;
@@ -35,7 +36,18 @@ public class ApiV1PostCUDController {
 
         return ResponseEntity.ok("게시글 등록 완료");
     }
+    //게시글 수정
+    @PutMapping("/{postId}")
+    public ResponseEntity<String> updatePost(
+            @PathVariable Long postId,
+            @RequestBody @Validated PostUpdateRequestDto postUpdateRequestDto,
+            @AuthenticationPrincipal SecurityUser userDetails) {
 
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        postService.updatePost(postId, postUpdateRequestDto, user);
+        return ResponseEntity.ok("게시글 수정 완료");
+    }
 
     // 현재 로그인한 사용자가 마지막으로 저장한 임시 글을 불러오는 API
     @GetMapping("/drafts/latest")
@@ -72,18 +84,7 @@ public class ApiV1PostCUDController {
         return ResponseEntity.ok("게시글 삭제 완료");
     }
 
-    @PutMapping("/{postId}")
-    public ResponseEntity<String> updatePost(
-            @PathVariable Long postId,
-            @RequestBody @Validated PostRequestDto dto,
-            @AuthenticationPrincipal SecurityUser userDetails) {
 
-        User user = userRepository.findById(userDetails.getId())
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-        postService.updatePost(postId, dto, user);
-        return ResponseEntity.ok("게시글 수정 완료");
-    }
 
 
     // 게시글 추천

@@ -32,4 +32,8 @@ public class Image {
     public void setPost(Post post) {
         this.post = post;
     }
+
+    public String getUrl() {
+        return imageUrl;  // S3에서 저장된 이미지 URL 반환
+    }
 }

@@ -4,10 +4,12 @@ import com.commitmate.re_cord.domain.post.category.entity.Category;
 import com.commitmate.re_cord.domain.post.category.repository.CategoryRepository;
 import com.commitmate.re_cord.domain.post.post.dto.PostRequestDto;
 import com.commitmate.re_cord.domain.post.post.dto.PostResponseDto;
+import com.commitmate.re_cord.domain.post.post.dto.PostUpdateRequestDto;
 import com.commitmate.re_cord.domain.post.post.entity.Image;
 import com.commitmate.re_cord.domain.post.post.entity.Post;
 import com.commitmate.re_cord.domain.post.post.entity.PostLike;
 import com.commitmate.re_cord.domain.post.post.entity.PostStatus;
+import com.commitmate.re_cord.domain.post.post.repository.ImageRepository;
 import com.commitmate.re_cord.domain.post.post.repository.PostLikeRepository;
 import com.commitmate.re_cord.domain.post.post.repository.PostRepository;
 import com.commitmate.re_cord.domain.user.user.entity.User;
@@ -37,6 +39,7 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final UserRepository userRepository;
     private final S3Service s3Service;
+    private final ImageRepository imageRepository;
     //게시글 생성
     @Transactional
     public void createPost(PostRequestDto postRequestDto, List<MultipartFile> images, long userId) {
@@ -102,6 +105,60 @@ public class PostService {
         // 게시글 저장
         postRepository.save(post);
     }
+
+    @Transactional
+    public void updatePost(Long postId, PostUpdateRequestDto postUpdateRequestDto, User user) {
+        // 1. 수정할 게시글 존재 여부 확인
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("수정할 게시글을 찾을 수 없습니다. ID: " + postId));
+
+        // 2. 수정 권한 확인
+        if (!post.getUser().getId().equals(user.getId())) {
+            throw new SecurityException("작성자 본인만 수정할 수 있습니다.");
+        }
+
+        // 3. 카테고리 존재 여부 확인
+        Category category = categoryRepository.findById(postUpdateRequestDto.getCategoryId())
+                .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다. ID: " + postUpdateRequestDto.getCategoryId()));
+
+        // 4. 게시글 내용 업데이트
+        post.setTitle(postUpdateRequestDto.getTitle());
+        post.setContent(postUpdateRequestDto.getContent());
+        post.setStatus(postUpdateRequestDto.getStatus() != null ? postUpdateRequestDto.getStatus() : post.getStatus());
+        post.setCategory(category);
+        post.setUpdateStatus(UpdateStatus.UPDATED);
+
+        // 5. 기존 이미지 삭제
+        List<String> imageUrlsToDelete = postUpdateRequestDto.getImageUrlsToDelete();
+        if (imageUrlsToDelete != null && !imageUrlsToDelete.isEmpty()) {
+            for (String imageUrl : imageUrlsToDelete) {
+                s3Service.delete(imageUrl);  // S3에서 이미지 삭제
+            }
+            imageRepository.deleteAll(post.getImages());  // DB에서 삭제
+        }
+
+        // 6. 새 이미지 업로드 처리
+        List<MultipartFile> newImages = postUpdateRequestDto.getNewImages();
+        if (newImages != null && !newImages.isEmpty()) {
+            List<Image> uploadedImages = new ArrayList<>();
+            for (MultipartFile imageFile : newImages) {
+                try {
+                    String imageUrl = s3Service.uploadImage(imageFile, user.getId());
+                    Image newImage = new Image();
+                    newImage.setUrl(imageUrl);
+                    newImage.setPost(post);
+                    uploadedImages.add(newImage);
+                } catch (IOException e) {
+                    throw new RuntimeException("새 이미지 업로드 실패: " + e.getMessage());
+                }
+            }
+            post.setImages(uploadedImages);  // 새 이미지를 게시글에 추가
+        }
+
+        // DB 업데이트는 트랜잭션 종료 시 자동 처리됩니다.
+    }
+
+
 
 
     // PostStatus에 따라 UpdateStatus를 설정하는 메서드
@@ -177,33 +234,6 @@ public class PostService {
     public int getPostViews(Long postId) {
         return postRepository.findViewsById(postId)
                 .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-    }
-
-    @Transactional
-    public void updatePost(Long postId, PostRequestDto dto, User user) {
-        // 1. 수정할 게시글 존재 여부 확인
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new RuntimeException("수정할 게시글을 찾을 수 없습니다. ID: " + postId));
-
-        // 2. 수정 권한 확인 (기존 로직 유지)
-        if (!post.getUser().getId().equals(user.getId())) {
-            throw new SecurityException("작성자 본인만 수정할 수 있습니다.");
-        }
-
-        // 3. 카테고리 존재 여부 확인
-        Category category = categoryRepository.findById(dto.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("카테고리를 찾을 수 없습니다. ID: " + dto.getCategoryId()));
-
-        // 4. 게시글 내용 업데이트
-        post.setTitle(dto.getTitle());
-        post.setContent(dto.getContent());
-        post.setStatus(dto.getStatus() != null ? dto.getStatus() : post.getStatus()); // null인 경우 기존 상태 유지
-        post.setCategory(category);
-        post.setUpdateStatus(UpdateStatus.UPDATED);
-
-        // 5. Post 엔티티는 영속성 컨텍스트에 의해 변경 감지(Dirty Checking)가 일어나
-        //    트랜잭션 종료 시 자동으로 데이터베이스에 반영됩니다.
-        //    따라서 명시적인 save() 호출은 불필요합니다.
     }
 
     // 게시글 삭제

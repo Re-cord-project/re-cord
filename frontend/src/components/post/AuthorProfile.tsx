@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
@@ -42,6 +43,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
 
     useEffect(() => {
         const fetchUserProfile = async () => {
+            // 조회 대상 사용자 ID 확인 및 없으면 반환
             if (!targetUserId) {
                 setIsLoading(false)
                 return
@@ -49,6 +51,25 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
 
             try {
                 setIsLoading(true)
+
+                // // 로그인한 사용자 정보를 사용하는 경우 API 호출 없이 바로 사용
+                // if (isLogin && targetUserId === loginUser.id) {
+                //     // 임시로 통계 정보 추가 (실제 데이터가 없는 경우)
+                //     setAuthor({
+                //         ...loginUser,
+                //         introduction: loginUser.bootcamp ? `${loginUser.bootcamp} ${loginUser.generation}기` : '',
+                //         profileImageUrl: '/profile.png',
+                //         provider: 'local',
+                //         role: loginUser.bootcamp || '개발자',
+                //         stats: {
+                //             followers: 0,
+                //             following: 0,
+                //             posts: 0,
+                //         },
+                //     })
+                //     setIsLoading(false)
+                //     return
+                // }
 
                 // 인증된 요청으로 사용자 정보 가져오기
                 const response = await fetch(`http://localhost:8090/api/auth/${targetUserId}`, {
@@ -70,59 +91,22 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                 // 기본 통계 정보 설정
                 let stats = { followers: 0, following: 0, posts: 0 }
 
-                // 각각의 통계 데이터를 개별 API에서 가져오기
+                // 단일 counts API 호출로 팔로우/팔로잉 통계 갱신
                 try {
-                    console.log('통계 정보 가져오기 시작, targetUserId:', targetUserId)
-
-                    // 팔로워 수 가져오기
-                    const followersResponse = await fetch(
-                        `http://localhost:8090/api/users/${targetUserId}/followers/count`,
-                        {
-                            credentials: 'include',
-                        },
+                    const resCounts = await fetch(
+                        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${targetUserId}/counts`,
+                        { credentials: 'include' },
                     )
-
-                    if (followersResponse.ok) {
-                        const followersData = await followersResponse.json()
-                        stats.followers = followersData
-                        console.log('가져온 팔로워 수:', followersData)
-                    } else {
-                        console.warn('팔로워 수 API 응답 실패:', followersResponse.status)
+                    if (resCounts.ok) {
+                        const { followerCount, followingCount } = await resCounts.json()
+                        stats = {
+                            followers: followerCount,
+                            following: followingCount,
+                            posts: stats.posts, // 필요 시 게시글 수도 업데이트
+                        }
                     }
-
-                    // 팔로잉 수 가져오기
-                    const followingResponse = await fetch(
-                        `http://localhost:8090/api/users/${targetUserId}/following/count`,
-                        {
-                            credentials: 'include',
-                        },
-                    )
-
-                    if (followingResponse.ok) {
-                        const followingData = await followingResponse.json()
-                        stats.following = followingData
-                        console.log('가져온 팔로잉 수:', followingData)
-                    } else {
-                        console.warn('팔로잉 수 API 응답 실패:', followingResponse.status)
-                    }
-
-                    // 게시글 수 가져오기
-                    // Statistics 컴포넌트와 동일한 엔드포인트 사용
-                    const postsResponse = await fetch(`http://localhost:8090/api/posts/count/${targetUserId}`, {
-                        credentials: 'include',
-                    })
-
-                    if (postsResponse.ok) {
-                        const postsData = await postsResponse.json()
-                        stats.posts = postsData
-                        console.log('가져온 게시글 수:', postsData)
-                    } else {
-                        console.warn('게시글 수 API 응답 실패:', postsResponse.status)
-                    }
-
-                    console.log('최종 통계 정보:', stats)
                 } catch (statsErr) {
-                    console.error('통계 정보 로드 실패 (기본값 사용):', statsErr)
+                    console.warn('통계 정보 로드 실패 (기본값 사용):', statsErr)
                 }
 
                 setAuthor({
@@ -132,70 +116,27 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                     role: userData.bootcamp || '개발자',
                 })
 
-                // 로그인 사용자가 이 사용자를 팔로우하는지 확인
+                // 팔로우 상태 체크 (로그인 사용자 대상)
                 if (isLogin && loginUser.id !== targetUserId) {
-                    checkFollowStatus(targetUserId)
-                }
-            } catch (err) {
-                console.error('사용자 정보 로드 오류:', err)
-
-                // 오류가 발생하면 기본 데이터 표시
-                const defaultAuthor = {
-                    ...loginUser,
-                    introduction: loginUser.bootcamp ? `${loginUser.bootcamp} ${loginUser.generation}기` : '',
-                    profileImageUrl: '/profile.png',
-                    provider: 'local',
-                    role: loginUser.bootcamp || '개발자',
-                    stats: {
-                        followers: 0,
-                        following: 0,
-                        posts: 0,
-                    },
-                }
-
-                // 로그인 사용자라도 통계 정보는 API로 가져오기 시도
-                if (isLogin) {
-                    try {
-                        const postsResponse = await fetch(`http://localhost:8090/api/posts/count/${loginUser.id}`, {
-                            credentials: 'include',
-                        })
-
-                        if (postsResponse.ok) {
-                            const postsData = await postsResponse.json()
-                            defaultAuthor.stats.posts = postsData
-                            console.log('로그인 사용자 게시글 수:', postsData)
-                        }
-                    } catch (statsErr) {
-                        console.error('로그인 사용자 통계 정보 로드 실패:', statsErr)
+                    const resFollow = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/follow`, {
+                        credentials: 'include',
+                    })
+                    if (resFollow.ok) {
+                        const list: Array<{ userId: number }> = await resFollow.json()
+                        setHasFollowed(
+                            list.some((u) => u.userId === targetUserId), // 팔로우 중인지 판단
+                        )
                     }
-
-                    setAuthor(defaultAuthor)
-                } else {
-                    setError(err instanceof Error ? err.message : '사용자 정보를 불러오는 데 문제가 발생했습니다.')
                 }
+            } catch (e: any) {
+                console.error('사용자 정보 로드 오류:', e)
+                setError(e.message) // 에러 메시지 설정
             } finally {
                 setIsLoading(false)
             }
         }
-
         fetchUserProfile()
-    }, [targetUserId, isLogin, loginUser])
-
-    const checkFollowStatus = async (targetId: number) => {
-        if (!isLogin) return
-        try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/followers`, {
-                credentials: 'include',
-            })
-            if (!res.ok) return
-            const list: Array<{ userId: number; hasFollowed?: boolean }> = await res.json()
-            const matched = list.find((u) => u.userId === targetId)
-            // 백엔드가 hasFollowed 필드를 주면 그 값, 아니면 존재 여부로 판단
-            setHasFollowed(matched ? Boolean(matched.hasFollowed ?? true) : false)
-        } catch (e) {
-            console.error('팔로우 상태 확인 오류:', e)
-        }
-    }
+    }, [targetUserId, isLogin, loginUser.id])
 
     if (isLoading) {
         return <div className="bg-white rounded-lg shadow-sm p-6 mb-6">프로필 로딩 중...</div>
@@ -263,11 +204,11 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                 <p className="text-xs text-gray-500 mt-1">{author.role}</p>
                 <div className="flex justify-between w-full mt-4 text-xs text-gray-600">
                     <div className="text-center">
-                        <div className="font-bold">{author.stats.followers}</div>
+                        <div className="font-bold">{author.stats.following}</div>
                         <div>팔로워</div>
                     </div>
                     <div className="text-center">
-                        <div className="font-bold">{author.stats.following}</div>
+                        <div className="font-bold">{author.stats.followers}</div>
                         <div>팔로잉</div>
                     </div>
                     <div className="text-center">

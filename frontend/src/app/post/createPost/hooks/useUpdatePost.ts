@@ -123,36 +123,24 @@ export const useUpdatePost = (postId?: number) => {
         setError(null)
 
         try {
-            // FormData 객체 생성
-            const formData = new FormData()
-
-            // 모든 데이터를 JSON으로 변환하여 'dto' 필드에 추가
+            // JSON 데이터 준비
             const dtoData = {
                 title: postData.title,
-                content: postData.content, // HTML 태그 제거하지 않고 원본 HTML을 그대로 전송
+                content: postData.content,
                 categoryId: postData.categoryId,
                 userId: postData.userId,
             }
 
-            // JSON 문자열로 변환하여 'dto' 필드로 추가
-            const dtoBlob = new Blob([JSON.stringify(dtoData)], { type: 'application/json' })
-            formData.append('dto', dtoBlob)
+            console.log('전송할 데이터:', dtoData)
 
-            console.log('전송할 데이터(dto):', dtoData)
-
-            // 이미지 파일이 있으면 추가
-            if (postData.images && postData.images.length > 0) {
-                postData.images.forEach((file: File, index: number) => {
-                    // 'images' 이름으로 파일들을 추가 (백엔드 API 스펙에 맞게 조정 필요)
-                    formData.append('images', file)
-                    console.log(`이미지 파일 ${index + 1} 추가:`, file.name)
-                })
-            }
-
+            // JSON 형식으로 데이터 전송
             const response = await fetch(`${API_BASE_URL}/api/posts/${postId}`, {
                 method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 credentials: 'include', // 쿠키 포함
-                body: formData,
+                body: JSON.stringify(dtoData),
             })
 
             if (!response.ok) {

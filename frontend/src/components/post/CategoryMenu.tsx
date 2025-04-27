@@ -81,7 +81,13 @@ const CategoryMenu: React.FC = () => {
                 throw new Error('잘못된 응답 형식입니다. 배열 형태의 카테고리 데이터가 필요합니다.')
             }
 
-            setCategories(data)
+            // 각 카테고리에 postCount 값이 없거나 undefined인 경우 0으로 설정
+            const categoriesWithCounts = data.map((category) => ({
+                ...category,
+                postCount: category.postCount !== undefined ? category.postCount : 0,
+            }))
+
+            setCategories(categoriesWithCounts)
         } catch (err) {
             console.error('카테고리 로딩 오류:', err)
             setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.')
