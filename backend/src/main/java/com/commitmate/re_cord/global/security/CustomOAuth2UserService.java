@@ -55,6 +55,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String oauthId = providerTypeCode + "__" + socialOauthId;
         Provider provider = Provider.valueOf(providerTypeCode);
+        String profileImageUrl = "https://re-cord.s3.ap-northeast-2.amazonaws.com/user/profile/default-profile.png";
 
         Optional<User> optionalUser = userService.findByUsername(username);
 
@@ -67,7 +68,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 👇 새 유저: 추가 정보 입력 필요 (임시 User 생성)
         User tempUser = null;
         try {
-            tempUser = userService.createTempUser(oauthId, username, email, provider);
+            tempUser = userService.createTempUser(oauthId, username, email, provider, profileImageUrl);
         } catch (Exception e) {
             // 예외 로깅
             e.printStackTrace();

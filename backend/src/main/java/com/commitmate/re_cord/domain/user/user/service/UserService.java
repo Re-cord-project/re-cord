@@ -54,6 +54,7 @@ public class UserService {
         user.setGeneration(dto.getGeneration());
         user.setRole(Role.basic);
         user.setBlogName(blogName);
+        user.setProfileImageUrl("https://re-cord.s3.ap-northeast-2.amazonaws.com/user/profile/default-profile.png");
         userRepository.save(user);
         return "User registered successfully";
     }
@@ -201,7 +202,7 @@ public class UserService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     // 소셜 로그인 시 임시 유저 생성
-    public User createTempUser(String oauthId, String username, String email, Provider provider) {
+    public User createTempUser(String oauthId, String username, String email, Provider provider, String profileImageUrl) {
         // 이미 존재하면 그대로 반환
 
         User user = userRepository.findByUsername(username).orElse(null);
@@ -215,6 +216,7 @@ public class UserService {
                     .provider(provider)
                     .refreshToken(UUID.randomUUID().toString())
                     .role(Role.basic)
+                    .profileImageUrl(profileImageUrl)
                     .build();
 
             // 유저 저장
