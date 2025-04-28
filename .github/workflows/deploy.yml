@@ -68,6 +68,7 @@ jobs:
       - name: 빌드 실행
         working-directory: backend
         run: ./gradlew build -x test --no-daemon
+
       - name: Docker Build and Push
         uses: docker/build-push-action@v3
         with:
