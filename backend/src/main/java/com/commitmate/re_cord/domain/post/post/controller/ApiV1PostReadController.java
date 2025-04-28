@@ -68,11 +68,7 @@ public class ApiV1PostReadController {
         Page<PostResponseDto> posts = postService.getPostsByCategory(categoryId, page, size);
         return ResponseEntity.ok(posts);
     }
-    // userId에 해당하는 제일 최신글보기
-    @GetMapping("/latest/{userId}")
-    public ResponseEntity<PostResponseDto> getLatestPostByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(postService.getLatestPostByUserId(userId));
-    }
+
 
     // ✅ 작성자의 다른 게시글 조회
     @GetMapping("/{userid}/other-posts")
@@ -107,6 +103,11 @@ public class ApiV1PostReadController {
         return postService.getTotalPostCount(userId);
     }
 
+    // userId에 해당하는 제일 최신글보기
+    @GetMapping("/latest/{userId}")
+    public ResponseEntity<PostResponseDto> getLatestPostByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(postService.getLatestPostByUserId(userId));
+    }
 
 
 }

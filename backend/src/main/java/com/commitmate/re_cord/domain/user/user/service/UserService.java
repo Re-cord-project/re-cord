@@ -2,6 +2,7 @@ package com.commitmate.re_cord.domain.user.user.service;
 
 
 import com.commitmate.re_cord.domain.user.user.dto.SignupDto;
+import com.commitmate.re_cord.domain.user.user.dto.UserIdResponseDto;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.enums.Provider;
 import com.commitmate.re_cord.domain.user.user.enums.Role;
@@ -258,4 +259,9 @@ public class UserService {
                 .orElse(null); // 사용자가 없으면 null 반환 또는 예외 처리
     }
 
+    public UserIdResponseDto getUserIdByBlogName(String blogName) {
+        return userRepository.findByBlogName(blogName)
+                .map(user -> new UserIdResponseDto(user.getId()))
+                .orElse(null); // 못 찾으면 null 반환
+    }
 }

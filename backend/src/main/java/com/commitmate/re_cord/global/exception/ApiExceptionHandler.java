@@ -1,5 +1,6 @@
 package com.commitmate.re_cord.global.exception;
 
+import com.commitmate.re_cord.global.exception.exceptions.ResourceNotFoundException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.http.ResponseEntity;
@@ -31,4 +32,13 @@ public class ApiExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body("로그인 후 사용이 가능합니다.");
     }
+
+    // 리소스를 찾을 수 없을 때, 404 Not Found
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
+
 }

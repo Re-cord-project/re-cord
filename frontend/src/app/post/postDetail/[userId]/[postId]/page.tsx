@@ -132,7 +132,7 @@ const PostDetail = () => {
                 <div className="w-full md:w-56 md:mr-8">
                     <AuthorProfile userId={Number(params.userId)} />
                     <SearchBar />
-                    <CategoryMenu />
+                    <CategoryMenu userId={Number(params.userId)} />
                     <Statistics />
                 </div>
 

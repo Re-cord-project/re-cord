@@ -1,3 +1,5 @@
+'use client'
+
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 import Image from 'next/image'
 import Link from 'next/link'

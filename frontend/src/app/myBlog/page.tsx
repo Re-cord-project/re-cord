@@ -113,7 +113,7 @@ const HomePage: React.FC = () => {
                 <div className="w-full md:w-56 md:mr-8">
                     <AuthorProfile userId={loginUser.id} />
                     <SearchBar />
-                    <CategoryMenu />
+                    <CategoryMenu userId={loginUser.id} />
                     <Statistics />
                 </div>
 

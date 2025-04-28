@@ -33,24 +33,18 @@ public class CategoryController {
         return ResponseEntity.ok("카테고리 생성 완료: " + category.getName());
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<Category>> getCategories(@PathVariable long userId) {
+        List<Category> categories = categoryService.getCategoriesByUserId(userId);
+        return ResponseEntity.ok(categories);
+    }
+
     // 로그인한 사용자만 자신의 카테고리 목록 조회
     @GetMapping
     public ResponseEntity<List<Category>> getCategories(@AuthenticationPrincipal SecurityUser userDetails) {
         long userId = userDetails.getId();
         List<Category> categories = categoryService.getCategoriesByUserId(userId);
         return ResponseEntity.ok(categories);
-    }
-
-    // 로그인한 사용자만 자신이 만든 카테고리 조회
-    @GetMapping("/{categoryId}")
-    public ResponseEntity<Category> getCategory(
-            @PathVariable Long categoryId,
-            @AuthenticationPrincipal SecurityUser userDetails) {
-
-        long userId = userDetails.getId();
-        Category category = categoryService.getCategoryByIdAndUserId(categoryId, userId);
-
-        return ResponseEntity.ok(category);
     }
 
     // 로그인한 사용자만 자신이 만든 카테고리 삭제

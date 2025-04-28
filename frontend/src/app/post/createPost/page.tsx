@@ -205,7 +205,8 @@ const CreatePostPage = () => {
                 if (result.success) {
                     setUnsavedChanges(false)
                     alert(isEditMode ? '게시물이 수정되었습니다.' : '게시물이 등록되었습니다.')
-                    router.push('/post/postList')
+                    // 글 작성자의 userId로 리스트 이동
+                    router.push(`/post/postList?userId=${loginUser.id}`)
                 } else {
                     alert(result.error || (isEditMode ? '게시물 수정에 실패했습니다.' : '게시물 등록에 실패했습니다.'))
                 }
