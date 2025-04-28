@@ -5,21 +5,17 @@ FROM gradle:jdk-21-and-23-graal-jammy AS builder
 WORKDIR /app
 
 # 소스 코드와 Gradle 래퍼 복사
-COPY gradle-wrapper.properties gradlew .  # gradlew와 gradle-wrapper.properties 파일 추가
-COPY build.gradle.kts .  # build.gradle.kts 복사
-COPY settings.gradle.kts .  # settings.gradle.kts 복사
-
-# Gradle wrapper에 실행 권한 부여
-RUN chmod +x gradlew
+COPY build.gradle.kts .
+COPY settings.gradle.kts .
 
 # 종속성 설치
-RUN ./gradlew dependencies --no-daemon
+RUN gradle dependencies --no-daemon
 
 # 소스 코드 복사
 COPY src src
 
 # 애플리케이션 빌드
-RUN ./gradlew build --no-daemon
+RUN gradle build --no-daemon
 
 # 두 번째 스테이지: 실행 스테이지
 FROM container-registry.oracle.com/graalvm/jdk:23
