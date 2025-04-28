@@ -30,6 +30,10 @@ public class ApiV1PostReadController {
     // 게시글 하나 상세 보기
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDto> getPost(@PathVariable Long postId) {
+
+
+
+
         return ResponseEntity.ok(postService.getPostById(postId));
     }
 
