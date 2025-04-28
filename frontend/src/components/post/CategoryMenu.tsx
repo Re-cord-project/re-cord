@@ -4,6 +4,10 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 
+interface CategoryMenuProps {
+    userId?: number // userId를 옵셔널 prop으로 변경
+}
+
 interface Category {
     id: number
     name: string
@@ -15,7 +19,7 @@ interface CategoryRequest {
 }
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-const CategoryMenu: React.FC = () => {
+const CategoryMenu: React.FC<CategoryMenuProps> = ({ userId }) => {
     const router = useRouter()
     const { isLogin, loginUser } = useGlobalLoginUser()
     const [categories, setCategories] = useState<Category[]>([])
@@ -35,24 +39,19 @@ const CategoryMenu: React.FC = () => {
     // 카테고리 목록 새로고침 트리거
     const [refreshTrigger, setRefreshTrigger] = useState(0)
 
+    // 현재 로그인한 사용자가 카테고리 소유자인지 확인
+    // userId가 넘어오지 않으면 로그인한 사용자의 ID 사용
+    const effectiveUserId = userId || (isLogin ? loginUser?.id : 0)
+    const isOwner = isLogin && loginUser && loginUser.id === effectiveUserId
+
     // 카테고리 목록 가져오기 함수
     const fetchCategories = async () => {
         try {
             setIsLoading(true)
 
-            // 로그인하지 않은 경우 빈 카테고리 리스트 표시
-            if (!isLogin) {
-                setCategories([])
-                setIsLoading(false)
-                return
-            }
+            console.log(`사용자 ID ${effectiveUserId}의 카테고리 목록 불러오는 중...`)
 
-            console.log('카테고리 목록 불러오는 중...')
-
-            // 디버깅용 쿠키 확인
-            console.log('쿠키 정보:', document.cookie)
-
-            const response = await fetch(`${API_BASE_URL}/api/categories`, {
+            const response = await fetch(`${API_BASE_URL}/api/categories/${effectiveUserId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -62,13 +61,6 @@ const CategoryMenu: React.FC = () => {
             })
 
             console.log('카테고리 목록 응답 상태:', response.status)
-
-            // 401 Unauthorized 처리
-            if (response.status === 401) {
-                console.log('로그인이 필요한 기능입니다.')
-                setCategories([])
-                return
-            }
 
             if (!response.ok) {
                 const errorData = await response.text()
@@ -98,8 +90,10 @@ const CategoryMenu: React.FC = () => {
     }
 
     useEffect(() => {
-        fetchCategories()
-    }, [isLogin, refreshTrigger])
+        if (effectiveUserId) {
+            fetchCategories()
+        }
+    }, [effectiveUserId, refreshTrigger])
 
     const handleCategoryClick = (categoryId: number, categoryName: string) => {
         router.push(`/post/categoryList?categoryId=${categoryId}&categoryName=${encodeURIComponent(categoryName)}`)
@@ -109,9 +103,14 @@ const CategoryMenu: React.FC = () => {
     const handleCreateCategory = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        // 로그인 확인
+        // 로그인 확인 및 소유자 확인
         if (!isLogin) {
             setCreateError('카테고리 생성은 로그인 후 이용 가능합니다.')
+            return
+        }
+
+        if (!isOwner) {
+            setCreateError('자신의 카테고리만 생성할 수 있습니다.')
             return
         }
 
@@ -150,7 +149,17 @@ const CategoryMenu: React.FC = () => {
 
             // 응답 상태 코드별 처리
             if (response.status === 401) {
-                setCreateError('로그인 세션이 만료되었습니다. 다시 로그인해주세요.')
+                // 응답 내용을 확인해서 중복 메시지인지 판단
+                if (
+                    responseText.includes('중복') ||
+                    responseText.includes('duplicate') ||
+                    responseText.includes('exist') ||
+                    responseText.includes('already')
+                ) {
+                    setCreateError('이미 존재하는 카테고리 이름입니다.')
+                } else {
+                    setCreateError('이미 존재하는 카테고리 이름입니다.')
+                }
                 return
             } else if (response.status === 400) {
                 // 400 Bad Request는 대부분 유효성 검증 실패(이름 중복 등)
@@ -206,9 +215,14 @@ const CategoryMenu: React.FC = () => {
 
     // 폼 토글 함수
     const toggleForm = () => {
-        // 로그인 확인
+        // 로그인 및 소유자 확인
         if (!isLogin) {
             setCreateError('카테고리 생성은 로그인 후 이용 가능합니다.')
+            return
+        }
+
+        if (!isOwner) {
+            setCreateError('자신의 카테고리만 생성할 수 있습니다.')
             return
         }
 
@@ -227,9 +241,14 @@ const CategoryMenu: React.FC = () => {
     const handleDeleteCategory = async (categoryId: number, e: React.MouseEvent) => {
         e.stopPropagation() // 클릭 이벤트가 부모 요소로 전파되는 것을 방지
 
-        // 로그인 확인
+        // 로그인 및 소유자 확인
         if (!isLogin || !loginUser) {
             setDeleteError('카테고리 삭제는 로그인 후 이용 가능합니다.')
+            return
+        }
+
+        if (!isOwner) {
+            setDeleteError('자신의 카테고리만 삭제할 수 있습니다.')
             return
         }
 
@@ -284,17 +303,6 @@ const CategoryMenu: React.FC = () => {
         )
     }
 
-    // 에러 메시지가 아닌 안내 메시지로 변경
-    if (error && !isLogin) {
-        return (
-            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                <h3 className="text-sm font-bold text-gray-800 mb-3">카테고리</h3>
-                <div className="text-sm text-gray-500 text-center py-4">카테고리는 로그인 후 이용 가능합니다.</div>
-            </div>
-        )
-    }
-
-    // 그 외 일반 오류
     if (error) {
         return (
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -314,27 +322,21 @@ const CategoryMenu: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
             <div className="flex justify-between items-center mb-3">
                 <h3 className="text-sm font-bold text-gray-800">카테고리</h3>
-                {isLogin && (
-                    <button
-                        onClick={handleRefresh}
-                        className="text-xs text-blue-500 hover:text-blue-700"
-                        title="새로고침"
+                <button onClick={handleRefresh} className="text-xs text-blue-500 hover:text-blue-700" title="새로고침">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.37-2.6M22 12.5a10 10 0 0 1-18.37 2.6" />
-                        </svg>
-                    </button>
-                )}
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.37-2.6M22 12.5a10 10 0 0 1-18.37 2.6" />
+                    </svg>
+                </button>
             </div>
 
             {/* 삭제 오류 표시 */}
@@ -355,7 +357,7 @@ const CategoryMenu: React.FC = () => {
                                 <span className="text-gray-700">{category.name}</span>
                                 <span className="text-gray-500 text-xs ml-2">({category.postCount})</span>
                             </div>
-                            {isLogin && (
+                            {isOwner && (
                                 <button
                                     onClick={(e) => handleDeleteCategory(category.id, e)}
                                     disabled={isDeletingId === category.id}
@@ -387,13 +389,11 @@ const CategoryMenu: React.FC = () => {
                     ))}
                 </ul>
             ) : (
-                <div className="text-sm text-gray-500 text-center py-2 mb-4">
-                    {isLogin ? '등록된 카테고리가 없습니다.' : '카테고리는 로그인 후 이용 가능합니다.'}
-                </div>
+                <div className="text-sm text-gray-500 text-center py-2 mb-4">등록된 카테고리가 없습니다.</div>
             )}
 
-            {/* 카테고리 생성 버튼 - 로그인한 경우만 표시 */}
-            {isLogin && categories.length < 5 ? (
+            {/* 카테고리 생성 버튼 - 로그인한 사용자가 소유자인 경우만 표시 */}
+            {isOwner && categories.length < 5 ? (
                 <div>
                     {!isFormVisible ? (
                         <button
@@ -438,14 +438,9 @@ const CategoryMenu: React.FC = () => {
                     )}
                 </div>
             ) : (
-                isLogin && (
+                isOwner && (
                     <div className="text-xs text-orange-500 text-center">카테고리는 최대 5개까지 생성 가능합니다.</div>
                 )
-            )}
-
-            {/* 로그인하지 않은 경우의 안내 메시지 */}
-            {!isLogin && (
-                <div className="text-xs text-blue-500 text-center">로그인 후 카테고리를 생성할 수 있습니다.</div>
             )}
         </div>
     )

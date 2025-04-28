@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 
 interface PostResponseDto {
@@ -10,6 +12,7 @@ interface PostResponseDto {
     likes: number
     createdAt: string
     imageUrls?: string[]
+    blogName?: string // blogName 필드 추가
 }
 
 interface AuthorDto {
@@ -18,6 +21,7 @@ interface AuthorDto {
     email: string
     profileImage?: string
     bio?: string
+    blogName?: string // blogName 필드 추가
 }
 
 export const useLatestPost = (userId: number) => {
@@ -38,8 +42,10 @@ export const useLatestPost = (userId: number) => {
             try {
                 setIsLoading(true)
 
-                // 1. 사용자 정보 가져오기
-                const userResponse = await fetch(`http://localhost:8090/api/auth/${userId}`)
+                // 1. 사용자 정보 가져오기 (쿠키 인증 추가)
+                const userResponse = await fetch(`http://localhost:8090/api/auth/${userId}`, {
+                    credentials: 'include',
+                })
 
                 if (!userResponse.ok) {
                     const errorText = await userResponse.text()
@@ -55,8 +61,8 @@ export const useLatestPost = (userId: number) => {
                     throw new Error('사용자 정보 응답을 처리하는데 실패했습니다. 서버가 실행 중인지 확인해주세요.')
                 }
 
-                // 2. 해당 사용자의 최신 게시글 가져오기
-                const postResponse = await fetch(`http://localhost:8090/api/posts/latest/${userId}`)
+                // 2. 해당 사용자의 최신 게시글 가져오기 (쿠키 인증 추가)
+                const postResponse = await fetch(`http://localhost:8090/api/posts/public/latest/${userId}`, {})
 
                 if (!postResponse.ok) {
                     const errorText = await postResponse.text()
