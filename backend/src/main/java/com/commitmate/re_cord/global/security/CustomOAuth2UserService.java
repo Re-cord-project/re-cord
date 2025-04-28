@@ -21,6 +21,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final UserService userService;
+    private final TempTokenProvider tempTokenProvider;
 
     // 소셜 로그인이 성공할 때마다 이 함수가 실행된다.
     @Transactional
@@ -78,7 +79,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 응답 헤더에 한글이 들어가므로 인코딩해준다.
         if (tempUser != null && tempUser.getId() != null) {
             // 임시 사용자 존재 → 추가 정보 입력이 필요하므로 예외 던짐
-            throw new OAuth2AdditionalInfoRequiredException(oauthId, username, email);
+            String tempToken = tempTokenProvider.createTempToken(oauthId, username, email);
+            throw new OAuth2AdditionalInfoRequiredException(tempToken);
         } else {
             // 사용자 생성 실패 처리
             throw new AuthenticationServiceException("임시 사용자 생성에 실패했습니다");
