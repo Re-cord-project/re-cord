@@ -14,6 +14,10 @@ RUN gradle dependencies --no-daemon
 # 소스 코드 복사
 COPY src src
 
+#dB 설정
+ENV SPRING_PROFILES_ACTIVE=prod
+
+
 # 애플리케이션 빌드
 RUN gradle build --no-daemon
 
