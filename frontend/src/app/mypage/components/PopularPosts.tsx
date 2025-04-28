@@ -1,7 +1,18 @@
 import React from 'react'
 import Link from 'next/link'
 import PostCard from './PostCardProps'
-import { Post } from '@/app/types/post'
+
+type Post = {
+    id: number
+    title: string
+    content: string
+    createdAt: string
+    views: number
+    likes: number
+    comments: number
+    slug: string
+    date: string
+}
 
 type PopularPostsProps = {
     posts: Post[]
@@ -13,7 +24,7 @@ export default function PopularPosts({ posts }: PopularPostsProps) {
 
     return (
         <div className="mb-8">
-            <h2 className="text-2xl font-bold mb-4 text-black">실시간 추천 게시물 TOP 5</h2>
+            <h2 className="text-2xl font-bold mb-4 text-black">인기 게시물 TOP 5</h2>
             <div className="space-y-2">
                 {top5.map((post) => (
                     <PostCard key={post.id} post={post} />

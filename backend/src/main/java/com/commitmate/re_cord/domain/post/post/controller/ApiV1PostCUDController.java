@@ -2,6 +2,7 @@ package com.commitmate.re_cord.domain.post.post.controller;
 
 import com.commitmate.re_cord.domain.post.post.dto.PostRequestDto;
 import com.commitmate.re_cord.domain.post.post.dto.PostResponseDto;
+import com.commitmate.re_cord.domain.post.post.dto.UpdatePostStatusRequest;
 import com.commitmate.re_cord.domain.post.post.entity.Post;
 import com.commitmate.re_cord.domain.post.post.service.PostService;
 import com.commitmate.re_cord.domain.user.user.entity.User;
