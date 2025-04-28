@@ -97,55 +97,55 @@ const ContentEditor = forwardRef<ContentEditorRef, ContentEditorProps>(
         const handleFileDrop = (file: File): Promise<string> => {
             return new Promise((resolve, reject) => {
                 if (!file.type.startsWith('image/')) {
-                    reject('이미지 파일이 아닙니다.');
-                    return;
+                    reject('이미지 파일이 아닙니다.')
+                    return
                 }
-                
+
                 // 파일명과 크기로 중복 체크를 위한 키 생성
-                const fileKey = `${file.name}-${file.size}`;
-                
+                const fileKey = `${file.name}-${file.size}`
+
                 // 메모이제이션을 위한 맵 (파일 키 => dataUrl)
                 if (!fileDropCache.current) {
-                    fileDropCache.current = new Map();
+                    fileDropCache.current = new Map()
                 }
-                
+
                 // 이미 처리한 이미지인지 확인
                 if (fileDropCache.current.has(fileKey)) {
-                    console.log('중복된 이미지 감지됨, 캐시된 URL 사용:', file.name);
-                    resolve(fileDropCache.current.get(fileKey)!);
-                    return;
+                    console.log('중복된 이미지 감지됨, 캐시된 URL 사용:', file.name)
+                    resolve(fileDropCache.current.get(fileKey)!)
+                    return
                 }
-                
-                const reader = new FileReader();
+
+                const reader = new FileReader()
                 reader.onload = () => {
-                    const dataUrl = reader.result as string;
-                    
+                    const dataUrl = reader.result as string
+
                     // 임시 이미지 URL과 파일 매핑 저장
                     setTempImages((prevMap) => {
-                        const newMap = new Map(prevMap);
-                        newMap.set(dataUrl, file);
-                        return newMap;
-                    });
-                    
+                        const newMap = new Map(prevMap)
+                        newMap.set(dataUrl, file)
+                        return newMap
+                    })
+
                     // 캐시에 저장
-                    fileDropCache.current!.set(fileKey, dataUrl);
-                    
+                    fileDropCache.current!.set(fileKey, dataUrl)
+
                     // 콜백 호출
                     if (onImageDrop) {
-                        onImageDrop(file, dataUrl);
+                        onImageDrop(file, dataUrl)
                     }
-                    
-                    resolve(dataUrl);
-                };
+
+                    resolve(dataUrl)
+                }
                 reader.onerror = () => {
-                    reject('이미지 파일을 읽는 중 오류가 발생했습니다.');
-                };
-                reader.readAsDataURL(file);
-            });
-        };
+                    reject('이미지 파일을 읽는 중 오류가 발생했습니다.')
+                }
+                reader.readAsDataURL(file)
+            })
+        }
 
         // 에디터 초기화 및 파일 캐시를 위한 ref 추가
-        const fileDropCache = useRef<Map<string, string> | null>(null);
+        const fileDropCache = useRef<Map<string, string> | null>(null)
 
         // 기본 에디터 설정
         const editorOptions: IAllProps['init'] = {
@@ -203,12 +203,12 @@ const ContentEditor = forwardRef<ContentEditorRef, ContentEditorProps>(
                 // 이미지 파일 생성
                 const file = new File([blobInfo.blob()], blobInfo.filename(), {
                     type: blobInfo.blob().type,
-                });
-                
+                })
+
                 // 공통 handleFileDrop 함수 사용
-                return handleFileDrop(file);
+                return handleFileDrop(file)
             },
-            
+
             // 파일 붙여넣기 이벤트 비활성화 - 에디터의 기본 처리 방지
             paste_data_images: false,
 
@@ -235,70 +235,74 @@ const ContentEditor = forwardRef<ContentEditorRef, ContentEditorProps>(
                 editor.on('init', function () {
                     editor.setContent(value || '')
                 })
-                
+
                 // 이미지 붙여넣기 이벤트 캡처
-                editor.on('paste', function(e) {
-                    const clipboardData = e.clipboardData;
+                editor.on('paste', function (e) {
+                    const clipboardData = e.clipboardData
                     if (clipboardData && clipboardData.items) {
-                        const items = clipboardData.items;
-                        
+                        const items = clipboardData.items
+
                         for (let i = 0; i < items.length; i++) {
                             if (items[i].type.indexOf('image') !== -1) {
                                 // 클립보드의 이미지 파일 가져오기
-                                const file = items[i].getAsFile();
+                                const file = items[i].getAsFile()
                                 if (file) {
                                     // 기본 붙여넣기 동작 방지
-                                    e.preventDefault();
-                                    
+                                    e.preventDefault()
+
                                     // 이미지 처리 및 삽입
-                                    handleFileDrop(file).then(url => {
-                                        editor.insertContent(`<img src="${url}" alt="${file.name}" />`);
-                                    }).catch(error => {
-                                        console.error('이미지 붙여넣기 처리 오류:', error);
-                                    });
-                                    
+                                    handleFileDrop(file)
+                                        .then((url) => {
+                                            editor.insertContent(`<img src="${url}" alt="${file.name}" />`)
+                                        })
+                                        .catch((error) => {
+                                            console.error('이미지 붙여넣기 처리 오류:', error)
+                                        })
+
                                     // 한 번에 하나의 이미지만 처리
-                                    break;
+                                    break
                                 }
                             }
                         }
                     }
-                });
+                })
 
                 // 파일 드롭 이벤트 완전히 재정의
                 editor.on('drop', function (e) {
-                    const dataTransfer = e.dataTransfer;
+                    const dataTransfer = e.dataTransfer
                     if (dataTransfer && dataTransfer.files.length > 0) {
                         // 이미지 파일만 처리
                         for (let i = 0; i < dataTransfer.files.length; i++) {
-                            const file = dataTransfer.files[i];
+                            const file = dataTransfer.files[i]
                             if (file.type.startsWith('image/')) {
                                 // 에디터 기본 드롭 처리 방지
-                                e.preventDefault();
-                                
+                                e.preventDefault()
+
                                 // 이미지 처리 및 삽입
-                                handleFileDrop(file).then(url => {
-                                    // 에디터 내용에 이미지 추가 (캐럿 위치에)
-                                    editor.insertContent(`<img src="${url}" alt="${file.name}" />`);
-                                }).catch(error => {
-                                    console.error('이미지 드롭 처리 오류:', error);
-                                });
-                                
+                                handleFileDrop(file)
+                                    .then((url) => {
+                                        // 에디터 내용에 이미지 추가 (캐럿 위치에)
+                                        editor.insertContent(`<img src="${url}" alt="${file.name}" />`)
+                                    })
+                                    .catch((error) => {
+                                        console.error('이미지 드롭 처리 오류:', error)
+                                    })
+
                                 // 멀티 이미지 동시 처리 시 한 번에 하나만 처리하도록 변경
-                                break;
+                                break
                             }
                         }
                     }
-                });
-                
+                })
+
                 // 에디터 내 이미지 클릭 핸들러 (선택 사항)
-                editor.on('click', function(e) {
-                    const target = e.target as HTMLElement;
+                editor.on('click', function (e) {
+                    const target = e.target as HTMLElement
                     if (target.nodeName === 'IMG') {
                         // 이미지 클릭 시 동작 처리
-                        console.log('이미지 클릭됨:', (target as HTMLImageElement).src);
+                        console.log('이미지 클릭됨:', (target as HTMLImageElement).src)
                     }
-                });
+                })
             },
         }
 
