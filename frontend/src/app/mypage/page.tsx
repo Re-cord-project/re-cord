@@ -1,8 +1,7 @@
-'use client'
+"use client";
 
-import { redirect } from 'next/navigation'
+import React from "react";
 
 export default function Mypage() {
-    redirect('/mypage/profile')
-    return null
+  return <div>MY PAGE</div>;
 }
