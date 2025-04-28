@@ -36,6 +36,7 @@ spring:
 
           github:
             clientId: ON_SECRET
+            client-secret: ON_SECRET
             scope:
               - read:user
               - user:email
