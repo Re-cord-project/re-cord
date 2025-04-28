@@ -11,6 +11,8 @@ export default function LoginPage() {
     const [error, setError] = useState('')
 
     const socialLoginForKakaoUrl = 'http://localhost:8090/oauth2/authorization/kakao'
+    const socialLoginForGithubUrl = 'http://localhost:8090/oauth2/authorization/github'
+
     const redirectUrlAfterSocialLogin = 'http://localhost:3000'
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -35,7 +37,7 @@ export default function LoginPage() {
                 setError(data.message || '로그인에 실패했습니다.')
             }
         } catch (err) {
-            setError('로그인 중 오류가 발생했습니다.')
+            setError('회원정보가 일치하지 않습니다.')
             console.error('Login error:', err)
         }
     }
@@ -82,25 +84,19 @@ export default function LoginPage() {
                             style={{ fontFeatureSettings: '"kern" on' }}
                         ></span>
                     </div>
-                    <div className="flex items-center justify-between">
-                        <label className="flex items-center">
-                            <input type="checkbox" className="form-checkbox" />
-                            <span className="ml-2 text-sm text-gray-600">로그인 상태 유지</span>
-                        </label>
-                        <Link href="/forgot-password" className="text-sm text-gray-600 hover:text-gray-800">
-                            비밀번호 찾기
-                        </Link>
+                    <div>
+                        <button
+                            type="submit"
+                            className="w-full h-[38px] flex justify-center items-center px-4 py-2 rounded-[8px] text-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
+                            style={{
+                                background:
+                                    'linear-gradient(0deg, rgba(0, 0, 0, 0.001), rgba(0, 0, 0, 0.001)), #78B3CE',
+                                border: '1px solid rgba(0, 0, 0, 0)',
+                            }}
+                        >
+                            로그인
+                        </button>
                     </div>
-                    <button
-                        type="submit"
-                        className="w-full h-[38px] flex justify-center items-center px-4 py-2 rounded-[8px] bg-[#78B3CE] text-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
-                        style={{
-                            background: 'linear-gradient(0deg, rgba(0, 0, 0, 0.001), rgba(0, 0, 0, 0.001)), #78B3CE',
-                            border: '1px solid rgba(0, 0, 0, 0)',
-                        }}
-                    >
-                        로그인
-                    </button>
                 </form>
 
                 <div className="mt-8">
@@ -119,6 +115,14 @@ export default function LoginPage() {
                             className="flex justify-center items-center w-full py-2 px-4 bg-[#FEE500] text-[#000000] rounded-md hover:bg-[#FDD800] transition-colors"
                         >
                             카카오로 시작하기
+                        </Link>
+                    </div>
+                    <div className="mt-3">
+                        <Link
+                            href={`${socialLoginForGithubUrl}?redirectUrl=${redirectUrlAfterSocialLogin}`}
+                            className="flex justify-center items-center w-full py-2 px-4 bg-[#000000] text-white rounded-md hover:bg-[#1a1a1a] transition-colors"
+                        >
+                            깃허브로 시작하기
                         </Link>
                     </div>
                 </div>

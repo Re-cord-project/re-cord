@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation'
 export default function SignupPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
-    const oauthId = searchParams?.get('oauthId') ?? ''
+    const tempToken = searchParams?.get('token') ?? ''
 
     const [email, setEmail] = useState('')
     const [bootcamp, setBootcamp] = useState('')
@@ -15,6 +15,42 @@ export default function SignupPage() {
     const [isEmailChecking, setIsEmailChecking] = useState(false)
     const [emailCheckMessage, setEmailCheckMessage] = useState('')
     const [isEmailChecked, setIsEmailChecked] = useState(false)
+    const [oauthId, setOauthId] = useState('')
+
+    useEffect(() => {
+        const verifyToken = async () => {
+            if (!tempToken) {
+                setError('유효하지 않은 접근입니다.')
+                return
+            }
+
+            try {
+                const response = await fetch('http://localhost:8090/api/auth/temp-token/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: tempToken }),
+                })
+
+                if (response.ok) {
+                    const data = await response.json()
+                    console.log('Token verification response:', data)
+                    setEmail(data.email)
+                    setOauthId(data.oauthId || '')
+                    setIsEmailChecked(true)
+                    setEmailCheckMessage('이메일이 확인되었습니다.')
+                } else {
+                    setError('토큰이 만료되었거나 유효하지 않습니다. 다시 로그인해주세요.')
+                }
+            } catch (error) {
+                console.error('Token verification error:', error)
+                setError('토큰 검증 중 오류가 발생했습니다. 다시 로그인해주세요.')
+            }
+        }
+
+        verifyToken()
+    }, [tempToken])
 
     const checkEmailDuplicate = async () => {
         if (!email) {
@@ -67,6 +103,11 @@ export default function SignupPage() {
             return
         }
 
+        if (!bootcamp) {
+            setError('부트캠프를 선택해주세요.')
+            return
+        }
+
         try {
             const response = await fetch('http://localhost:8090/api/oauth2/complete-signup', {
                 method: 'POST',
@@ -78,7 +119,7 @@ export default function SignupPage() {
                     oauthId,
                     email,
                     bootcamp: bootcamp || null,
-                    generation: generation ? parseInt(generation) : null,
+                    generation: generation || null,
                 }),
             })
 
@@ -146,29 +187,52 @@ export default function SignupPage() {
 
                     <div className="relative">
                         <label htmlFor="bootcamp" className="block text-sm font-medium text-gray-700 mb-1">
-                            부트캠프 (선택)
+                            부트캠프 <span className="text-red-500">*</span>
                         </label>
-                        <input
-                            id="bootcamp"
-                            type="text"
-                            value={bootcamp}
-                            onChange={(e) => setBootcamp(e.target.value)}
-                            className="w-full h-[50px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 focus:placeholder-transparent text-black"
-                            placeholder="부트캠프명 (선택사항)"
-                        />
+                        <div className="relative">
+                            <select
+                                id="bootcamp"
+                                value={bootcamp}
+                                onChange={(e) => setBootcamp(e.target.value)}
+                                required
+                                className="w-full h-[50px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 focus:placeholder-transparent text-black appearance-none bg-white pr-10"
+                            >
+                                <option value="" className="text-gray-400">
+                                    부트캠프를 선택해주세요
+                                </option>
+                                <option value="멋쟁이 사자처럼">멋쟁이 사자처럼</option>
+                                <option value="SSAFY">SSAFY</option>
+                                <option value="우아한 테크코스">우아한 테크코스</option>
+                                <option value="항해 99">항해 99</option>
+                                <option value="네이버 부스트캠프">네이버 부스트캠프</option>
+                                <option value="스파르타">스파르타</option>
+                                <option value="프로그래머스 데브코스">프로그래머스 데브코스</option>
+                                <option value="한화시스템 BEYOND SW캠프">한화시스템 BEYOND SW캠프</option>
+                                <option value="그 외">그 외</option>
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="relative">
                         <label htmlFor="generation" className="block text-sm font-medium text-gray-700 mb-1">
-                            기수 (선택)
+                            과정/기수 (선택)
                         </label>
                         <input
                             id="generation"
-                            type="number"
+                            type="text"
                             value={generation}
                             onChange={(e) => setGeneration(e.target.value)}
                             className="w-full h-[50px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-500 focus:placeholder-transparent text-black"
-                            placeholder="기수 (선택사항)"
+                            placeholder="자바 백엔드/13기"
                         />
                     </div>
 

@@ -338,6 +338,7 @@ export const processEditorContent = async (
             return null
         }
     }
+
     return null
 }
 

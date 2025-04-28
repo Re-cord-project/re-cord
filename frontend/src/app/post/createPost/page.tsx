@@ -66,6 +66,7 @@ const CreatePostPage = () => {
             title: '',
             content: '',
             categoryId: undefined, // 카테고리 ID를 undefined로 설정하여 기본값으로 ID 1이 선택되지 않도록 함
+
         },
     })
 

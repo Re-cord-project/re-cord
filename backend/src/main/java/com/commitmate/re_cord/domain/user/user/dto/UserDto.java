@@ -25,7 +25,7 @@ public class UserDto {
 
     private final String bootcamp;
 
-    private final int generation;
+    private final String generation;
 
     public UserDto(User user) {
         this.id = user.getId();
