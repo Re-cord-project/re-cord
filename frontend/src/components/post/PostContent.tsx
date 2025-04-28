@@ -64,18 +64,17 @@ const useUserInfo = (userId: number) => {
 
                 if (userProfileResponse.ok) {
                     const profileImageUrl = await userProfileResponse.text()
+                    const isValidUrl =
+                        profileImageUrl && profileImageUrl.trim() !== '' && profileImageUrl.trim() !== 'null'
 
-                    // 유효한 URL 확인
-                    if (profileImageUrl && profileImageUrl.trim() !== '' && profileImageUrl.trim() !== 'null') {
-                        const finalProfileUrl = getFormattedProfileUrl(profileImageUrl)
-                        setUserInfo({ profileImageUrl: finalProfileUrl })
-                    } else {
-                        setUserInfo({ profileImageUrl: '/default-profile.png' })
-                    }
+                    setUserInfo({
+                        profileImageUrl: isValidUrl ? getFormattedProfileUrl(profileImageUrl) : '/default-profile.png',
+                    })
                 } else {
                     setUserInfo({ profileImageUrl: '/default-profile.png' })
                 }
             } catch (error) {
+                console.error('사용자 프로필 이미지를 불러오는 중 오류 발생:', error)
                 setUserInfo({ profileImageUrl: '/default-profile.png' })
             } finally {
                 setIsLoadingUser(false)
@@ -94,20 +93,33 @@ const useLikeStatus = (postId: number, initialLikes: number) => {
     const [localLikes, setLocalLikes] = useState(initialLikes)
     const [isLoading, setIsLoading] = useState(false)
     const [isInitialized, setIsInitialized] = useState(false)
+    const { isLogin } = useGlobalLoginUser()
+
+    useEffect(() => {
+        // 글 정보가 변경될 때마다 좋아요 카운트 동기화
+        setLocalLikes(initialLikes)
+    }, [initialLikes])
 
     useEffect(() => {
         const fetchLikeStatus = async () => {
+            // 로그인 상태가 아니면 좋아요 체크를 하지 않음
+            if (!isLogin) {
+                setIsInitialized(true)
+                return
+            }
+
             try {
                 const liked = await checkPostLikeStatus(postId)
                 setIsLiked(liked)
-                setIsInitialized(true)
             } catch (error) {
+                console.error('좋아요 상태 확인 중 오류 발생:', error)
+            } finally {
                 setIsInitialized(true)
             }
         }
 
         fetchLikeStatus()
-    }, [postId])
+    }, [postId, isLogin])
 
     const handleLikeToggle = async (e: React.MouseEvent) => {
         e.preventDefault()
@@ -115,17 +127,23 @@ const useLikeStatus = (postId: number, initialLikes: number) => {
 
         if (isLoading || !isInitialized) return
 
+        if (!isLogin) {
+            alert('좋아요를 누르려면 먼저 로그인해 주세요.')
+            return
+        }
+
         setIsLoading(true)
 
         try {
             const success = await togglePostLike(postId)
 
             if (success) {
-                setIsLiked(!isLiked)
+                setIsLiked((prev) => !prev)
                 setLocalLikes((prev) => (isLiked ? prev - 1 : prev + 1))
             }
         } catch (error) {
-            // 에러 처리
+            console.error('좋아요 상태 변경 중 오류 발생:', error)
+            alert('좋아요 처리 중 오류가 발생했습니다. 다시 시도해 주세요.')
         } finally {
             setIsLoading(false)
         }
@@ -136,15 +154,14 @@ const useLikeStatus = (postId: number, initialLikes: number) => {
 
 // 유틸리티 함수
 const getFormattedProfileUrl = (profileImageUrl: string): string => {
-    if (profileImageUrl.startsWith('http')) {
-        return profileImageUrl
-    } else if (profileImageUrl === '/profile.jpg' || profileImageUrl === '/default-profile.png') {
-        return profileImageUrl
-    } else if (profileImageUrl.startsWith('/')) {
-        return `${API_BASE_URL}${profileImageUrl}`
-    } else {
-        return `${API_BASE_URL}/${profileImageUrl}`
-    }
+    if (!profileImageUrl) return '/default-profile.png'
+
+    if (profileImageUrl.startsWith('http')) return profileImageUrl
+
+    if (profileImageUrl === '/profile.jpg' || profileImageUrl === '/default-profile.png') return profileImageUrl
+
+    // API 서버 경로 처리
+    return profileImageUrl.startsWith('/') ? `${API_BASE_URL}${profileImageUrl}` : `${API_BASE_URL}/${profileImageUrl}`
 }
 
 const formatTimeAgo = (dateString: string | null): string => {
@@ -173,7 +190,7 @@ const extractTagsFromContent = (content: string): string[] => {
     const hashtagRegex = /#(\w+)/g
     const matches = content.match(hashtagRegex) || []
     const uniqueTags = [...new Set(matches.map((tag) => tag.substring(1)))]
-    return uniqueTags.slice(0, 5)
+    return uniqueTags.slice(0, 5) // 최대 5개 태그만 표시
 }
 
 const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refreshPost, loginUserId }) => {
@@ -195,7 +212,7 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
             ? [post.categoryName, ...defaultTags.slice(0, 2)]
             : defaultTags
 
-    // 게시글 수정 및 삭제 핸들러
+    // 게시글 수정 핸들러
     const handleEditClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
@@ -210,10 +227,10 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
             return
         }
 
-        // 수정 페이지로 이동
         router.push(`/post/createPost?edit=true&postId=${post.id}`)
     }
 
+    // 게시글 삭제 핸들러
     const handleDeleteClick = async (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
@@ -230,10 +247,12 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
                 alert('게시글이 성공적으로 삭제되었습니다.')
                 router.push('/post/postList')
             } else {
-                alert('게시글 삭제에 실패했습니다.')
+                const errorData = await response.json().catch(() => null)
+                throw new Error(errorData?.message || '게시글 삭제에 실패했습니다.')
             }
         } catch (error) {
-            alert('게시글 삭제 중 오류가 발생했습니다.')
+            console.error('게시글 삭제 오류:', error)
+            alert(error instanceof Error ? error.message : '게시글 삭제 중 오류가 발생했습니다.')
         }
     }
 

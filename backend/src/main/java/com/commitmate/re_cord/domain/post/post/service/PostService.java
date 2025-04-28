@@ -374,6 +374,20 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    // 작성자의 모든 게시글 조회 (userId 기준)
+    public Page<PostResponseDto> getAllPostsByUser(Long userId, int page, int size) {
+        // 유저 존재 여부 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다. id=" + userId));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Post> postPage = postRepository.findAllByUserIdWithImages(userId, pageable);
+
+        return postPage.map(PostResponseDto::new);
+    }
+
+
     public boolean isPostLikedByUser(Long postId, Long userId) {
         return postLikeRepository.existsByPostIdAndUserId(postId, userId);
     }
