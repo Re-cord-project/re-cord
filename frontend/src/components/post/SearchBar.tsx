@@ -3,6 +3,9 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 const SearchBar: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState('')
     const router = useRouter()
@@ -13,7 +16,7 @@ const SearchBar: React.FC = () => {
 
         try {
             const response = await fetch(
-                `http://localhost:8090/api/posts/search?keyword=${encodeURIComponent(searchTerm)}&page=0&size=10`,
+                `${API_BASE_URL}/api/posts/public/search?keyword=${encodeURIComponent(searchTerm)}&page=0&size=10`,
                 {
                     // 헤더 없이 쿠키만 사용
                     credentials: 'include', // 쿠키 기반 인증을 위해 사용

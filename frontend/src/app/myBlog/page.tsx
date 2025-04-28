@@ -19,8 +19,9 @@ interface Post {
     title: string
     content: string
     categoryName: string | null
+    categoryId: number
     username: string | null
-    authorId: number
+    userId: number
     views: number
     likes: number
     status: string | null
@@ -87,7 +88,8 @@ const HomePage: React.FC = () => {
               ...latestPost,
               categoryName: latestPost.categoryName || null,
               username: latestPost.username || null,
-              authorId: userId, // 현재 로그인한 사용자 ID 사용
+              userId: userId, // 현재 로그인한 사용자 ID 사용
+              categoryId: 0,
               status: null,
               updateStatus: null,
               updatedAt: null,

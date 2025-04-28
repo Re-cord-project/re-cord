@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 
 // API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8090'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 // 게시 상태 타입 정의
 export type PostStatus = 'PUBLISHED'
@@ -15,25 +15,28 @@ interface PostData {
     content: string
     categoryId: number
     status: PostStatus
+    userId?: number // userId 필드 추가 (선택적으로 설정)
+    images?: File[] // 이미지 파일 리스트 추가
 }
 
-// HTML 태그를 제거하는 함수
-const stripHtmlTags = (html: string): string => {
-    // 브라우저 환경이라면 DOMParser 사용
-    if (typeof window !== 'undefined' && typeof DOMParser !== 'undefined') {
-        try {
-            const doc = new DOMParser().parseFromString(html, 'text/html')
-            return doc.body.textContent || ''
-        } catch (e) {
-            console.error('DOMParser 파싱 에러:', e)
-            // 파싱 실패 시 정규식으로 대체
-            return html.replace(/<[^>]*>/g, '')
-        }
-    }
+// HTML 태그를 제거하는 함수 (사용하지 않음 - 주석으로 남김)
+// content를 저장할 때는 HTML을 그대로 보존해야 이미지 태그가 유지됨
+// const stripHtmlTags = (html: string): string => {
+//     // 브라우저 환경이라면 DOMParser 사용
+//     if (typeof window !== 'undefined' && typeof DOMParser !== 'undefined') {
+//         try {
+//             const doc = new DOMParser().parseFromString(html, 'text/html')
+//             return doc.body.textContent || ''
+//         } catch (e) {
+//             console.error('DOMParser 파싱 에러:', e)
+//             // 파싱 실패 시 정규식으로 대체
+//             return html.replace(/<[^>]*>/g, '')
+//         }
+//     }
 
-    // 서버 사이드나 DOMParser를 사용할 수 없는 환경에서는 정규식 사용
-    return html.replace(/<[^>]*>/g, '')
-}
+//     // 서버 사이드나 DOMParser를 사용할 수 없는 환경에서는 정규식 사용
+//     return html.replace(/<[^>]*>/g, '')
+// }
 
 export const useCreatePost = () => {
     const router = useRouter()
@@ -55,23 +58,58 @@ export const useCreatePost = () => {
 
             console.log('로그인 상태:', isLogin, '사용자 ID:', loginUser.id)
 
-            // HTML 태그 제거하여 순수 텍스트만 전송
-            const processedData = {
+            // FormData 객체 생성
+            const formData = new FormData()
+
+            // 모든 데이터를 JSON으로 변환하여 'dto' 필드에 추가
+            const dtoData = {
                 title: postData.title,
-                content: stripHtmlTags(postData.content),
+                content: postData.content, // HTML 태그 제거하지 않고 그대로 사용
                 categoryId: postData.categoryId,
                 status: postData.status,
+                userId: postData.userId || loginUser.id,
             }
 
-            console.log('백엔드 API 요청 페이로드(HTML 태그 제거):', processedData)
+            // JSON 문자열로 변환하여 'dto' 필드로 추가
+            const dtoBlob = new Blob([JSON.stringify(dtoData)], { type: 'application/json' })
+            formData.append('dto', dtoBlob)
 
+            console.log('백엔드 API 요청 페이로드(dto):', dtoData)
+
+            // 이미지 파일이 있으면 추가
+            if (postData.images && postData.images.length > 0) {
+                console.log(`총 ${postData.images.length}개의 이미지 파일이 업로드됩니다.`)
+
+                // 각 이미지 파일을 'images' 필드로 추가
+                for (let i = 0; i < postData.images.length; i++) {
+                    const file = postData.images[i]
+                    // 백엔드에서 @RequestPart List<MultipartFile> images로 받을 수 있도록
+                    // 모든 파일을 동일한 필드명 'images'로 추가
+                    formData.append('images', file)
+                    console.log(`이미지 파일 ${i + 1} 추가:`, file.name, `(${file.size} bytes, ${file.type})`)
+                }
+            } else {
+                console.log('업로드할 이미지 파일이 없습니다.')
+            }
+
+            // FormData 내용 확인 (디버깅용)
+            console.log('FormData에 포함된 항목:')
+            for (const pair of formData.entries()) {
+                if (pair[0] === 'dto') {
+                    console.log('dto: [JSON Blob]')
+                } else if (pair[0] === 'images') {
+                    console.log(`${pair[0]}: ${(pair[1] as File).name}`)
+                } else {
+                    console.log(`${pair[0]}: ${pair[1]}`)
+                }
+            }
+
+            // 실제 게시글 생성 요청
             const response = await fetch(`${API_BASE_URL}/api/posts`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                // Content-Type 헤더를 명시적으로 설정하지 않음 - 브라우저가 자동으로 multipart/form-data로 설정
                 credentials: 'include', // 쿠키 기반 인증을 사용
-                body: JSON.stringify(processedData),
+                body: formData,
             })
 
             if (!response.ok) {

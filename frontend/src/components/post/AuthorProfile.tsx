@@ -1,14 +1,17 @@
 'use client'
+
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { useGlobalLoginUser } from '../../app/stores/auth/loginUser'
+import { FollowButton } from '@/components/follow/FollowButton'
 
 interface AuthorStats {
     followers: number
     following: number
     posts: number
 }
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 interface Author {
     id: number
@@ -33,7 +36,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
     const [author, setAuthor] = useState<Author | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const [isFollowing, setIsFollowing] = useState(false)
+    const [hasFollowed, setHasFollowed] = useState(false)
     const [followLoading, setFollowLoading] = useState(false)
 
     // URL에서 사용자 ID를 가져오거나 전달받은 userId 또는 로그인한 사용자 ID를 사용
@@ -41,6 +44,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
 
     useEffect(() => {
         const fetchUserProfile = async () => {
+            // 조회 대상 사용자 ID 확인 및 없으면 반환
             if (!targetUserId) {
                 setIsLoading(false)
                 return
@@ -49,27 +53,27 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
             try {
                 setIsLoading(true)
 
-                // 로그인한 사용자 정보를 사용하는 경우 API 호출 없이 바로 사용
-                if (isLogin && targetUserId === loginUser.id) {
-                    // 임시로 통계 정보 추가 (실제 데이터가 없는 경우)
-                    setAuthor({
-                        ...loginUser,
-                        introduction: loginUser.bootcamp ? `${loginUser.bootcamp} ${loginUser.generation}기` : '',
-                        profileImageUrl: '/profile.png',
-                        provider: 'local',
-                        role: loginUser.bootcamp || '개발자',
-                        stats: {
-                            followers: 0,
-                            following: 0,
-                            posts: 0,
-                        },
-                    })
-                    setIsLoading(false)
-                    return
-                }
+                // // 로그인한 사용자 정보를 사용하는 경우 API 호출 없이 바로 사용
+                // if (isLogin && targetUserId === loginUser.id) {
+                //     // 임시로 통계 정보 추가 (실제 데이터가 없는 경우)
+                //     setAuthor({
+                //         ...loginUser,
+                //         introduction: loginUser.bootcamp ? `${loginUser.bootcamp} ${loginUser.generation}기` : '',
+                //         profileImageUrl: '/profile.png',
+                //         provider: 'local',
+                //         role: loginUser.bootcamp || '개발자',
+                //         stats: {
+                //             followers: 0,
+                //             following: 0,
+                //             posts: 0,
+                //         },
+                //     })
+                //     setIsLoading(false)
+                //     return
+                // }
 
                 // 인증된 요청으로 사용자 정보 가져오기
-                const response = await fetch(`http://localhost:8090/api/auth/${targetUserId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/auth/${targetUserId}`, {
                     method: 'GET',
                     credentials: 'include', // 쿠키 인증을 위해 추가
                 })
@@ -88,15 +92,19 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                 // 기본 통계 정보 설정
                 let stats = { followers: 0, following: 0, posts: 0 }
 
-                // 별도의 통계 API가 있는 경우 호출 (없으면 기본값 사용)
+                // 단일 counts API 호출로 팔로우/팔로잉 통계 갱신
                 try {
-                    const statsResponse = await fetch(`http://localhost:8090/api/users/${targetUserId}/stats`, {
-                        credentials: 'include', // 쿠키 인증을 위해 추가
-                    })
-
-                    if (statsResponse.ok) {
-                        const statsData = await statsResponse.json()
-                        stats = statsData
+                    const resCounts = await fetch(
+                        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${targetUserId}/counts`,
+                        { credentials: 'include' },
+                    )
+                    if (resCounts.ok) {
+                        const { followerCount, followingCount } = await resCounts.json()
+                        stats = {
+                            followers: followerCount,
+                            following: followingCount,
+                            posts: stats.posts, // 필요 시 게시글 수도 업데이트
+                        }
                     }
                 } catch (statsErr) {
                     console.warn('통계 정보 로드 실패 (기본값 사용):', statsErr)
@@ -109,97 +117,27 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                     role: userData.bootcamp || '개발자',
                 })
 
-                // 로그인 사용자가 이 사용자를 팔로우하는지 확인
+                // 팔로우 상태 체크 (로그인 사용자 대상)
                 if (isLogin && loginUser.id !== targetUserId) {
-                    checkFollowStatus(targetUserId)
-                }
-            } catch (err) {
-                console.error('사용자 정보 로드 오류:', err)
-
-                // 오류가 발생하면 로그인 사용자 정보를 사용하는 대체 데이터 표시
-                if (isLogin) {
-                    setAuthor({
-                        ...loginUser,
-                        introduction: loginUser.bootcamp ? `${loginUser.bootcamp} ${loginUser.generation}기` : '',
-                        profileImageUrl: '/profile.png',
-                        provider: 'local',
-                        role: loginUser.bootcamp || '개발자',
-                        stats: {
-                            followers: 0,
-                            following: 0,
-                            posts: 0,
-                        },
+                    const resFollow = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/follow`, {
+                        credentials: 'include',
                     })
-                } else {
-                    setError(err instanceof Error ? err.message : '사용자 정보를 불러오는 데 문제가 발생했습니다.')
+                    if (resFollow.ok) {
+                        const list: Array<{ userId: number }> = await resFollow.json()
+                        setHasFollowed(
+                            list.some((u) => u.userId === targetUserId), // 팔로우 중인지 판단
+                        )
+                    }
                 }
+            } catch (e: any) {
+                console.error('사용자 정보 로드 오류:', e)
+                setError(e.message) // 에러 메시지 설정
             } finally {
                 setIsLoading(false)
             }
         }
-
         fetchUserProfile()
-    }, [targetUserId, isLogin, loginUser])
-
-    // 팔로우 상태 확인
-    const checkFollowStatus = async (targetId: number) => {
-        if (!isLogin) return
-
-        try {
-            const response = await fetch(`http://localhost:8090/api/follows/check/${loginUser.id}/${targetId}`, {
-                credentials: 'include', // 쿠키 인증을 위해 추가
-            })
-
-            if (response.ok) {
-                const data = await response.json()
-                setIsFollowing(data.following)
-            }
-        } catch (err) {
-            console.error('팔로우 상태 확인 오류:', err)
-        }
-    }
-
-    // 팔로우/언팔로우 토글
-    const handleFollowToggle = async () => {
-        if (!isLogin || !author || followLoading) return
-
-        setFollowLoading(true)
-        try {
-            // 새로운 컨트롤러에 맞게 팔로우 엔드포인트 수정
-            const endpoint = isFollowing
-                ? `http://localhost:8090/api/follows/unfollow/${loginUser.id}/${author.id}`
-                : `http://localhost:8090/api/${loginUser.id}/follow/${author.id}`
-
-            const method = isFollowing ? 'DELETE' : 'POST'
-
-            const response = await fetch(endpoint, {
-                method,
-                credentials: 'include', // 쿠키 인증을 위해 추가
-            })
-
-            if (response.ok) {
-                // 팔로우 상태 및 통계 업데이트
-                setIsFollowing(!isFollowing)
-
-                // 통계 수치 업데이트 (팔로워 수 변경)
-                if (author) {
-                    setAuthor({
-                        ...author,
-                        stats: {
-                            ...author.stats,
-                            followers: isFollowing ? author.stats.followers - 1 : author.stats.followers + 1,
-                        },
-                    })
-                }
-            } else {
-                console.error('팔로우 작업 실패')
-            }
-        } catch (err) {
-            console.error('팔로우 토글 오류:', err)
-        } finally {
-            setFollowLoading(false)
-        }
-    }
+    }, [targetUserId, isLogin, loginUser.id])
 
     if (isLoading) {
         return <div className="bg-white rounded-lg shadow-sm p-6 mb-6">프로필 로딩 중...</div>
@@ -267,11 +205,11 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                 <p className="text-xs text-gray-500 mt-1">{author.role}</p>
                 <div className="flex justify-between w-full mt-4 text-xs text-gray-600">
                     <div className="text-center">
-                        <div className="font-bold">{author.stats.followers}</div>
+                        <div className="font-bold">{author.stats.following}</div>
                         <div>팔로워</div>
                     </div>
                     <div className="text-center">
-                        <div className="font-bold">{author.stats.following}</div>
+                        <div className="font-bold">{author.stats.followers}</div>
                         <div>팔로잉</div>
                     </div>
                     <div className="text-center">
@@ -289,17 +227,25 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                             글 작성하기
                         </Link>
                     ) : isLogin ? (
-                        <button
-                            onClick={handleFollowToggle}
-                            disabled={followLoading}
-                            className={`w-full py-2 text-sm font-medium rounded-md transition-colors cursor-pointer !rounded-button flex justify-center items-center ${
-                                isFollowing
-                                    ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                                    : 'bg-[#78B3CE] text-white hover:bg-[#5C9CB9]'
-                            }`}
-                        >
-                            {followLoading ? '처리 중...' : isFollowing ? '언팔로우' : '팔로우'}
-                        </button>
+                        <FollowButton
+                            userId={author.id.toString()}
+                            initialHasFollowed={hasFollowed}
+                            onFollowStatusChange={(newStatus) => {
+                                // 부모 컴포넌트 state 업데이트
+                                setHasFollowed(newStatus)
+                                setAuthor((prev) =>
+                                    prev
+                                        ? {
+                                              ...prev,
+                                              stats: {
+                                                  ...prev.stats,
+                                                  followers: prev.stats.followers + (newStatus ? 1 : -1),
+                                              },
+                                          }
+                                        : prev,
+                                )
+                            }}
+                        />
                     ) : null}
                 </div>
             </div>

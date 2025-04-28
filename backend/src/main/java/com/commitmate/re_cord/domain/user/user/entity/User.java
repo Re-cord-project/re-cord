@@ -1,5 +1,6 @@
 package com.commitmate.re_cord.domain.user.user.entity;
 
+import com.commitmate.re_cord.domain.post.category.entity.Category;  // Category 클래스 import 추가
 import com.commitmate.re_cord.domain.user.block.entity.Block;
 import com.commitmate.re_cord.domain.user.follow.entity.Follow;
 import com.commitmate.re_cord.domain.user.user.enums.Provider;
@@ -24,9 +25,10 @@ import java.util.List;
 @SuperBuilder
 @Builder
 @ToString
-@Table(name="users") //user는 h2데이터베이스 기본 예약어
+@Table(name="users") // user는 h2데이터베이스 기본 예약어
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User extends BaseEntity {
+
     private String oauthId;    // 카카오에서 받아올 oauthId -> 추가 필요
     private String email;
     private String username;
@@ -41,7 +43,6 @@ public class User extends BaseEntity {
 
     @Column(nullable = true)
     private String profileImageUrl; //프로필 이미지, 기본값 제공
-
 
     @Enumerated(EnumType.STRING)
     private Provider provider;
@@ -63,6 +64,10 @@ public class User extends BaseEntity {
     // 나를 차단한 사용자들
     @OneToMany(mappedBy = "blockedId")
     private List<Block> blockedList = new ArrayList<>();
+
+    // 내가 만든 카테고리 목록 (OneToMany)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Category> categories = new ArrayList<>();
 
     public User(long id, String oauthId, String username) {
         this.setId(id);
@@ -99,5 +104,4 @@ public class User extends BaseEntity {
 
         return authorities;
     }
-
 }

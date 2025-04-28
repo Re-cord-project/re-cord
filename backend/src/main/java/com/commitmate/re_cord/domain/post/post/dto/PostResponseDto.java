@@ -45,10 +45,7 @@ public class PostResponseDto {
         this.createdAt = post.getCreatedAt() != null ? post.getCreatedAt().toString() : null;
         this.updatedAt = post.getUpdatedAt() != null ? post.getUpdatedAt().toString() : null;
 
-        // ✅ 이미지 URL 리스트 추출
-        this.imageUrls = post.getImages().stream()
-                .map(image -> image.getUrl())
-                .collect(Collectors.toList());
+
     }
 
     private String getEnumName(Enum<?> enumValue) {
