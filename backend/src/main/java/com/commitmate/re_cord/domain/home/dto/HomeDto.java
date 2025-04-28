@@ -15,6 +15,8 @@ public class HomeDto {
     private String username;
     private int likes;
     private String createdAt;
+    private Long userId;
+    private String profileImageUrl;
 
     public static HomeDto from(Post post) {
         return new HomeDto(
@@ -23,7 +25,9 @@ public class HomeDto {
                 post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl(),
                 post.getUser().getUsername(),
                 post.getLikes(),
-                post.getCreatedAt().toString() // 포맷 원하면 포맷팅 추가 가능
+                post.getCreatedAt().toString(), // 포맷 원하면 포맷팅 추가 가능
+                post.getUser().getId(),
+                post.getUser().getProfileImageUrl()
         );
     }
 

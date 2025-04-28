@@ -52,6 +52,7 @@ public class UserService {
         user.setGeneration(dto.getGeneration());
         user.setRole(Role.basic);
         user.setBlogName(blogName);
+        user.setProfileImageUrl("https://re-cord.s3.ap-northeast-2.amazonaws.com/user/profile/default-profile.png");
         userRepository.save(user);
         return "User registered successfully";
     }
@@ -133,6 +134,7 @@ public class UserService {
                 .password(password)
                 .provider(provider)
                 .refreshToken(UUID.randomUUID().toString())
+                .profileImageUrl("https://re-cord.s3.ap-northeast-2.amazonaws.com/user/profile/default-profile.png")
                 .build();
 
         return userRepository.save(user);
@@ -211,6 +213,7 @@ public class UserService {
                     .username(username)
                     .provider(provider)
                     .refreshToken(UUID.randomUUID().toString())
+                    .profileImageUrl("https://re-cord.s3.ap-northeast-2.amazonaws.com/user/profile/default-profile.png ")
                     .role(Role.basic)
                     .build();
 
