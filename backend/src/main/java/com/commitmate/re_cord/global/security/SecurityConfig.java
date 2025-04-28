@@ -44,6 +44,8 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/users/*/counts", "/api/posts/public/**")
                                 .permitAll()
+                                .requestMatchers("api/home/**")
+                                .permitAll()
                                 .requestMatchers("/api/auth/check-email")
                                 .permitAll()
                                 .anyRequest()

@@ -4,8 +4,10 @@ import com.commitmate.re_cord.domain.post.post.entity.Post;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class HomeDto {
@@ -17,6 +19,11 @@ public class HomeDto {
     private String createdAt;
     private Long userId;
     private String profileImageUrl;
+
+    public void updateThumbnailUrl(String defaultThumbnailUrl) {
+        this.thumbnailUrl = defaultThumbnailUrl;
+    }
+
 
     public static HomeDto from(Post post) {
         return new HomeDto(

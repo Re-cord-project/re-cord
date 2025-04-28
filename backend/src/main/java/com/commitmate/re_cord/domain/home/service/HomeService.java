@@ -43,8 +43,15 @@ public class HomeService {
 
         Page<Post> posts = postRepository.findWeeklyPopularPosts(thisMonday, pageable);
         return posts.stream()
-                .map(HomeDto::from)
+                .map(post -> {
+                    HomeDto homeDto = HomeDto.from(post);
+                    if (homeDto.getThumbnailUrl() == null) {
+                        homeDto.updateThumbnailUrl("https://re-cord.s3.ap-northeast-2.amazonaws.com/user/profile/default-thumbnail.png");
+                    }
+                    return homeDto;
+                })
                 .collect(Collectors.toList());
+
     }
 
     public String findTopBootcampName() {

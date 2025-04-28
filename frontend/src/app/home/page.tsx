@@ -3,7 +3,8 @@
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import RecentPosts from '@/components/home/RecentPosts'; // ✅ 최근 회고록 컴포넌트만 따로
+import RecentPosts from '@/components/home/RecentPosts'; 
+import WeeklyPopularPosts from '@/components/home/WeeklyPopularPosts';
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,6 +62,9 @@ export default function HomePage() {
 
       {/* 최근 올라온 회고록 */}
       <RecentPosts />
+
+      {/* 이번 주 인기 회고록 */}
+      <WeeklyPopularPosts />
 
       {/* 플로팅 버튼 */}
       <div className="fixed bottom-6 right-6">
