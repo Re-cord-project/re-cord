@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/posts")
+@RequestMapping("/api/posts/public")
 public class ApiV1PostReadController {
     private final PostService postService;
     private final MyPagePostService myPagePostService;
@@ -88,15 +88,6 @@ public class ApiV1PostReadController {
         return postService.getAllPostsByUser(userid);
     }
 
-    @GetMapping("/{postId}/like/status")
-    public ResponseEntity<Boolean> checkLikeStatus(
-            @PathVariable Long postId,
-            @AuthenticationPrincipal SecurityUser securityUser
-    ) {
-        long userId = securityUser.getId(); // ✅ SecurityUser에서 직접 ID 추출
-        boolean isLiked = postService.isPostLikedByUser(postId, userId);
-        return ResponseEntity.ok(isLiked);
-    }
 
     // 특정 사용자의 게시글 조회수 총합
     @GetMapping("/views/{userId}")

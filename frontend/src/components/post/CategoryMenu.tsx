@@ -13,6 +13,7 @@ interface Category {
 interface CategoryRequest {
     name: string
 }
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 const CategoryMenu: React.FC = () => {
     const router = useRouter()
@@ -51,7 +52,7 @@ const CategoryMenu: React.FC = () => {
             // 디버깅용 쿠키 확인
             console.log('쿠키 정보:', document.cookie)
 
-            const response = await fetch('http://localhost:8090/api/categories', {
+            const response = await fetch(`${API_BASE_URL}/api/categories`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -81,7 +82,13 @@ const CategoryMenu: React.FC = () => {
                 throw new Error('잘못된 응답 형식입니다. 배열 형태의 카테고리 데이터가 필요합니다.')
             }
 
-            setCategories(data)
+            // 각 카테고리에 postCount 값이 없거나 undefined인 경우 0으로 설정
+            const categoriesWithCounts = data.map((category) => ({
+                ...category,
+                postCount: category.postCount !== undefined ? category.postCount : 0,
+            }))
+
+            setCategories(categoriesWithCounts)
         } catch (err) {
             console.error('카테고리 로딩 오류:', err)
             setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.')
@@ -125,7 +132,7 @@ const CategoryMenu: React.FC = () => {
         try {
             console.log('카테고리 생성 요청 시작, 이름:', newCategoryName)
 
-            const response = await fetch('http://localhost:8090/api/categories', {
+            const response = await fetch(`${API_BASE_URL}/api/categories`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -231,7 +238,7 @@ const CategoryMenu: React.FC = () => {
             setDeleteError(null)
 
             try {
-                const response = await fetch(`http://localhost:8090/api/categories/${categoryId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/categories/${categoryId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

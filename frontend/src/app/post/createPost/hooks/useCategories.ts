@@ -7,6 +7,8 @@ interface Category {
     name: string
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 export const useCategories = () => {
     const [categories, setCategories] = useState<Category[]>([])
     const [isLoading, setIsLoading] = useState(true)
@@ -16,7 +18,7 @@ export const useCategories = () => {
         const fetchCategories = async () => {
             try {
                 setIsLoading(true)
-                const response = await fetch('http://localhost:8090/api/categories', {
+                const response = await fetch(`${API_BASE_URL}/api/categories`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',

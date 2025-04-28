@@ -19,6 +19,7 @@ interface Post {
     title: string
     content: string
     categoryName: string | null
+    categoryId: number
     username: string | null
     userId: number
     views: number
@@ -88,6 +89,7 @@ const HomePage: React.FC = () => {
               categoryName: latestPost.categoryName || null,
               username: latestPost.username || null,
               userId: userId, // 현재 로그인한 사용자 ID 사용
+              categoryId: 0,
               status: null,
               updateStatus: null,
               updatedAt: null,
