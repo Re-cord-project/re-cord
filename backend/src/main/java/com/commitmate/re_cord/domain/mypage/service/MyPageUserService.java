@@ -3,6 +3,7 @@ package com.commitmate.re_cord.domain.mypage.service;
 import com.commitmate.re_cord.domain.user.user.dto.UpdateUserDTO;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
+import com.commitmate.re_cord.global.config.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MyPageUserService {
 
     private final UserRepository userRepository;
+
 
 
     @Transactional(readOnly = true)
