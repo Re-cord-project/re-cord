@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 
 // API 기본 URL 설정
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8090'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 // 게시 상태 타입 정의
 export type PostStatus = 'PUBLISHED'

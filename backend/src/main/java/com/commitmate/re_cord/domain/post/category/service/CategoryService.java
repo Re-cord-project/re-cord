@@ -4,6 +4,7 @@ package com.commitmate.re_cord.domain.post.category.service;
 import com.commitmate.re_cord.domain.post.category.dto.CategoryRequest;
 import com.commitmate.re_cord.domain.post.category.entity.Category;
 import com.commitmate.re_cord.domain.post.category.repository.CategoryRepository;
+import com.commitmate.re_cord.domain.post.post.entity.Post;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import com.commitmate.re_cord.global.security.SecurityUser;
@@ -20,6 +21,8 @@ public class CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository; // UserRepository를 주입받아서 사용
+
+    private static final Long DEFAULT_CATEGORY_ID = 1L;
 
     // 카테고리 생성 (로그인한 사용자만 가능)
     public Category createCategory(long userId, String name) {
@@ -52,15 +55,25 @@ public class CategoryService {
     }
 
     // 카테고리 삭제 (로그인한 사용자만 가능)
+    @Transactional
     public boolean deleteCategory(Long categoryId, long userId) {
+        // 카테고리 조회
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다."));
 
-        if (category.getUser().getId() == userId) {
-            categoryRepository.delete(category);
-            return true;
+        // 사용자가 해당 카테고리의 소유자인지 확인
+        if (category.getUser().getId() != userId) {
+            return false; // 권한이 없으면 삭제 불가
         }
 
-        return false; // 권한이 없으면 삭제 불가
+        // 해당 카테고리에 속한 게시글들의 카테고리 변경 (기본 카테고리로)
+        for (Post post : category.getPosts()) {
+            post.setCategory(categoryRepository.findById(DEFAULT_CATEGORY_ID)
+                    .orElseThrow(() -> new IllegalArgumentException("기본 카테고리를 찾을 수 없습니다.")));
+        }
+
+        // 게시글 카테고리 변경 후 카테고리 삭제
+        categoryRepository.delete(category);
+        return true; // 삭제 완료
     }
 }

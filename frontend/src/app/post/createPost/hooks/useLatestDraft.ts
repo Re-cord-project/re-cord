@@ -10,6 +10,7 @@ interface LatestDraft {
     createdAt: string
     userId: number
 }
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 export const useLatestDraft = () => {
     const [latestDraft, setLatestDraft] = useState<LatestDraft | null>(null)
@@ -21,7 +22,7 @@ export const useLatestDraft = () => {
         setError(null)
 
         try {
-            const response = await fetch('http://localhost:8090/api/posts/drafts/latest', {
+            const response = await fetch(`${API_BASE_URL}/api/posts/drafts/latest`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

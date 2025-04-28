@@ -33,10 +33,12 @@ public class Category extends BaseEntity {
 
     // User와의 ManyToOne 관계 설정
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)  // 카테고리마다 user_id 외래키 설정
+    @JoinColumn(name = "user_id", nullable = true)  // 카테고리마다 user_id 외래키 설정
     private User user;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonIgnore
     private List<Post> posts = new ArrayList<>();
+
+
 }

@@ -42,6 +42,7 @@ interface PostResponse {
     numberOfElements: number
     empty: boolean
 }
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 export const usePosts = (userId?: number) => {
     const [posts, setPosts] = useState<Post[]>([])
@@ -59,10 +60,10 @@ export const usePosts = (userId?: number) => {
 
                 if (userId) {
                     // 특정 사용자의 모든 게시글 조회
-                    url = `http://localhost:8090/api/posts/${userId}/posts`
+                    url = `${API_BASE_URL}/api/posts/public/${userId}/posts`
                 } else {
                     // 모든 게시글 페이징 조회 (기존 로직)
-                    url = `http://localhost:8090/api/posts?page=${currentPage}&size=5&includeUsername=true`
+                    url = `${API_BASE_URL}/api/posts/public?page=${currentPage}&size=5&includeUsername=true`
                 }
 
                 const response = await fetch(url, {
@@ -70,8 +71,7 @@ export const usePosts = (userId?: number) => {
                     headers: {
                         'Content-Type': 'application/json',
                         Accept: 'application/json',
-                    },
-                    credentials: 'include', // 쿠키 인증 방식은 credentials: 'include'만으로 충분
+                    }
                 })
 
                 if (!response.ok) {

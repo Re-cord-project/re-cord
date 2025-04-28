@@ -65,7 +65,11 @@ const CreatePostPage = () => {
         defaultValues: {
             title: '',
             content: '',
+<<<<<<< HEAD
             categoryId: 2,
+=======
+            categoryId: undefined, // 카테고리 ID를 undefined로 설정하여 기본값으로 ID 1이 선택되지 않도록 함
+>>>>>>> origin/dev
         },
     })
 
@@ -113,11 +117,24 @@ const CreatePostPage = () => {
     }, [])
 
     // 에디터에 드래그된 이미지 처리 핸들러 (useCallback으로 최적화)
-    const handleEditorImageDrop = useCallback((file: File, previewUrl: string) => {
-        console.log('에디터에서 이미지 감지됨:', file.name)
-        setUploadedImages((prev) => [...prev, file])
-        setImagePreviewUrls((prev) => [...prev, previewUrl])
-    }, [])
+    const handleEditorImageDrop = useCallback(
+        (file: File, previewUrl: string) => {
+            console.log('에디터에서 이미지 감지됨:', file.name)
+
+            // 중복 확인: 파일 이름과 크기로 중복 확인
+            const isDuplicate = uploadedImages.some((img) => img.name === file.name && img.size === file.size)
+
+            // 중복된 이미지가 아닐 경우에만 추가
+            if (!isDuplicate) {
+                console.log('새 이미지 추가:', file.name)
+                setUploadedImages((prev) => [...prev, file])
+                setImagePreviewUrls((prev) => [...prev, previewUrl])
+            } else {
+                console.log('중복된 이미지 감지됨, 건너뜀:', file.name)
+            }
+        },
+        [uploadedImages],
+    )
 
     // submit 핸들러 최적화
     const onSubmit = useCallback(
@@ -135,6 +152,27 @@ const CreatePostPage = () => {
             try {
                 let finalContent = data.content
 
+                // categoryId가 null이나 undefined인 경우 기본값 설정
+                let categoryId = data.categoryId
+                if (!categoryId) {
+                    // 사용자 카테고리 찾기 (ID가 1이 아닌 카테고리)
+                    const userCategories = categories.filter((cat) => cat.id !== 1)
+                    if (userCategories.length > 0) {
+                        categoryId = userCategories[0].id
+                        console.log('카테고리 ID가 없어 첫 번째 사용자 카테고리로 설정:', categoryId)
+                    } else if (categories.length > 0) {
+                        // 최후의 수단으로 첫 번째 카테고리 사용
+                        categoryId = categories[0].id
+                        console.log('유효한 사용자 카테고리가 없어 첫 번째 카테고리 사용:', categoryId)
+                    }
+                }
+
+                // 이미지 로깅: 업로드할 이미지 확인
+                console.log(`업로드될 이미지 수: ${uploadedImages.length}`)
+                uploadedImages.forEach((img, idx) => {
+                    console.log(`이미지 ${idx + 1}: ${img.name}, 크기: ${img.size} 바이트, 타입: ${img.type}`)
+                })
+
                 // 에디터에서 blob 이미지 처리 (S3 업로드 후 URL 치환)
                 if (contentEditorRef.current?.processContentBeforeSubmit) {
                     console.log('본문 이미지 처리 시작...')
@@ -146,20 +184,24 @@ const CreatePostPage = () => {
 
                 // 수정 모드일 경우 updatePost 훅 사용
                 if (isEditMode && editPostId) {
-                    console.log(`게시글(ID: ${editPostId})을 수정합니다.`)
+                    console.log(`게시글(ID: ${editPostId})을 수정합니다. 카테고리 ID:`, categoryId)
                     result = await updatePost(editPostId, {
                         ...data,
                         content: finalContent, // 이미지가 S3 URL로 치환된 최종 콘텐츠
+                        categoryId: categoryId, // 유효한 카테고리 ID 사용
                         userId: loginUser.id, // 명시적으로 사용자 ID 지정
+                        images: uploadedImages, // 이미지 파일 배열 추가
                     })
                 }
                 // 새 글 작성의 경우 create API 사용
                 else {
-                    console.log('새 글을 작성하여 게시합니다.')
+                    console.log('새 글을 작성하여 게시합니다. 카테고리 ID:', categoryId)
                     result = await publishPost({
                         ...data,
                         content: finalContent, // 이미지가 S3 URL로 치환된 최종 콘텐츠
+                        categoryId: categoryId, // 유효한 카테고리 ID 사용
                         userId: loginUser.id, // 명시적으로 사용자 ID 지정
+                        images: uploadedImages, // 이미지 파일 배열 추가
                     })
                 }
 
@@ -177,7 +219,18 @@ const CreatePostPage = () => {
                 setIsProcessingImages(false)
             }
         },
-        [isLogin, loginUser, router, isEditMode, editPostId, updatePost, publishPost, uploadImageToS3],
+        [
+            isLogin,
+            loginUser,
+            router,
+            isEditMode,
+            editPostId,
+            updatePost,
+            publishPost,
+            uploadImageToS3,
+            categories,
+            uploadedImages,
+        ],
     )
 
     const handleCancel = () => {
@@ -232,16 +285,26 @@ const CreatePostPage = () => {
                 return
             }
 
+            // 기본 카테고리(ID 1)인 경우 사용자 카테고리로 변경
+            let categoryId = postData.categoryId
+            if (categoryId === 1 && categories.length > 0) {
+                const userCategories = categories.filter((cat) => cat.id !== 1)
+                if (userCategories.length > 0) {
+                    categoryId = userCategories[0].id
+                    console.log('기본 카테고리에서 사용자 카테고리로 변경:', categoryId)
+                }
+            }
+
             // 게시글 정보 폼에 설정
             console.log('폼에 게시글 데이터 설정:', {
                 title: postData.title,
                 content: postData.content,
-                categoryId: postData.categoryId,
+                categoryId: categoryId,
             })
 
             setValue('title', postData.title)
             setValue('content', postData.content)
-            setValue('categoryId', postData.categoryId)
+            setValue('categoryId', categoryId)
 
             // 작성자 확인 (보안 검사)
             if (postData.userId && loginUser && postData.userId !== loginUser.id) {
@@ -266,6 +329,22 @@ const CreatePostPage = () => {
             setValue('categoryId', post.categoryId)
         }
     }, [post, isEditMode, setValue])
+
+    // 카테고리 데이터가 로드되면 자동으로 첫 번째 유효한 카테고리로 설정 (기본 카테고리 ID 1 제외)
+    useEffect(() => {
+        if (categories.length > 0 && !isEditMode) {
+            // 사용자의 카테고리 찾기 (ID가 1이 아닌 카테고리)
+            const userCategories = categories.filter((cat) => cat.id !== 1)
+            if (userCategories.length > 0) {
+                // 첫 번째 유효한 카테고리로 설정
+                console.log('기본 카테고리 설정:', userCategories[0])
+                setValue('categoryId', userCategories[0].id)
+            } else if (categories.length > 0) {
+                // 사용자 카테고리가 없으면 첫 번째 카테고리 사용 (최후의 방법)
+                setValue('categoryId', categories[0].id)
+            }
+        }
+    }, [categories, isEditMode, setValue])
 
     if (isLoginUserPending || isCategoriesLoading || isLoadingPost || isLoadingPostData) {
         return (
@@ -313,11 +392,13 @@ const CreatePostPage = () => {
                                             onChange={(e) => field.onChange(Number(e.target.value))}
                                             className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         >
-                                            {categories.map((category) => (
-                                                <option key={category.id} value={category.id}>
-                                                    {category.name}
-                                                </option>
-                                            ))}
+                                            {categories
+                                                .filter((category) => category.id !== 1) // ID가 1인 기본 카테고리는 제외
+                                                .map((category) => (
+                                                    <option key={category.id} value={category.id}>
+                                                        {category.name}
+                                                    </option>
+                                                ))}
                                         </select>
                                     )}
                                 />

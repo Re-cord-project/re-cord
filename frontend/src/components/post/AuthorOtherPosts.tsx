@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons'
 
 // API 기본 URL 환경 변수
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8090'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 interface PostSummary {
     id: number
@@ -45,19 +45,18 @@ const AuthorOtherPosts: React.FC<AuthorOtherPostsProps> = ({ authorId, limit = 5
                 if (isPostDetailPage) {
                     // postDetail 페이지에서 사용할 때는 기존 API 호출
                     apiUrl = currentPostId
-                        ? `${API_BASE_URL}/api/posts/${authorId}/other-posts?excludePostId=${currentPostId}`
-                        : `${API_BASE_URL}/api/posts/${authorId}/other-posts`
+                        ? `${API_BASE_URL}/api/posts/public/${authorId}/other-posts?excludePostId=${currentPostId}`
+                        : `${API_BASE_URL}/api/posts/public/${authorId}/other-posts`
                 } else {
                     // postHome이나 otherBlogHome 페이지에서 사용할 때는 새 API 호출
-                    apiUrl = `${API_BASE_URL}/api/posts/${authorId}/posts`
+                    apiUrl = `${API_BASE_URL}/api/posts/public/${authorId}/posts`
                 }
 
                 console.log('호출하는 API URL:', apiUrl) // API URL 로깅
 
                 // fetch를 사용하고 쿠키 인증 방식 적용
                 const response = await fetch(apiUrl, {
-                    method: 'GET',
-                    credentials: 'include', // 쿠키 인증을 위해 추가
+                    method: 'GET'
                 })
 
                 // 401 Unauthorized 오류 처리
