@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,7 +30,7 @@ import java.util.UUID;
 public class UserService {
     private final AuthTokenService authTokenService;
     private final UserRepository userRepository;
-//    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     // 일반 회원가입
     @Transactional
@@ -38,15 +39,16 @@ public class UserService {
             return "Email already exists";
         }
 
-//        String encodedPassword = passwordEncoder.encode(password); // 비밀번호 암호화
+        // 비밀번호 인코딩
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
         // 블로그명 생성
         String blogName = generateBlogName(dto.getEmail());
 
 
         User user = new User();
         user.setEmail(dto.getEmail());
-//        user.setPassword(encodedPassword);
-        user.setPassword(dto.getPassword());
+        user.setPassword(encodedPassword);
+//        user.setPassword(dto.getPassword());
         user.setUsername(dto.getUsername());
         user.setBootcamp(dto.getBootcamp());
         user.setGeneration(dto.getGeneration());
@@ -74,16 +76,16 @@ public class UserService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
 
-//            if (passwordEncoder.matches(password, user.getPassword())) {
-//                String refreshToken = UUID.randomUUID().toString();
-//                user.setRefreshToken(refreshToken);
-//                userRepository.save(user);
-
-            // 평문 비교 (보안 위험 있음 - 테스트용만)
-            if (password.equals(user.getPassword())) {
+            if (passwordEncoder.matches(password, user.getPassword())) {
                 String refreshToken = UUID.randomUUID().toString();
                 user.setRefreshToken(refreshToken);
                 userRepository.save(user);
+
+//            // 평문 비교 (보안 위험 있음 - 테스트용만)
+//            if (password.equals(user.getPassword())) {
+//                String refreshToken = UUID.randomUUID().toString();
+//                user.setRefreshToken(refreshToken);
+//                userRepository.save(user);
 
                 String accessToken = authTokenService.genAccessToken(user);
                 return user.getRefreshToken() + " " + accessToken;
