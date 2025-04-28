@@ -7,7 +7,8 @@ import AuthorProfile from '@/components/post/AuthorProfile'
 import CategoryMenu from '@/components/post/CategoryMenu'
 import Statistics from '@/components/post/Statistics'
 import SearchBar from '@/components/post/SearchBar'
-import { useLatestPost } from './hooks/useLatestPost'
+// Blog 폴더의 useLatestPost 훅으로 변경
+import { useLatestPost } from '@/app/Blog/hooks/useLatestPost'
 import PostContent from '@/components/post/PostContent'
 import PostComments from '@/components/comment/commentSection'
 import AuthorOtherPosts from '@/components/post/AuthorOtherPosts'
@@ -33,8 +34,12 @@ interface Post {
 
 const HomePage: React.FC = () => {
     const { loginUser, isLogin, isLoginUserPending } = useGlobalLoginUser()
-    const userId = isLogin ? loginUser.id : 0
-    const { post: latestPost, isLoading, error } = useLatestPost(userId)
+
+    // blogName이 있으면 blogName을 사용하고, 없으면 userId를 사용 (0은 유효하지 않은 ID로 처리됨)
+    const userIdOrBlogname = isLogin ? loginUser.id : 0
+
+    // 개선된 useLatestPost 훅을 사용
+    const { post: latestPost, author, isLoading, error, apiCalled } = useLatestPost(userIdOrBlogname)
 
     // 로그인 상태 확인 중
     if (isLoginUserPending) {
@@ -88,7 +93,7 @@ const HomePage: React.FC = () => {
               ...latestPost,
               categoryName: latestPost.categoryName || null,
               username: latestPost.username || null,
-              userId: userId, // 현재 로그인한 사용자 ID 사용
+              userId: loginUser.id, // 현재 로그인한 사용자 ID 사용
               categoryId: 0,
               status: null,
               updateStatus: null,

@@ -42,7 +42,7 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers("/register", "/login","/api/categories/**", "/api/posts/public/**")
                                 .permitAll()
-                                .requestMatchers(HttpMethod.GET, "/api/users/*/counts")
+                                .requestMatchers(HttpMethod.GET, "/api/users/*/counts","/api/auth/by-blogName/**")
                                 .permitAll()
                                 .requestMatchers("api/home/**")
                                 .permitAll()
