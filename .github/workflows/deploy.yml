@@ -62,6 +62,8 @@ jobs:
           echo "OWNER_LC=${OWNER,,}" >> ${GITHUB_ENV}
         env:
           OWNER: "${{ github.repository_owner }}"
+      - name: gradlew 실행권한 추가
+        run: chmod +x backend/gradlew
       - name: 빌드 앤 푸시 (테스트 제외)
         run: ./backend/gradlew build -x test --no-daemon
       - name: Docker Build and Push
