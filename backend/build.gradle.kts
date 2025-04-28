@@ -57,7 +57,8 @@ dependencies {
 	// Oauth2
 	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 
-
+	// AWS S3 SDK (S3 사용을 위한 핵심 의존성)
+	implementation("com.amazonaws:aws-java-sdk-s3:1.12.683")
 
 }
 

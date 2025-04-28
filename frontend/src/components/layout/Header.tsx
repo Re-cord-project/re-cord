@@ -30,7 +30,7 @@ export default function Header() {
                                 홈
                             </Link>
                             <Link
-                                href="/myblog"
+                                href="/myBlog"
                                 className={`relative h-[64px] flex items-center px-1 pt-1 text-sm whitespace-nowrap
                                     ${
                                         pathname === '/myblog'

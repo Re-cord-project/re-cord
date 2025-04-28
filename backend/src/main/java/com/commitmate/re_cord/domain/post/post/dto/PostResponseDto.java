@@ -16,6 +16,7 @@ public class PostResponseDto {
     private String content;
     private String categoryName;
     private String username;
+    private Long userId;  // 작성자 ID 추가
     private int views;
     private int likes;
     private String status;
@@ -35,16 +36,16 @@ public class PostResponseDto {
         this.categoryName = post.getCategory() != null ? post.getCategory().getName() : null;
         this.username = post.getUser() != null ? post.getUser().getUsername() : null;
 
+        // 작성자 ID 추가
+        this.userId = post.getUser() != null ? post.getUser().getId() : null;
+
         this.status = getEnumName(post.getStatus());
         this.updateStatus = getEnumName(post.getUpdateStatus());
 
         this.createdAt = post.getCreatedAt() != null ? post.getCreatedAt().toString() : null;
         this.updatedAt = post.getUpdatedAt() != null ? post.getUpdatedAt().toString() : null;
 
-        // ✅ 이미지 URL 리스트 추출
-        this.imageUrls = post.getImages().stream()
-                .map(image -> image.getUrl())
-                .collect(Collectors.toList());
+
     }
 
     private String getEnumName(Enum<?> enumValue) {

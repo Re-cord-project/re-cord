@@ -1,11 +1,29 @@
-import type { NextConfig } from 'next'
-
-const nextConfig: NextConfig = {
-    async rewrites() {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+    reactStrictMode: true,
+    swcMinify: true,
+    images: {
+        domains: ['localhost', 're-cord.s3.ap-northeast-2.amazonaws.com'],
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 're-cord.s3.ap-northeast-2.amazonaws.com',
+                pathname: '/**',
+            },
+            {
+                protocol: 'http',
+                hostname: 'localhost',
+                port: '8090',
+                pathname: '/**',
+            },
+        ],
+    },
+    async redirects() {
         return [
             {
-                source: '/api/:path*',
-                destination: 'http://localhost:8090/api/:path*', // 백엔드 주소
+                source: '/',
+                destination: '/home',
+                permanent: true,
             },
         ]
     },

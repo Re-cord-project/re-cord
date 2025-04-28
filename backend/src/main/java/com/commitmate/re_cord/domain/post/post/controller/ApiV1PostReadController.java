@@ -1,18 +1,23 @@
 package com.commitmate.re_cord.domain.post.post.controller;
 
+import com.commitmate.re_cord.domain.mypage.service.MyPagePostService;
 import com.commitmate.re_cord.domain.post.post.dto.PostResponseDto;
 import com.commitmate.re_cord.domain.post.post.service.PostService;
+import com.commitmate.re_cord.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/posts")
 public class ApiV1PostReadController {
     private final PostService postService;
-
+    private final MyPagePostService myPagePostService;
     // 게시글 전체 목록 보기
     @GetMapping
     public Page<PostResponseDto> getAllPosts(
@@ -68,5 +73,49 @@ public class ApiV1PostReadController {
     public ResponseEntity<PostResponseDto> getLatestPostByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(postService.getLatestPostByUserId(userId));
     }
+
+    // ✅ 작성자의 다른 게시글 조회
+    @GetMapping("/{userid}/other-posts")
+    public List<PostResponseDto> getOtherPostsBySameUser(
+            @PathVariable Long userid,
+            @RequestParam(required = false) Long excludePostId) {
+        return postService.getOtherPostsBySameUser(userid, excludePostId);
+    }
+
+    // ✅ 작성자의 모든 게시글 조회
+    @GetMapping("/{userid}/posts")
+    public List<PostResponseDto> getAllPostsBySameUser(@PathVariable Long userid) {
+        return postService.getAllPostsByUser(userid);
+    }
+
+    @GetMapping("/{postId}/like/status")
+    public ResponseEntity<Boolean> checkLikeStatus(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal SecurityUser securityUser
+    ) {
+        long userId = securityUser.getId(); // ✅ SecurityUser에서 직접 ID 추출
+        boolean isLiked = postService.isPostLikedByUser(postId, userId);
+        return ResponseEntity.ok(isLiked);
+    }
+
+    // 특정 사용자의 게시글 조회수 총합
+    @GetMapping("/views/{userId}")
+    public Long getTotalPostViews(@PathVariable Long userId) {
+        return myPagePostService.getTotalPostViews(userId);
+    }
+
+    // 특정 사용자의 게시글 좋아요 총합
+    @GetMapping("/likes/{userId}")
+    public Long getTotalPostLikes(@PathVariable Long userId) {
+        return myPagePostService.getTotalPostLikes(userId);
+    }
+
+    // 특정 사용자의 게시글 총합
+    @GetMapping("/count/{userId}")
+    public Long getTotalPostCount(@PathVariable Long userId) {
+        return postService.getTotalPostCount(userId);
+    }
+
+
 
 }

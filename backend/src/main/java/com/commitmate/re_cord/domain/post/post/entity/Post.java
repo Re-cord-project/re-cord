@@ -31,8 +31,10 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Lob
+    @Column(columnDefinition = "TEXT", nullable = false) // MySQL, PostgreSQL 등에선 이거
     private String content;
+
 
     private int views = 0;
     private int likes = 0;
@@ -48,6 +50,9 @@ public class Post extends BaseEntity {
     @ToString.Exclude // ToString 무한 루프 방지
     private List<Image> images = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<PostLike> postLikes = new ArrayList<>();
 
     // 좋아요 증가 메서드
     public void increaseLikeCount() {
@@ -61,12 +66,42 @@ public class Post extends BaseEntity {
         }
     }
 
-    // 엔티티가 저장되기 전에 호출되는 @PrePersist
     @PrePersist
     public void prePersist() {
-        // 만약 updateStatus가 null이면 기본값으로 설정
         if (this.updateStatus == null) {
             this.updateStatus = UpdateStatus.NOT_EDITED;
         }
+        // 게시글 상태가 PUBLISHED일 때만 카테고리 postCount 증가
+        if (this.category != null && this.status == PostStatus.PUBLISHED) {
+            this.category.setPostCount(this.category.getPostCount() + 1);
+        }
+    }
+
+    @PreRemove
+    public void preRemove() {
+        // 게시글 상태가 PUBLISHED였다면 카테고리 postCount 감소
+        if (this.category != null && this.status == PostStatus.PUBLISHED) {
+            this.category.setPostCount(this.category.getPostCount() - 1);
+        }
+    }
+
+    @PostLoad
+    public void postLoad() {
+        if (this.updateStatus == null) {
+            this.updateStatus = UpdateStatus.NOT_EDITED;
+        }
+    }
+
+    // 게시글 상태를 업데이트하는 메서드 (soft delete를 위한)
+    public void updateStatus(PostStatus status) {
+        // 상태가 PUBLISHED에서 다른 상태로 변경될 때 postCount 감소
+        if (this.status == PostStatus.PUBLISHED && status != PostStatus.PUBLISHED && this.category != null) {
+            this.category.setPostCount(this.category.getPostCount() - 1);
+        }
+        // 상태가 다른 상태에서 PUBLISHED로 변경될 때 postCount 증가
+        else if (this.status != PostStatus.PUBLISHED && status == PostStatus.PUBLISHED && this.category != null) {
+            this.category.setPostCount(this.category.getPostCount() + 1);
+        }
+        this.status = status;
     }
 }
