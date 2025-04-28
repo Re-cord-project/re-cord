@@ -15,7 +15,7 @@ public class UpdateUserDTO {
     private String username;
     private String email;
     private String bootcamp;
-    private int generation;
+    private String generation;
 
     @Column(columnDefinition = "TEXT")
     private String profileImageUrl;
@@ -23,7 +23,7 @@ public class UpdateUserDTO {
     @Column(length = 500)  // 자기소개 길이
     private String introduction;
 
-    public UpdateUserDTO(String username, String email, String bootcamp, int generation, String profileImageUrl, String introduction) {
+    public UpdateUserDTO(String username, String email, String bootcamp, String generation, String profileImageUrl, String introduction) {
         this.username = username;
         this.email = email;
         this.bootcamp = bootcamp;

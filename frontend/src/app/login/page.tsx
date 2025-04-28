@@ -84,25 +84,19 @@ export default function LoginPage() {
                             style={{ fontFeatureSettings: '"kern" on' }}
                         ></span>
                     </div>
-                    <div className="flex items-center justify-between">
-                        <label className="flex items-center">
-                            <input type="checkbox" className="form-checkbox" />
-                            <span className="ml-2 text-sm text-gray-600">로그인 상태 유지</span>
-                        </label>
-                        <Link href="/forgot-password" className="text-sm text-gray-600 hover:text-gray-800">
-                            비밀번호 찾기
-                        </Link>
+                    <div>
+                        <button
+                            type="submit"
+                            className="w-full h-[38px] flex justify-center items-center px-4 py-2 rounded-[8px] text-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
+                            style={{
+                                background:
+                                    'linear-gradient(0deg, rgba(0, 0, 0, 0.001), rgba(0, 0, 0, 0.001)), #78B3CE',
+                                border: '1px solid rgba(0, 0, 0, 0)',
+                            }}
+                        >
+                            로그인
+                        </button>
                     </div>
-                    <button
-                        type="submit"
-                        className="w-full h-[38px] flex justify-center items-center px-4 py-2 rounded-[8px] bg-[#78B3CE] text-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]"
-                        style={{
-                            background: 'linear-gradient(0deg, rgba(0, 0, 0, 0.001), rgba(0, 0, 0, 0.001)), #78B3CE',
-                            border: '1px solid rgba(0, 0, 0, 0)',
-                        }}
-                    >
-                        로그인
-                    </button>
                 </form>
 
                 <div className="mt-8">

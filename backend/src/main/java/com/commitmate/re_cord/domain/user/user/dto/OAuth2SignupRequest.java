@@ -12,5 +12,5 @@ public class OAuth2SignupRequest {
     private String email;
 //    private String username;
     private String bootcamp;
-    private int generation;
+    private String generation;
 }

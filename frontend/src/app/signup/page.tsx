@@ -19,7 +19,7 @@ export default function SignupPage() {
     const [isEmailChecked, setIsEmailChecked] = useState(false)
     const [passwordError, setPasswordError] = useState('')
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target
         setFormData((prev) => ({
             ...prev,
@@ -104,8 +104,8 @@ export default function SignupPage() {
         setIsSubmitting(true)
 
         // 필수값 검증
-        if (!formData.email || !formData.username || !formData.password) {
-            setError('이메일, 닉네임, 비밀번호는 필수 입력값입니다.')
+        if (!formData.email || !formData.username || !formData.password || !formData.bootcamp) {
+            setError('이메일, 닉네임, 비밀번호, 부트캠프는 필수 입력값입니다.')
             setIsSubmitting(false)
             return
         }
@@ -141,8 +141,8 @@ export default function SignupPage() {
                     username: formData.username,
                     password: formData.password,
                     passwordConfirm: formData.passwordConfirm,
-                    bootcamp: formData.bootcamp || null,
-                    generation: formData.generation ? parseInt(formData.generation) : null,
+                    bootcamp: formData.bootcamp,
+                    generation: formData.generation,
                 }),
             })
 
@@ -256,29 +256,54 @@ export default function SignupPage() {
 
                     <div>
                         <label htmlFor="bootcamp" className="block text-sm font-medium text-gray-700 mb-1">
-                            부트캠프 (선택)
+                            부트캠프 <span className="text-red-500">*</span>
                         </label>
-                        <input
-                            id="bootcamp"
-                            name="bootcamp"
-                            type="text"
-                            value={formData.bootcamp}
-                            onChange={handleChange}
-                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
-                        />
+                        <div className="relative">
+                            <select
+                                id="bootcamp"
+                                name="bootcamp"
+                                value={formData.bootcamp}
+                                onChange={handleChange}
+                                required
+                                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black bg-white pr-10"
+                            >
+                                <option value="" className="text-gray-400">
+                                    부트캠프를 선택해주세요
+                                </option>
+                                <option value="멋쟁이 사자처럼">멋쟁이 사자처럼</option>
+                                <option value="SSAFY">SSAFY</option>
+                                <option value="우아한 테크코스">우아한 테크코스</option>
+                                <option value="항해 99">항해 99</option>
+                                <option value="네이버 부스트캠프">네이버 부스트캠프</option>
+                                <option value="스파르타">스파르타</option>
+                                <option value="프로그래머스 데브코스">프로그래머스 데브코스</option>
+                                <option value="한화시스템 BEYOND SW캠프">한화시스템 BEYOND SW캠프</option>
+                                <option value="그 외">그 외</option>
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
                     </div>
 
                     <div>
                         <label htmlFor="generation" className="block text-sm font-medium text-gray-700 mb-1">
-                            기수 (선택)
+                            과정/기수 (선택)
                         </label>
                         <input
                             id="generation"
                             name="generation"
-                            type="number"
+                            type="text"
                             value={formData.generation}
                             onChange={handleChange}
                             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-black"
+                            placeholder="자바 백엔드/13기"
                         />
                     </div>
 
