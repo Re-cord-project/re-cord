@@ -13,7 +13,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -23,15 +25,18 @@ public class ApiV1PostCUDController {
     private final PostService postService;
     private final UserRepository userRepository;
 
-    // 게시글 등록
     @PostMapping
     public ResponseEntity<String> createPost(
-            @RequestBody @Validated PostRequestDto dto,
+            @RequestPart @Validated PostRequestDto dto,  // 게시글 정보
+            @RequestPart(required = false) List<MultipartFile> images,  // 이미지 파일들
             @AuthenticationPrincipal SecurityUser userDetails) {
 
-        postService.createPost(dto, userDetails.getId());
+        // 게시글 생성 및 이미지 업로드 처리
+        postService.createPost(dto, images, userDetails.getId());
+
         return ResponseEntity.ok("게시글 등록 완료");
     }
+
 
     // 현재 로그인한 사용자가 마지막으로 저장한 임시 글을 불러오는 API
     @GetMapping("/drafts/latest")
@@ -68,7 +73,6 @@ public class ApiV1PostCUDController {
         return ResponseEntity.ok("게시글 삭제 완료");
     }
 
-    // 게시글 수정
     @PutMapping("/{postId}")
     public ResponseEntity<String> updatePost(
             @PathVariable Long postId,

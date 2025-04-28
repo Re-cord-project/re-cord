@@ -7,6 +7,7 @@ import com.commitmate.re_cord.global.security.handler.OAuth2FailureHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -39,9 +40,9 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers("/api/auth/register", "/api/auth/login", "api/auth/logout")
                                 .permitAll()
-                                .requestMatchers("/register", "/login")
+                                .requestMatchers("/register", "/login","api/categories/**")
                                 .permitAll()
-                                .requestMatchers("/api/**")
+                                .requestMatchers(HttpMethod.GET, "/api/users/*/counts")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated()

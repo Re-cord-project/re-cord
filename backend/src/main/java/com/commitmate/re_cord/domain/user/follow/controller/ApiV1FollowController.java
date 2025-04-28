@@ -1,6 +1,7 @@
 package com.commitmate.re_cord.domain.user.follow.controller;
 
 import com.commitmate.re_cord.domain.user.follow.dto.FollowActionRequestDto;
+import com.commitmate.re_cord.domain.user.follow.dto.FollowCountResponseDto;
 import com.commitmate.re_cord.domain.user.follow.dto.FollowUserResponseDto;
 import com.commitmate.re_cord.domain.user.follow.service.FollowService;
 import com.commitmate.re_cord.global.security.SecurityUser;
@@ -60,5 +61,39 @@ public class ApiV1FollowController {
     ) {
         List<FollowUserResponseDto> followers = followService.getFollowerList(currentUser.getId());
         return ResponseEntity.ok(followers);
+    }
+
+    @Operation(summary = "특정 유저의 팔로우/팔로잉 수 조회", description = "path variable 로 넘어온 userId 에 대한 팔로워·팔로잉 수를 반환합니다.")
+    @GetMapping("/{userId}/counts")
+    public ResponseEntity<FollowCountResponseDto> getUserCounts(
+            @PathVariable Long userId
+    ) {
+        long followerCount  = followService.countFollowers(userId);
+        long followingCount = followService.countFollowing(userId);
+
+        FollowCountResponseDto dto = FollowCountResponseDto.builder()
+                .followerCount(followerCount)
+                .followingCount(followingCount)
+                .build();
+
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/{userId}/followers/count")
+    public ResponseEntity<Long> getUserFollowerCount(
+            @PathVariable Long userId
+    ) {
+        long followerCount = followService.countFollowers(userId);  // 팔로워 수만 조회
+
+        return ResponseEntity.ok(followerCount);  // 팔로워 수를 그대로 반환
+    }
+
+    @GetMapping("/{userId}/following/count")
+    public ResponseEntity<Long> getUserFollowingCount(
+            @PathVariable Long userId
+    ) {
+        long followerCount = followService.countFollowing(userId);  // 팔로워 수만 조회
+
+        return ResponseEntity.ok(followerCount);  // 팔로워 수를 그대로 반환
     }
 }

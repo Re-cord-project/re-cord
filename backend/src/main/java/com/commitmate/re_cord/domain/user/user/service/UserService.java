@@ -39,6 +39,8 @@ public class UserService {
         }
 
 //        String encodedPassword = passwordEncoder.encode(password); // 비밀번호 암호화
+        // 블로그명 생성
+        String blogName = generateBlogName(dto.getEmail());
 
 
         User user = new User();
@@ -49,10 +51,16 @@ public class UserService {
         user.setBootcamp(dto.getBootcamp());
         user.setGeneration(dto.getGeneration());
         user.setRole(Role.basic);
+        user.setBlogName(blogName);
         userRepository.save(user);
         return "User registered successfully";
     }
-
+    // 블로그명 생성 로직
+    private String generateBlogName(String email) {
+        String emailPrefix = email.split("@")[0];  // 이메일의 '@' 앞부분
+        String randomSuffix = UUID.randomUUID().toString().substring(0, 8);  // 난수 생성 (8자리)
+        return emailPrefix + "_" + randomSuffix;  // 예: testuser_12345678
+    }
     // 이메일 중복 검사
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
@@ -230,6 +238,10 @@ public class UserService {
         user.setGeneration(generation);
         user.setRefreshToken(UUID.randomUUID().toString());
 
+        // 블로그명 생성
+        String blogName = generateBlogName(email);
+        user.setBlogName(blogName);
+
         return userRepository.save(user);
     }
 
@@ -238,4 +250,5 @@ public class UserService {
                 .map(User::getProfileImageUrl)
                 .orElse(null); // 사용자가 없으면 null 반환 또는 예외 처리
     }
+
 }
