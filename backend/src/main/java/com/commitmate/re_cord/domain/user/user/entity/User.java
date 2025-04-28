@@ -35,7 +35,7 @@ public class User extends BaseEntity {
     private String username;
     private String password;
     private String bootcamp;
-    private int generation;
+    private String generation;
     private String refreshToken;
     private String blogName;
 

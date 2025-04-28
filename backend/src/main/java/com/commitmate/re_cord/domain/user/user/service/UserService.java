@@ -233,7 +233,7 @@ public class UserService {
     }
 
     @Transactional
-    public User completeOAuth2Signup(String oauthId, String email, String bootcamp, int generation) {
+    public User completeOAuth2Signup(String oauthId, String email, String bootcamp, String generation) {
         System.out.println(oauthId);
         User user = userRepository.findByOauthId(oauthId)
                 .orElseThrow(() -> new RuntimeException("임시 계정이 없습니다"));
