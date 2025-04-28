@@ -63,7 +63,7 @@ jobs:
         env:
           OWNER: "${{ github.repository_owner }}"
       - name: 빌드 앤 푸시 (테스트 제외)
-        run: ./gradlew build -x test --no-daemon
+        run: ./backend/gradlew build -x test --no-daemon
       - name: Docker Build and Push
         uses: docker/build-push-action@v3
         with:
