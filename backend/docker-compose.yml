@@ -11,14 +11,15 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     networks:
-      - my_network
-  app:
+      - common
+
+  app1:
     image: record-app
     depends_on:
       - mysql
     networks:
-      - my_network
+      - common
 
 networks:
-  my_network:
+  common:
     driver: bridge
