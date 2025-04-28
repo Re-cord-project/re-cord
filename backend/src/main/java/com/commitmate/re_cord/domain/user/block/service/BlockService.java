@@ -1,15 +1,17 @@
 package com.commitmate.re_cord.domain.user.block.service;
 
+import com.commitmate.re_cord.domain.user.block.dto.BlockUserResponseDto;
 import com.commitmate.re_cord.domain.user.block.entity.Block;
 import com.commitmate.re_cord.domain.user.block.repository.BlockRepository;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.service.UserService;
 import com.commitmate.re_cord.global.exception.BlockNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -62,10 +64,25 @@ public class BlockService {
     }
 
     // 차단한 유저 목록 조회
-    @Transactional
-    public List<Block> getBlockedUsers(Long blockerId) {
-        User blocker = userService.getUserById(blockerId);
-        return blockRepository.findByBlockerId(blocker); // blocker가 차단한 유저 목록 반환
+    @Transactional(readOnly = true)
+    public List<BlockUserResponseDto> getBlockedList(Long userId) {
+        // 차단자 정보 조회
+        User blocker = userService.getUserById(userId);
+
+        // Block 엔티티 조회 후 User → DTO 매핑
+        return blockRepository.findByBlockerId(blocker)
+                .stream()
+                .map(block -> {
+                            User blockedUser = block.getBlockedId();
+
+                    return BlockUserResponseDto.builder()
+                            .userId(blockedUser.getId())
+                            .username(blockedUser.getUsername())
+                            .profileImageUrl(blockedUser.getProfileImageUrl())
+                            .blogName(blockedUser.getBlogName())
+                            .build();
+                })
+                .toList();
     }
 
     // 차단 여부 확인
