@@ -136,6 +136,7 @@ public class UserService {
                 .password(password)
                 .provider(provider)
                 .refreshToken(UUID.randomUUID().toString())
+                .profileImageUrl("https://re-cord.s3.ap-northeast-2.amazonaws.com/user/profile/default-profile.png")
                 .build();
 
         return userRepository.save(user);
@@ -215,6 +216,7 @@ public class UserService {
                     .email(email)
                     .provider(provider)
                     .refreshToken(UUID.randomUUID().toString())
+                    .profileImageUrl("https://re-cord.s3.ap-northeast-2.amazonaws.com/user/profile/default-profile.png ")
                     .role(Role.basic)
                     .profileImageUrl(profileImageUrl)
                     .build();
