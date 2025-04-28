@@ -1,4 +1,4 @@
-om:
+custom:
   site:
     name: "BLOG"
     cookieDomain: "${custom.prod.cookieDomain}"
