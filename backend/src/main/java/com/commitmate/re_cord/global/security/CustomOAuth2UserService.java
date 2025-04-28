@@ -67,7 +67,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 👇 새 유저: 추가 정보 입력 필요 (임시 User 생성)
         User tempUser = null;
         try {
-            tempUser = userService.createTempUser(oauthId, username, provider);
+            tempUser = userService.createTempUser(oauthId, username, email, provider);
         } catch (Exception e) {
             // 예외 로깅
             e.printStackTrace();
@@ -82,5 +82,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             // 사용자 생성 실패 처리
             throw new AuthenticationServiceException("임시 사용자 생성에 실패했습니다");
         }
+
     }
 }

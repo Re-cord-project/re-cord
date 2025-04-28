@@ -201,7 +201,7 @@ public class UserService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     // 소셜 로그인 시 임시 유저 생성
-    public User createTempUser(String oauthId, String username, Provider provider) {
+    public User createTempUser(String oauthId, String username, String email, Provider provider) {
         // 이미 존재하면 그대로 반환
 
         User user = userRepository.findByUsername(username).orElse(null);
@@ -211,6 +211,7 @@ public class UserService {
             user = User.builder()
                     .oauthId(oauthId)
                     .username(username)
+                    .email(email)
                     .provider(provider)
                     .refreshToken(UUID.randomUUID().toString())
                     .role(Role.basic)
@@ -220,8 +221,8 @@ public class UserService {
             User savedUser = userRepository.save(user);
 
             // 로그 확인
-            log.info("임시 유저 생성 완료 - oauthId: {}, username: {}, provider: {}",
-                    savedUser.getOauthId(), savedUser.getUsername(), savedUser.getProvider());
+            log.info("임시 유저 생성 완료 - oauthId: {}, username: {}, email: {}, provider: {}",
+                    savedUser.getOauthId(), savedUser.getUsername(), savedUser.getEmail(), savedUser.getProvider());
             return savedUser;
         } else {
             // 유저가 존재하면 기존 유저 반환
