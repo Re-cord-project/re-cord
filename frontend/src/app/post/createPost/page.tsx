@@ -65,7 +65,7 @@ const CreatePostPage = () => {
         defaultValues: {
             title: '',
             content: '',
-            categoryId: 1,
+            categoryId: 2,
         },
     })
 

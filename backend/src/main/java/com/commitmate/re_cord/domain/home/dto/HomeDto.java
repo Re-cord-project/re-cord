@@ -20,7 +20,7 @@ public class HomeDto {
         return new HomeDto(
                 post.getId(),
                 post.getTitle(),
-                post.getImages().isEmpty() ? null : post.getImages().get(0).getUrl(),
+                post.getImages().isEmpty() ? null : post.getImages().get(0).getImageUrl(),
                 post.getUser().getUsername(),
                 post.getLikes(),
                 post.getCreatedAt().toString() // 포맷 원하면 포맷팅 추가 가능

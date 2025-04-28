@@ -37,6 +37,8 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final UserRepository userRepository;
     private final S3Service s3Service;
+
+
     //게시글 생성
     @Transactional
     public void createPost(PostRequestDto postRequestDto, List<MultipartFile> images, long userId) {

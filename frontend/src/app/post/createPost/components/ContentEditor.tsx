@@ -261,32 +261,8 @@ export const processEditorContent = async (
             return null
         }
     }
-<<<<<<< HEAD
 
-    return (
-        <div className="editor-container">
-            <Editor
-                apiKey={apiKey}
-                onInit={(evt, editor) => {
-                    editorRef.current = editor
-                }}
-                value={editorContent}
-                onEditorChange={handleEditorChange}
-                disabled = {false}
-                init={editorOptions}
-            />
-
-            {/* 버튼 영역 */}
-            {actions && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="flex justify-end items-center">{actions}</div>
-                </div>
-            )}
-        </div>
-    )
-=======
     return null
->>>>>>> origin/dev
 }
 
 // 컴포넌트 표시 이름 설정

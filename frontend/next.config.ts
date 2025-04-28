@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    swcMinify: true,
+    // swcMinify: true,
     images: {
         domains: ['localhost', 're-cord.s3.ap-northeast-2.amazonaws.com'],
         remotePatterns: [
