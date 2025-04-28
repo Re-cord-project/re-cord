@@ -9,7 +9,7 @@ spring:
     active: dev
     include: secret
   datasource:
-    url: jdbc:mysql://localhost:3307/recorddb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/recorddb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: commitmate
     password: commitmate
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -29,12 +29,13 @@ spring:
         registration:
           kakao:
             clientId: ON_SECRET
-            scope: profile_nickname
+            scope: profile_nickname, account_email
             client-name: Kakao
             authorization-grant-type: authorization_code
             redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
           github:
             clientId: ON_SECRET
+            client-secret: ON_SECRET
             scope:
               - read:user
               - user:email

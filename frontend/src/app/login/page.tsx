@@ -11,6 +11,8 @@ export default function LoginPage() {
     const [error, setError] = useState('')
 
     const socialLoginForKakaoUrl = 'http://localhost:8090/oauth2/authorization/kakao'
+    const socialLoginForGithubUrl = 'http://localhost:8090/oauth2/authorization/github'
+
     const redirectUrlAfterSocialLogin = 'http://localhost:3000'
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -35,7 +37,7 @@ export default function LoginPage() {
                 setError(data.message || '로그인에 실패했습니다.')
             }
         } catch (err) {
-            setError('로그인 중 오류가 발생했습니다.')
+            setError('회원정보가 일치하지 않습니다.')
             console.error('Login error:', err)
         }
     }
@@ -119,6 +121,14 @@ export default function LoginPage() {
                             className="flex justify-center items-center w-full py-2 px-4 bg-[#FEE500] text-[#000000] rounded-md hover:bg-[#FDD800] transition-colors"
                         >
                             카카오로 시작하기
+                        </Link>
+                    </div>
+                    <div className="mt-3">
+                        <Link
+                            href={`${socialLoginForGithubUrl}?redirectUrl=${redirectUrlAfterSocialLogin}`}
+                            className="flex justify-center items-center w-full py-2 px-4 bg-[#000000] text-white rounded-md hover:bg-[#1a1a1a] transition-colors"
+                        >
+                            깃허브로 시작하기
                         </Link>
                     </div>
                 </div>
