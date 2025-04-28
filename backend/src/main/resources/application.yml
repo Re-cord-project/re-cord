@@ -73,11 +73,11 @@ spring:
 
 logging:
   level:
-    com.ll.blog:
-    org.hibernate.SQL:
-    org.hibernate.orm.jdbc.bind:
-    org.hibernate.orm.jdbc.extract:
-    org.springframework.transaction.interceptor:
+    com.ll.blog: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.orm.jdbc.extract: TRACE
+    org.springframework.transaction.interceptor: TRACE
 
 custom:
   dev:
