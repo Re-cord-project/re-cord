@@ -7,8 +7,9 @@ export default function SignupPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const oauthId = searchParams?.get('oauthId') ?? ''
+    const emailParam = searchParams?.get('email') ?? ''
 
-    const [email, setEmail] = useState('')
+    const [email, setEmail] = useState(emailParam)
     const [bootcamp, setBootcamp] = useState('')
     const [generation, setGeneration] = useState('')
     const [error, setError] = useState('')
