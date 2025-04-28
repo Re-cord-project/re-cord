@@ -22,4 +22,6 @@ public class PostUpdateRequestDto {
 
     // 기존 이미지를 삭제하려면 파일 URL 목록을 받는 것도 가능
     private List<String> imageUrlsToDelete;  // 삭제할 이미지 URL 리스트
+
+    private List<String> updatedImageUrls;
 }

@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.UUID;
 
+
+
 @Service
 @RequiredArgsConstructor
 public class S3Service {
@@ -44,22 +46,35 @@ public class S3Service {
                 .build();
     }
 
-    // 이미지 업로드 메서드
     public String uploadImage(MultipartFile file, Long userId) throws IOException {
+        System.out.println("uploadImage 진입 - 파일명: " + (file != null ? file.getOriginalFilename() : "파일 없음"));
+
         String ext = Objects.requireNonNull(file.getOriginalFilename())
                 .substring(file.getOriginalFilename().lastIndexOf("."));
         String fileKey = "user/" + userId + "/images/" + UUID.randomUUID() + ext;
+
+        System.out.println("생성된 fileKey: " + fileKey);
 
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType(file.getContentType());
         metadata.setContentLength(file.getSize());
 
-        // 이미지 업로드
-        amazonS3.putObject(new PutObjectRequest(bucket, fileKey, file.getInputStream(), metadata));
+        try {
+            System.out.println("S3 업로드 시도");
+            amazonS3.putObject(new PutObjectRequest(bucket, fileKey, file.getInputStream(), metadata));
+            System.out.println("S3 업로드 성공");
+        } catch (Exception e) {
+            System.err.println("S3 업로드 실패");
+            e.printStackTrace();
+            throw e;
+        }
 
-        // 업로드된 이미지의 URL 반환
-        return getFileUrl(fileKey);
+        String fileUrl = getFileUrl(fileKey);
+        System.out.println("생성된 fileUrl: " + fileUrl);
+
+        return fileUrl;
     }
+
 
     // S3에서 파일 URL을 가져오는 메서드
     public String getFileUrl(String fileKey) {

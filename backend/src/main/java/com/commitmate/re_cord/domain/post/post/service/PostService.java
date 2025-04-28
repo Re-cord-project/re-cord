@@ -17,6 +17,7 @@ import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import com.commitmate.re_cord.global.config.S3Service;
 import com.commitmate.re_cord.global.jpa.UpdateStatus;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -40,73 +41,117 @@ public class PostService {
     private final UserRepository userRepository;
     private final S3Service s3Service;
     private final ImageRepository imageRepository;
+
     //게시글 생성
     @Transactional
     public void createPost(PostRequestDto postRequestDto, List<MultipartFile> images, long userId) {
+        Post savedPost = null;
 
-        // 카테고리 검증
-        Category category = categoryRepository.findById(postRequestDto.getCategoryId())
-                .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다"));
+        try {
+            // 카테고리 검증
+            Category category = categoryRepository.findById(postRequestDto.getCategoryId())
+                    .orElseThrow(() -> new IllegalArgumentException("카테고리를 찾을 수 없습니다"));
 
-        // 게시글 상태 검증
-        PostStatus status = postRequestDto.getStatus();
-        if (status == null) {
-            throw new IllegalArgumentException("게시글 상태는 필수입니다.");
-        }
-
-        if (status == PostStatus.PUBLISHED) {
-            if (postRequestDto.getTitle() == null || postRequestDto.getTitle().trim().isEmpty()) {
-                throw new IllegalArgumentException("제목은 필수입니다.");
+            // 게시글 상태 검증
+            PostStatus status = postRequestDto.getStatus();
+            if (status == null) {
+                throw new IllegalArgumentException("게시글 상태는 필수입니다.");
             }
-            if (postRequestDto.getContent() == null || postRequestDto.getContent().trim().isEmpty()) {
-                throw new IllegalArgumentException("내용은 필수입니다.");
-            }
-        }
 
-        // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
-
-        // 로그인한 유저가 draft 로 임시저장하면 그전 draft 인 게시물은 삭제 = 임시저장은 제일 최신꺼만 볼 수 있음
-        if (status == PostStatus.DRAFT) {
-            postRepository.deleteByUserAndStatus(user, PostStatus.DRAFT);
-        }
-
-        // 게시글 생성
-        Post post = Post.builder()
-                .title(postRequestDto.getTitle())
-                .content(postRequestDto.getContent())
-                .status(status)
-                .user(user)
-                .category(category)
-                .likes(0)
-                .views(0)
-                .updateStatus(getUpdateStatusByPostStatus(status))
-                .build();
-
-        // 이미지 업로드 처리 (S3에 이미지 업로드하고 URL 반환)
-        if (images != null && !images.isEmpty()) {
-            List<Image> uploadedImages = new ArrayList<>();
-            for (MultipartFile image : images) {
-                try {
-                    String imageUrl = s3Service.uploadImage(image, userId);  // userId 추가!
-                    // S3 서비스에서 이미지 업로드
-                    Image postImage = new Image();
-                    postImage.setUrl(imageUrl);  // 이미지 URL 설정
-                    postImage.setPost(post);  // 게시글과 연결
-                    uploadedImages.add(postImage);
-                } catch (IOException e) {
-                    throw new RuntimeException("이미지 업로드 실패: " + e.getMessage());
+            if (status == PostStatus.PUBLISHED) {
+                // 제목 및 내용 필수 검증
+                if (postRequestDto.getTitle() == null || postRequestDto.getTitle().trim().isEmpty()) {
+                    throw new IllegalArgumentException("제목은 필수입니다.");
+                }
+                if (postRequestDto.getContent() == null || postRequestDto.getContent().trim().isEmpty()) {
+                    throw new IllegalArgumentException("내용은 필수입니다.");
                 }
             }
-            post.setImages(uploadedImages);  // 업로드된 이미지를 게시글에 추가
-        }
 
-        // 게시글 저장
-        postRepository.save(post);
+            // 유저 조회
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+            // 게시글 상태가 DRAFT일 경우 기존 DRAFT 삭제
+            if (status == PostStatus.DRAFT) {
+                postRepository.deleteByUserAndStatus(user, PostStatus.DRAFT);
+            }
+
+            // 게시글 생성
+            Post post = Post.builder()
+                    .title(postRequestDto.getTitle())
+                    .content(postRequestDto.getContent())
+                    .status(status)
+                    .user(user)
+                    .category(category)
+                    .likes(0)
+                    .views(0)
+                    .updateStatus(getUpdateStatusByPostStatus(status))
+                    .build();
+            System.out.println("넘어온 이미지 수: " + (images != null ? images.size() : 0));
+
+            // 게시글 저장
+            savedPost = postRepository.save(post);
+            System.out.println("게시글 저장 완료. ID: " + savedPost.getId());
+
+            // 이미지 처리
+            if (images != null && !images.isEmpty()) {
+                // 이미지가 있을 경우 하나씩 처리
+                for (MultipartFile image : images) {
+                    // 이미지 업로드 및 DB 저장
+                    uploadAndSaveImage(image, savedPost, userId);
+                }
+            }
+
+        } catch (Exception e) {
+            // 예외 발생 시 로그 출력 후 롤백
+            System.err.println("게시글 저장 트랜잭션 실패: " + e);
+            e.printStackTrace();
+            throw e;  // 트랜잭션 롤백을 위해 다시 throw
+        }
     }
 
-    //게시글 수정
+    private void uploadAndSaveImage(MultipartFile image, Post savedPost, long userId) {
+        try {
+            // 이미지 업로드 (S3 서비스에서 실패 시 예외 발생)
+            String fileKey = s3Service.uploadImage(image, userId);
+            if (fileKey == null || fileKey.isEmpty()) {
+                throw new RuntimeException("S3 업로드 실패: fileKey가 null이거나 비어 있습니다.");
+            }
+
+            String imageUrl = "https://s3-bucket-url.com/" + fileKey;
+
+            // 이미지 정보 저장 전 검증
+            if (savedPost == null) {
+                throw new RuntimeException("게시글이 null입니다. 게시글이 저장되지 않았습니다.");
+            }
+
+            // Image 객체 생성 및 DB 저장
+            Image postImage = Image.builder()
+                    .imageUrl(imageUrl)
+                    .post(savedPost)  // 이미 저장된 post 사용
+                    .fileKey(fileKey)
+                    .build();
+
+            // 즉시 저장 및 flush 확인
+            Image savedImage = imageRepository.save(postImage);
+            if (savedImage == null) {
+                throw new RuntimeException("이미지 저장 실패: 저장된 이미지 객체가 null입니다.");
+            }
+
+            System.out.println("이미지 저장 성공: " + savedImage.getId());
+        } catch (Exception e) {
+            // 이미지 업로드 또는 저장 실패 시 로그
+            System.err.println("이미지 업로드 또는 저장 실패. 파일명: " + image.getOriginalFilename());
+            System.err.println("에러 메시지: " + e.getMessage());
+            e.printStackTrace();
+
+            // 트랜잭션 롤백을 위해 RuntimeException 던짐
+            throw new RuntimeException("이미지 저장 실패로 인해 게시글 저장을 롤백합니다.");
+        }
+    }
+
+
     @Transactional
     public void updatePost(Long postId, PostUpdateRequestDto postUpdateRequestDto, User user) {
         // 1. 수정할 게시글 존재 여부 확인
@@ -158,7 +203,7 @@ public class PostService {
                 try {
                     String imageUrl = s3Service.uploadImage(imageFile, user.getId());
                     Image newImage = new Image();
-                    newImage.setUrl(imageUrl);
+                    newImage.setImageUrl(imageUrl);
                     newImage.setPost(post);
                     uploadedImages.add(newImage);
                 } catch (IOException e) {
@@ -168,8 +213,19 @@ public class PostService {
             post.setImages(uploadedImages);
         }
 
+        // 10. 기존 이미지 URL 수정 (변경된 이미지 URL을 업데이트)
+        List<String> updatedImageUrls = postUpdateRequestDto.getUpdatedImageUrls(); // 수정된 이미지 URL 리스트
+        if (updatedImageUrls != null && !updatedImageUrls.isEmpty()) {
+            for (int i = 0; i < updatedImageUrls.size(); i++) {
+                Image image = post.getImages().get(i);  // 게시글에 연결된 기존 이미지
+                String updatedUrl = updatedImageUrls.get(i);
+                image.setImageUrl(updatedUrl);  // 기존 이미지의 URL을 수정된 URL로 업데이트
+            }
+        }
+
         // 트랜잭션 종료 시 변경사항 자동 반영
     }
+
 
 
     // PostStatus에 따라 UpdateStatus를 설정하는 메서드

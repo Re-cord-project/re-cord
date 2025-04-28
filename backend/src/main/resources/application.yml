@@ -1,5 +1,6 @@
 server:
   port: 8090
+
 spring:
   output:
     ansi:
@@ -32,8 +33,6 @@ spring:
             client-name: Kakao
             authorization-grant-type: authorization_code
             redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
-#            redirect-uri: "http://localhost:8090/login/oauth2/code/kakao"
-
           github:
             clientId: ON_SECRET
             scope:
@@ -42,7 +41,6 @@ spring:
             client-name: Github
             authorization-grant-type: authorization_code
             redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
-
           google:
             clientId: ON_SECRET
             scope:
@@ -68,13 +66,19 @@ spring:
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
             user-name-attribute: id
 
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
+
 logging:
   level:
-    com.ll.blog: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.orm.jdbc.bind: TRACE
-    org.hibernate.orm.jdbc.extract: TRACE
-    org.springframework.transaction.interceptor: TRACE
+    com.ll.blog:
+    org.hibernate.SQL:
+    org.hibernate.orm.jdbc.bind:
+    org.hibernate.orm.jdbc.extract:
+    org.springframework.transaction.interceptor:
+
 custom:
   dev:
     cookieDomain: localhost
@@ -89,4 +93,3 @@ custom:
     cookieDomain: "${custom.dev.cookieDomain}"
     frontUrl: "${custom.dev.frontUrl}"
     backUrl: "${custom.dev.backUrl}"
-

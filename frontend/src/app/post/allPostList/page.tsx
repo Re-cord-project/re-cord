@@ -38,7 +38,7 @@ export default function AllPostListPage() {
         const fetchPosts = async () => {
             try {
                 setLoading(true)
-                const response = await fetch(`http://localhost:8090/api/posts?page=${currentPage}&size=10`, {
+                const response = await fetch(`http://localhost:8090/api/posts/public?page=${currentPage}&size=10`, {
                     credentials: 'include',
                 })
 

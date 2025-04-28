@@ -11,6 +11,7 @@ interface PostResponseDto {
     createdAt: string
     imageUrls?: string[]
 }
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 export const useLatestPost = (userId: number) => {
     const [post, setPost] = useState<PostResponseDto | null>(null)
@@ -28,37 +29,18 @@ export const useLatestPost = (userId: number) => {
             try {
                 setIsLoading(true)
 
-                // 로컬 스토리지에서 JWT 토큰 확인 (혹시 있다면)
-                const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token')
-
                 const headers: Record<string, string> = {
                     'Content-Type': 'application/json',
                 }
 
-                // 토큰이 있으면 Authorization 헤더에 추가
-                if (token) {
-                    headers['Authorization'] = `Bearer ${token}`
-                }
-
-                const response = await fetch(`http://localhost:8090/api/posts/latest/${userId}`, {
+                const response = await fetch(`${API_BASE_URL}/api/posts/public/latest/${userId}`, {
                     method: 'GET',
                     headers: headers,
-                    credentials: 'include', // 쿠키도 함께 전송
                 })
 
                 if (!response.ok) {
                     // 404 상태는 게시물이 없는 정상적인 상황으로 처리
                     if (response.status === 404) {
-                        setPost(null)
-                        setError(null)
-                        return
-                    }
-
-                    // 401/403 상태는 인증 관련 문제
-                    if (response.status === 401 || response.status === 403) {
-                        console.warn('인증이 필요한 요청입니다. 로그인이 필요합니다.')
-                        // 로그인은 되어있지만 서버에서 인증이 실패하는 경우,
-                        // 게시글이 없는 것으로 처리하고 에러 메시지는 표시하지 않음
                         setPost(null)
                         setError(null)
                         return

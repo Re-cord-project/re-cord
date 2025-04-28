@@ -27,9 +27,10 @@ public class ApiV1PostCUDController {
 
     @PostMapping
     public ResponseEntity<String> createPost(
-            @RequestPart @Validated PostRequestDto dto,  // 게시글 정보
-            @RequestPart(required = false) List<MultipartFile> images,  // 이미지 파일들
+            @RequestPart("dto") @Validated PostRequestDto dto,
+            @RequestPart(name = "images", required = false) List<MultipartFile> images,
             @AuthenticationPrincipal SecurityUser userDetails) {
+
 
         // 게시글 생성 및 이미지 업로드 처리
         postService.createPost(dto, images, userDetails.getId());
@@ -100,14 +101,5 @@ public class ApiV1PostCUDController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{postId}/like/status")
-    public ResponseEntity<Boolean> checkLikeStatus(
-            @PathVariable Long postId,
-            @AuthenticationPrincipal SecurityUser securityUser
-    ) {
-        long userId = securityUser.getId(); // ✅ SecurityUser에서 직접 ID 추출
-        boolean isLiked = postService.isPostLikedByUser(postId, userId);
-        return ResponseEntity.ok(isLiked);
-    }
 
 }

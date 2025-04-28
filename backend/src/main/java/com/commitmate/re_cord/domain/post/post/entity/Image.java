@@ -6,8 +6,9 @@ import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@Setter // 이게 있으면 따로 추가 안 해도 돼
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
 public class Image {
 
@@ -15,25 +16,13 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
+    @Column(name = "image_url") // 명시적으로 컬럼명 매핑 및 NOT NULL 설정 (필요하다면)
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @JoinColumn(name = "post_id") // post_id는 외래 키이므로 NOT NULL 설정
     private Post post;
 
     private String fileKey;
 
-    // 또는 수동으로
-    public void setUrl(String url) {
-        this.imageUrl = url;
-    }
-
-    public void setPost(Post post) {
-        this.post = post;
-    }
-
-    public String getUrl() {
-        return imageUrl;  // S3에서 저장된 이미지 URL 반환
-    }
 }

@@ -113,11 +113,24 @@ const CreatePostPage = () => {
     }, [])
 
     // 에디터에 드래그된 이미지 처리 핸들러 (useCallback으로 최적화)
-    const handleEditorImageDrop = useCallback((file: File, previewUrl: string) => {
-        console.log('에디터에서 이미지 감지됨:', file.name)
-        setUploadedImages((prev) => [...prev, file])
-        setImagePreviewUrls((prev) => [...prev, previewUrl])
-    }, [])
+    const handleEditorImageDrop = useCallback(
+        (file: File, previewUrl: string) => {
+            console.log('에디터에서 이미지 감지됨:', file.name)
+
+            // 중복 확인: 파일 이름과 크기로 중복 확인
+            const isDuplicate = uploadedImages.some((img) => img.name === file.name && img.size === file.size)
+
+            // 중복된 이미지가 아닐 경우에만 추가
+            if (!isDuplicate) {
+                console.log('새 이미지 추가:', file.name)
+                setUploadedImages((prev) => [...prev, file])
+                setImagePreviewUrls((prev) => [...prev, previewUrl])
+            } else {
+                console.log('중복된 이미지 감지됨, 건너뜀:', file.name)
+            }
+        },
+        [uploadedImages],
+    )
 
     // submit 핸들러 최적화
     const onSubmit = useCallback(
@@ -150,6 +163,12 @@ const CreatePostPage = () => {
                     }
                 }
 
+                // 이미지 로깅: 업로드할 이미지 확인
+                console.log(`업로드될 이미지 수: ${uploadedImages.length}`)
+                uploadedImages.forEach((img, idx) => {
+                    console.log(`이미지 ${idx + 1}: ${img.name}, 크기: ${img.size} 바이트, 타입: ${img.type}`)
+                })
+
                 // 에디터에서 blob 이미지 처리 (S3 업로드 후 URL 치환)
                 if (contentEditorRef.current?.processContentBeforeSubmit) {
                     console.log('본문 이미지 처리 시작...')
@@ -167,6 +186,7 @@ const CreatePostPage = () => {
                         content: finalContent, // 이미지가 S3 URL로 치환된 최종 콘텐츠
                         categoryId: categoryId, // 유효한 카테고리 ID 사용
                         userId: loginUser.id, // 명시적으로 사용자 ID 지정
+                        images: uploadedImages, // 이미지 파일 배열 추가
                     })
                 }
                 // 새 글 작성의 경우 create API 사용
@@ -177,6 +197,7 @@ const CreatePostPage = () => {
                         content: finalContent, // 이미지가 S3 URL로 치환된 최종 콘텐츠
                         categoryId: categoryId, // 유효한 카테고리 ID 사용
                         userId: loginUser.id, // 명시적으로 사용자 ID 지정
+                        images: uploadedImages, // 이미지 파일 배열 추가
                     })
                 }
 
@@ -194,7 +215,18 @@ const CreatePostPage = () => {
                 setIsProcessingImages(false)
             }
         },
-        [isLogin, loginUser, router, isEditMode, editPostId, updatePost, publishPost, uploadImageToS3, categories],
+        [
+            isLogin,
+            loginUser,
+            router,
+            isEditMode,
+            editPostId,
+            updatePost,
+            publishPost,
+            uploadImageToS3,
+            categories,
+            uploadedImages,
+        ],
     )
 
     const handleCancel = () => {

@@ -66,15 +66,15 @@ export const usePosts = () => {
         try {
             // 컨트롤러 매핑에 맞게 URL 수정
             const response = await fetch(
-                `http://localhost:8090/api/posts/${userId}/posts?page=${currentPage}&size=5&includeUsername=true`,
+                `http://localhost:8090/api/posts/public/${userId}/posts?page=${currentPage}&size=5&includeUsername=true`,
                 {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
                         Accept: 'application/json',
-                    },
-                    credentials: 'include',
-                },
+                    }
+                    
+                }
             )
 
             if (!response.ok) {

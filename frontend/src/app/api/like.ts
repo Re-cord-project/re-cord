@@ -46,7 +46,7 @@ export async function checkPostLikeStatus(postId: number): Promise<boolean> {
             headers: {
                 'Content-Type': 'application/json',
             },
-            credentials: 'include',
+    
         })
 
         console.log(`좋아요 상태 확인 API 응답 상태:`, response.status)
