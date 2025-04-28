@@ -40,7 +40,7 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers("/api/auth/register", "/api/auth/login", "api/auth/logout")
                                 .permitAll()
-                                .requestMatchers("/register", "/login")
+                                .requestMatchers("/register", "/login","api/categories/**")
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/users/*/counts")
                                 .permitAll()
