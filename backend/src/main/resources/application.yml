@@ -13,9 +13,6 @@ spring:
     username: commitmate
     password: commitmate
     driver-class-name: com.mysql.cj.jdbc.Driver
-  config:
-    activate:
-      on-profile: prod  # prod 환경에서만 활성화됨
   jpa:
     open-in-view: false
     hibernate:

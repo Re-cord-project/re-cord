@@ -1,11 +1,8 @@
-custom:
-  site:
-    name: "BLOG"
-    cookieDomain: "${custom.prod.cookieDomain}"
-    frontUrl: "${custom.prod.frontUrl}"
-    backUrl: "${custom.prod.backUrl}"
-
 spring:
+  profiles: prod
+  config:
+    activate:
+      on-profile: prod  # prod 프로파일에서만 활성화되는 설정
   datasource:
     url: jdbc:mysql://mysql:3306/your_db_name?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     username: ${MYSQL_USER}
@@ -18,3 +15,11 @@ spring:
       hibernate:
         format_sql: true
         use_sql_comments: true
+
+custom:
+  site:
+    name: "BLOG"
+    cookieDomain: "${custom.prod.cookieDomain}"
+    frontUrl: "${custom.prod.frontUrl}"
+    backUrl: "${custom.prod.backUrl}"
+
