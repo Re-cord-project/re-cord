@@ -83,7 +83,7 @@ export function FollowerList() {
     }
   };
 
-  // 팔로워 목록 렌더링
+  // 팔로워 목록
   return (
     <div>
       <div className="border border-gray-200 rounded-lg overflow-hidden">
