@@ -48,7 +48,7 @@ public class ApiV1HomeController {
     public ResponseEntity<List<HomeDto>> getPopularPostsByBootcamp(
             @RequestParam String bootcamp
     ) {
-        List<HomeDto> posts = homeService.getPopularPostsByBootcamp(bootcamp);
+        List<HomeDto> posts = homeService.getPopularPublishedPostsByBootcamp(bootcamp);
         return ResponseEntity.ok(posts);
     }
 
