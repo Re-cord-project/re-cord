@@ -114,7 +114,7 @@ export default function BlogPage() {
                     <AuthorProfile userId={author?.id || 0} />
                     <SearchBar />
                     <CategoryMenu userId={author?.id || 0} />
-                    <Statistics />
+                    <Statistics userId={author?.id || 0} />
                 </div>
 
                 {/* 메인 콘텐츠 영역 */}

@@ -104,7 +104,7 @@ export default function AllPostListPage() {
                         <AuthorProfile />
                         <SearchBar />
                         <CategoryMenu />
-                        <Statistics />
+                        <Statistics userId={loginUser?.id} />
                     </div>
 
                     {/* 메인 콘텐츠 영역 */}

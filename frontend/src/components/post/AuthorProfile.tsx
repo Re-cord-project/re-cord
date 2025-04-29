@@ -284,6 +284,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                         </Link>
                     ) : isLogin ? (
                         <FollowButton
+                            variant="fullWidth"
                             userId={author.id.toString()}
                             initialHasFollowed={hasFollowed}
                             onFollowStatusChange={(newStatus) => {

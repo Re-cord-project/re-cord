@@ -119,7 +119,7 @@ const HomePage: React.FC = () => {
                     <AuthorProfile userId={loginUser.id} />
                     <SearchBar />
                     <CategoryMenu userId={loginUser.id} />
-                    <Statistics />
+                    <Statistics userId={loginUser.id} />
                 </div>
 
                 {/* 메인 콘텐츠 영역 */}
