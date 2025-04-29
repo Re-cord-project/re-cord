@@ -30,49 +30,46 @@ const Statistics: React.FC<StatisticsProps> = ({ userId }) => {
                 // 총 좋아요 수 가져오기
                 try {
                     const likesResponse = await fetch(`${API_BASE_URL}/api/posts/public/likes/${targetUserId}`, {})
-
                     if (likesResponse.ok) {
-                        const likesData = await likesResponse.json()
-                        setTotalLikes(likesData || 0) // 데이터가 없으면 0으로 설정
+                        const likesText = await likesResponse.text()
+                        setTotalLikes(likesText ? JSON.parse(likesText) : 0)
                     } else {
                         console.log('좋아요 수를 가져오는데 실패했습니다:', await likesResponse.text())
                         setTotalLikes(0)
                     }
                 } catch (err) {
                     console.error('좋아요 수 가져오기 오류:', err)
-                    setTotalLikes(0) // 오류 발생 시 기본값 0 설정
+                    setTotalLikes(0)
                 }
 
                 // 총 조회수 가져오기
                 try {
                     const viewsResponse = await fetch(`${API_BASE_URL}/api/posts/public/views/${targetUserId}`, {})
-
                     if (viewsResponse.ok) {
-                        const viewsData = await viewsResponse.json()
-                        setTotalViews(viewsData || 0) // 데이터가 없으면 0으로 설정
+                        const viewsText = await viewsResponse.text()
+                        setTotalViews(viewsText ? JSON.parse(viewsText) : 0)
                     } else {
                         console.log('조회수를 가져오는데 실패했습니다:', await viewsResponse.text())
                         setTotalViews(0)
                     }
                 } catch (err) {
                     console.error('조회수 가져오기 오류:', err)
-                    setTotalViews(0) // 오류 발생 시 기본값 0 설정
+                    setTotalViews(0)
                 }
 
                 // 총 게시글 수 가져오기
                 try {
                     const postsResponse = await fetch(`${API_BASE_URL}/api/posts/public/count/${targetUserId}`, {})
-
                     if (postsResponse.ok) {
-                        const postsData = await postsResponse.json()
-                        setTotalPosts(postsData || 0) // 데이터가 없으면 0으로 설정
+                        const postsText = await postsResponse.text()
+                        setTotalPosts(postsText ? JSON.parse(postsText) : 0)
                     } else {
                         console.log('게시글 수를 가져오는데 실패했습니다:', await postsResponse.text())
                         setTotalPosts(0)
                     }
                 } catch (err) {
                     console.error('게시글 수 가져오기 오류:', err)
-                    setTotalPosts(0) // 오류 발생 시 기본값 0 설정
+                    setTotalPosts(0)
                 }
             } catch (err) {
                 console.error('통계 정보 가져오기 오류:', err)

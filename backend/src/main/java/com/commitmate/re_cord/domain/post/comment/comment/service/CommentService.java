@@ -32,6 +32,14 @@ public class CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
+    // 부모 댓글 조회용
+    @Transactional(readOnly = true)
+    public CommentResponseDTO getCommentById(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
+        return new CommentResponseDTO(comment);
+    }
+
     @Transactional
     public CommentResponseDTO registerComment(CommentRequestDTO commentRequestDTO, Long postId, Long userId) {
         Post post = postRepository.findById(postId)
@@ -51,7 +59,9 @@ public class CommentService {
         Comment savedComment = commentRepository.save(comment);
 
 
-        return new CommentResponseDTO(savedComment.getId(),
+        return new CommentResponseDTO(
+                savedComment.getId(),
+                user.getId(),
                 savedComment.getContent(),
                 user.getUsername(),
                 savedComment.getCreatedAt().toString(),
@@ -93,7 +103,9 @@ public class CommentService {
         comment.setUpdateStatus(UpdateStatus.EDITED);
 
         Comment updatedComment = commentRepository.save(comment);
-        return new CommentResponseDTO(updatedComment.getId(),
+        return new CommentResponseDTO(
+                updatedComment.getId(),
+                updatedComment.getUser().getId(),
                 updatedComment.getContent(),
                 updatedComment.getUser().getUsername(),
                 updatedComment.getCreatedAt().toString(),

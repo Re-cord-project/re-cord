@@ -17,9 +17,9 @@ public class SignupDto {
     private String password;
     private String passwordConfirm;
     private String bootcamp;
-    private Integer generation;
+    private String generation;
 
-    public SignupDto(String email, String username, String password, String passwordConfirm, String bootcamp, int generation) {
+    public SignupDto(String email, String username, String password, String passwordConfirm, String bootcamp, String  generation) {
         this.email = email;
         this.username = username;
         this.password = password;

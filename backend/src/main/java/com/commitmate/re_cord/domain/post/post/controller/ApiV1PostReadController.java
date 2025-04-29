@@ -3,6 +3,7 @@ package com.commitmate.re_cord.domain.post.post.controller;
 import com.commitmate.re_cord.domain.mypage.service.MyPagePostService;
 import com.commitmate.re_cord.domain.post.post.dto.PostResponseDto;
 import com.commitmate.re_cord.domain.post.post.service.PostService;
+import com.commitmate.re_cord.domain.user.block.service.BlockService;
 import com.commitmate.re_cord.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,7 @@ import java.util.List;
 public class ApiV1PostReadController {
     private final PostService postService;
     private final MyPagePostService myPagePostService;
+    private final BlockService blockService;
     // 게시글 전체 목록 보기
     @GetMapping
     public Page<PostResponseDto> getAllPosts(
@@ -27,10 +29,24 @@ public class ApiV1PostReadController {
         return postService.getAllPosts(page, size);
     }
 
-    // 게시글 하나 상세 보기
+    // 게시글 하나 상세 보기 (로그인 유무에 따라 차단 검사)
     @GetMapping("/{postId}")
-    public ResponseEntity<PostResponseDto> getPost(@PathVariable Long postId) {
-        return ResponseEntity.ok(postService.getPostById(postId));
+    public ResponseEntity<PostResponseDto> getPost(
+            @PathVariable Long postId,
+            @AuthenticationPrincipal SecurityUser currentUser) {
+
+        // 게시글 DTO 조회
+        PostResponseDto dto = postService.getPostById(postId);
+        Long authorId = dto.getUserId();    // 작성자 ID
+
+        // 로그인한 사용자라면(=currentUser != null) 차단 검사
+        if (currentUser != null) {
+            Long viewerId = currentUser.getId();
+            blockService.checkIfBlocked(authorId, viewerId, "게시물을 사용할 수 없습니다.");
+        }
+
+        // 차단이 아니거나 비로그인 상태라면 정상 리턴
+        return ResponseEntity.ok(dto);
     }
 
     //게시글 좋아요 수
@@ -68,13 +84,9 @@ public class ApiV1PostReadController {
         Page<PostResponseDto> posts = postService.getPostsByCategory(categoryId, page, size);
         return ResponseEntity.ok(posts);
     }
-    // userId에 해당하는 제일 최신글보기
-    @GetMapping("/latest/{userId}")
-    public ResponseEntity<PostResponseDto> getLatestPostByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(postService.getLatestPostByUserId(userId));
-    }
 
-    // ✅ 작성자의 다른 게시글 조회
+
+    // 작성자의 다른 게시글 조회
     @GetMapping("/{userid}/other-posts")
     public List<PostResponseDto> getOtherPostsBySameUser(
             @PathVariable Long userid,
@@ -82,12 +94,22 @@ public class ApiV1PostReadController {
         return postService.getOtherPostsBySameUser(userid, excludePostId);
     }
 
-    // ✅ 작성자의 모든 게시글 조회
+    // 작성자의 모든 게시글 조회
     @GetMapping("/{userid}/posts")
     public List<PostResponseDto> getAllPostsBySameUser(@PathVariable Long userid) {
         return postService.getAllPostsByUser(userid);
     }
 
+    // 작성자의 모든 게시글 리스트
+    @GetMapping("/{userId}/posts/list")
+    public ResponseEntity<Page<PostResponseDto>> getAllPostsBySameUser(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<PostResponseDto> posts = postService.getAllPostsByUser(userId, page, size);
+        return ResponseEntity.ok(posts);
+    }
 
     // 특정 사용자의 게시글 조회수 총합
     @GetMapping("/views/{userId}")
@@ -107,6 +129,11 @@ public class ApiV1PostReadController {
         return postService.getTotalPostCount(userId);
     }
 
+    // userId에 해당하는 제일 최신글보기
+    @GetMapping("/latest/{userId}")
+    public ResponseEntity<PostResponseDto> getLatestPostByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(postService.getLatestPostByUserId(userId));
+    }
 
 
 }

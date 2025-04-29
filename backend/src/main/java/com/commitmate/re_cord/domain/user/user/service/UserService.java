@@ -2,6 +2,7 @@ package com.commitmate.re_cord.domain.user.user.service;
 
 
 import com.commitmate.re_cord.domain.user.user.dto.SignupDto;
+import com.commitmate.re_cord.domain.user.user.dto.UserIdResponseDto;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.enums.Provider;
 import com.commitmate.re_cord.domain.user.user.enums.Role;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -29,7 +31,7 @@ import java.util.UUID;
 public class UserService {
     private final AuthTokenService authTokenService;
     private final UserRepository userRepository;
-//    private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     // 일반 회원가입
     @Transactional
@@ -38,20 +40,22 @@ public class UserService {
             return "Email already exists";
         }
 
-//        String encodedPassword = passwordEncoder.encode(password); // 비밀번호 암호화
+        // 비밀번호 인코딩
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
         // 블로그명 생성
         String blogName = generateBlogName(dto.getEmail());
 
 
         User user = new User();
         user.setEmail(dto.getEmail());
-//        user.setPassword(encodedPassword);
-        user.setPassword(dto.getPassword());
+        user.setPassword(encodedPassword);
+//        user.setPassword(dto.getPassword());
         user.setUsername(dto.getUsername());
         user.setBootcamp(dto.getBootcamp());
         user.setGeneration(dto.getGeneration());
         user.setRole(Role.basic);
         user.setBlogName(blogName);
+        user.setProfileImageUrl("https://re-cord.s3.ap-northeast-2.amazonaws.com/user/profile/default-profile.png");
         userRepository.save(user);
         return "User registered successfully";
     }
@@ -74,16 +78,16 @@ public class UserService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
 
-//            if (passwordEncoder.matches(password, user.getPassword())) {
-//                String refreshToken = UUID.randomUUID().toString();
-//                user.setRefreshToken(refreshToken);
-//                userRepository.save(user);
-
-            // 평문 비교 (보안 위험 있음 - 테스트용만)
-            if (password.equals(user.getPassword())) {
+            if (passwordEncoder.matches(password, user.getPassword())) {
                 String refreshToken = UUID.randomUUID().toString();
                 user.setRefreshToken(refreshToken);
                 userRepository.save(user);
+
+//            // 평문 비교 (보안 위험 있음 - 테스트용만)
+//            if (password.equals(user.getPassword())) {
+//                String refreshToken = UUID.randomUUID().toString();
+//                user.setRefreshToken(refreshToken);
+//                userRepository.save(user);
 
                 String accessToken = authTokenService.genAccessToken(user);
                 return user.getRefreshToken() + " " + accessToken;
@@ -133,6 +137,7 @@ public class UserService {
                 .password(password)
                 .provider(provider)
                 .refreshToken(UUID.randomUUID().toString())
+                .profileImageUrl("https://re-cord.s3.ap-northeast-2.amazonaws.com/user/profile/default-profile.png")
                 .build();
 
         return userRepository.save(user);
@@ -199,7 +204,7 @@ public class UserService {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     // 소셜 로그인 시 임시 유저 생성
-    public User createTempUser(String oauthId, String username, Provider provider) {
+    public User createTempUser(String oauthId, String username, String email, Provider provider, String profileImageUrl) {
         // 이미 존재하면 그대로 반환
 
         User user = userRepository.findByUsername(username).orElse(null);
@@ -209,17 +214,20 @@ public class UserService {
             user = User.builder()
                     .oauthId(oauthId)
                     .username(username)
+                    .email(email)
                     .provider(provider)
                     .refreshToken(UUID.randomUUID().toString())
+                    .profileImageUrl("https://re-cord.s3.ap-northeast-2.amazonaws.com/user/profile/default-profile.png ")
                     .role(Role.basic)
+                    .profileImageUrl(profileImageUrl)
                     .build();
 
             // 유저 저장
             User savedUser = userRepository.save(user);
 
             // 로그 확인
-            log.info("임시 유저 생성 완료 - oauthId: {}, username: {}, provider: {}",
-                    savedUser.getOauthId(), savedUser.getUsername(), savedUser.getProvider());
+            log.info("임시 유저 생성 완료 - oauthId: {}, username: {}, email: {}, provider: {}",
+                    savedUser.getOauthId(), savedUser.getUsername(), savedUser.getEmail(), savedUser.getProvider());
             return savedUser;
         } else {
             // 유저가 존재하면 기존 유저 반환
@@ -228,7 +236,7 @@ public class UserService {
     }
 
     @Transactional
-    public User completeOAuth2Signup(String oauthId, String email, String bootcamp, int generation) {
+    public User completeOAuth2Signup(String oauthId, String email, String bootcamp, String generation) {
         System.out.println(oauthId);
         User user = userRepository.findByOauthId(oauthId)
                 .orElseThrow(() -> new RuntimeException("임시 계정이 없습니다"));
@@ -251,4 +259,9 @@ public class UserService {
                 .orElse(null); // 사용자가 없으면 null 반환 또는 예외 처리
     }
 
+    public UserIdResponseDto getUserIdByBlogName(String blogName) {
+        return userRepository.findByBlogName(blogName)
+                .map(user -> new UserIdResponseDto(user.getId()))
+                .orElse(null); // 못 찾으면 null 반환
+    }
 }

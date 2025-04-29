@@ -1,6 +1,12 @@
 server:
   port: 8090
 spring:
+  spring:
+    servlet:
+      multipart:
+        max-file-size: 10MB
+        max-request-size: 20MB
+
   output:
     ansi:
       enabled: ALWAYS
@@ -8,7 +14,11 @@ spring:
     active: dev
     include: secret
   datasource:
+
+#    url: jdbc:mysql://localhost:3307/recorddb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+#    url: jdbc:mysql://localhost:3333/recorddb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
     url: jdbc:mysql://localhost:3306/recorddb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+
     username: commitmate
     password: commitmate
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -28,18 +38,22 @@ spring:
         registration:
           kakao:
             clientId: ON_SECRET
-            scope: profile_nickname
+            scope: profile_nickname, account_email
             client-name: Kakao
             authorization-grant-type: authorization_code
             redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
+          #            redirect-uri: "http://localhost:8090/login/oauth2/code/kakao"
+
           github:
             clientId: ON_SECRET
+            client-secret: ON_SECRET
             scope:
               - read:user
               - user:email
             client-name: Github
             authorization-grant-type: authorization_code
             redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
+
           google:
             clientId: ON_SECRET
             scope:
@@ -65,11 +79,6 @@ spring:
             user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
             user-name-attribute: id
 
-  servlet:
-    multipart:
-      max-file-size: 20MB
-      max-request-size: 50MB
-
 logging:
   level:
     com.ll.blog: DEBUG
@@ -77,7 +86,6 @@ logging:
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
-
 custom:
   dev:
     cookieDomain: localhost

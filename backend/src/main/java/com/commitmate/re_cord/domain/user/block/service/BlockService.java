@@ -1,15 +1,19 @@
 package com.commitmate.re_cord.domain.user.block.service;
 
+import com.commitmate.re_cord.domain.post.comment.comment.entity.Comment;
+import com.commitmate.re_cord.domain.post.comment.comment.repository.CommentRepository;
+import com.commitmate.re_cord.domain.user.block.dto.BlockUserResponseDto;
 import com.commitmate.re_cord.domain.user.block.entity.Block;
 import com.commitmate.re_cord.domain.user.block.repository.BlockRepository;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.service.UserService;
 import com.commitmate.re_cord.global.exception.BlockNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
@@ -19,6 +23,7 @@ public class BlockService {
 
     private final BlockRepository blockRepository;
     private final UserService userService;
+    private final CommentRepository commentRepository;
 
     // 사용자 차단
     public void blockUser(Long blockerId, Long blockedId) {
@@ -62,10 +67,25 @@ public class BlockService {
     }
 
     // 차단한 유저 목록 조회
-    @Transactional
-    public List<Block> getBlockedUsers(Long blockerId) {
-        User blocker = userService.getUserById(blockerId);
-        return blockRepository.findByBlockerId(blocker); // blocker가 차단한 유저 목록 반환
+    @Transactional(readOnly = true)
+    public List<BlockUserResponseDto> getBlockedList(Long userId) {
+        // 차단자 정보 조회
+        User blocker = userService.getUserById(userId);
+
+        // Block 엔티티 조회 후 User → DTO 매핑
+        return blockRepository.findByBlockerId(blocker)
+                .stream()
+                .map(block -> {
+                            User blockedUser = block.getBlockedId();
+
+                    return BlockUserResponseDto.builder()
+                            .userId(blockedUser.getId())
+                            .username(blockedUser.getUsername())
+                            .profileImageUrl(blockedUser.getProfileImageUrl())
+                            .blogName(blockedUser.getBlogName())
+                            .build();
+                })
+                .toList();
     }
 
     // 차단 여부 확인
@@ -79,4 +99,17 @@ public class BlockService {
         }
     }
 
+    //대댓글 작성시 차단 여부 확인
+    @Transactional(readOnly = true)
+    public void checkIfBlockedByComment(Long parentCommentId, Long blockedId, String message) {
+        // 부모 댓글 엔티티 조회
+        Comment parent = commentRepository.findById(parentCommentId)
+                .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다."));
+
+        // 부모 댓글 작성자 ID를 blockerId로 사용
+        Long blockerId = parent.getUser().getId();
+
+        // 기존 checkIfBlocked 로직 재사용
+        checkIfBlocked(blockerId, blockedId, message);
+    }
 }

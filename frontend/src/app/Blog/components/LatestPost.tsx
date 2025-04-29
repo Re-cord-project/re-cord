@@ -12,6 +12,7 @@ interface PostProps {
     likes: number
     createdAt: string
     imageUrls?: string[]
+    blogName?: string // blogName 필드 추가
 }
 
 export const LatestPost: React.FC<{ post: PostProps }> = ({ post }) => {

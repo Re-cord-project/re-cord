@@ -60,7 +60,7 @@ export const usePosts = (userId?: number) => {
 
                 if (userId) {
                     // 특정 사용자의 모든 게시글 조회
-                    url = `${API_BASE_URL}/api/posts/public/${userId}/posts`
+                    url = `${API_BASE_URL}/api/posts/public/${userId}/posts/list`
                 } else {
                     // 모든 게시글 페이징 조회 (기존 로직)
                     url = `${API_BASE_URL}/api/posts/public?page=${currentPage}&size=5&includeUsername=true`
@@ -71,7 +71,7 @@ export const usePosts = (userId?: number) => {
                     headers: {
                         'Content-Type': 'application/json',
                         Accept: 'application/json',
-                    }
+                    },
                 })
 
                 if (!response.ok) {
@@ -82,20 +82,22 @@ export const usePosts = (userId?: number) => {
 
                 if (userId) {
                     // userId로 조회한 경우 (배열 형태로 반환됨)
-                    const formattedPosts = data.map((post: any) => ({
-                        id: post.id,
-                        userId: post.userId,
-                        categoryId: post.categoryId || 0,
-                        title: post.title,
-                        content: post.content,
-                        views: post.views || 0,
-                        likes: post.likes || 0,
-                        status: post.status || 'PUBLISHED',
-                        updateStatus: post.updateStatus || 'NOT_EDITED',
-                        createdAt: post.createdAt,
-                        updatedAt: post.updatedAt,
-                        username: post.username,
-                    }))
+                    const formattedPosts = data.content
+                        ? data.content.map((post: any) => ({
+                              id: post.id,
+                              userId: post.userId,
+                              categoryId: post.categoryId || 0,
+                              title: post.title,
+                              content: post.content,
+                              views: post.views || 0,
+                              likes: post.likes || 0,
+                              status: post.status || 'PUBLISHED',
+                              updateStatus: post.updateStatus || 'NOT_EDITED',
+                              createdAt: post.createdAt,
+                              updatedAt: post.updatedAt,
+                              username: post.username,
+                          }))
+                        : []
                     setPosts(formattedPosts)
                     // 페이징 정보가 없으므로 적절히 설정
                     setTotalPages(1)

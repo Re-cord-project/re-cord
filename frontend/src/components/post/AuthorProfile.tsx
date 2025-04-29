@@ -38,9 +38,55 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
     const [error, setError] = useState<string | null>(null)
     const [hasFollowed, setHasFollowed] = useState(false)
     const [followLoading, setFollowLoading] = useState(false)
+    // 프로필 이미지 URL 상태 추가
+    const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null)
 
     // URL에서 사용자 ID를 가져오거나 전달받은 userId 또는 로그인한 사용자 ID를 사용
     const targetUserId = userId || (params.id ? Number(params.id) : isLogin ? loginUser.id : null)
+
+    // 프로필 이미지를 가져오는 함수
+    const fetchProfileImage = async (userId: number) => {
+        try {
+            // PostContent와 동일한 API 호출
+            const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/${userId}/profile-image`, {
+                credentials: 'include', // 쿠키 인증을 위해 추가
+            })
+
+            if (userProfileResponse.ok) {
+                const imageUrl = await userProfileResponse.text()
+
+                // 유효한 URL 확인
+                if (imageUrl && imageUrl.trim() !== '' && imageUrl.trim() !== 'null') {
+                    // URL 처리
+                    if (imageUrl.startsWith('http')) {
+                        // 이미 절대 URL인 경우 그대로 사용
+                        setProfileImageUrl(imageUrl)
+                    } else if (imageUrl.startsWith('/')) {
+                        // 상대 경로인 경우
+                        if (imageUrl === '/profile.jpg' || imageUrl === '/default-profile.png') {
+                            setProfileImageUrl(imageUrl)
+                        } else {
+                            // 백엔드 URL에 경로 추가
+                            setProfileImageUrl(`${API_BASE_URL}${imageUrl}`)
+                        }
+                    } else {
+                        // 경로가 '/'로 시작하지 않는 경우 '/'를 추가
+                        setProfileImageUrl(`${API_BASE_URL}/${imageUrl}`)
+                    }
+                } else {
+                    // 기본 프로필 이미지 사용
+                    setProfileImageUrl('/default-profile.png')
+                }
+            } else {
+                // 에러 처리
+                console.log(`프로필 이미지가 없거나 로드 실패: ${userProfileResponse.status}`)
+                setProfileImageUrl('/default-profile.png')
+            }
+        } catch (error) {
+            console.error('프로필 이미지 로드 오류:', error)
+            setProfileImageUrl('/default-profile.png')
+        }
+    }
 
     useEffect(() => {
         const fetchUserProfile = async () => {
@@ -139,6 +185,13 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
         fetchUserProfile()
     }, [targetUserId, isLogin, loginUser.id])
 
+    // 사용자 정보를 불러온 후 프로필 이미지 가져오기
+    useEffect(() => {
+        if (targetUserId) {
+            fetchProfileImage(targetUserId)
+        }
+    }, [targetUserId])
+
     if (isLoading) {
         return <div className="bg-white rounded-lg shadow-sm p-6 mb-6">프로필 로딩 중...</div>
     }
@@ -187,9 +240,14 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
             <div className="flex flex-col items-center">
                 <div className="w-16 h-16 rounded-full overflow-hidden mb-3">
                     <img
-                        src={author.profileImageUrl || '/userProfile.png'}
+                        src={profileImageUrl || '/default-profile.png'}
                         alt={`${author.username}의 프로필`}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                            // 이미지 로드 실패 시 기본 이미지로 대체
+                            e.currentTarget.onerror = null
+                            e.currentTarget.src = '/default-profile.png'
+                        }}
                     />
                 </div>
                 <Link

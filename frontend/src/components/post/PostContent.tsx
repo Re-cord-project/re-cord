@@ -16,11 +16,11 @@ import {
 import { togglePostLike, checkPostLikeStatus } from '@/app/api/like'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 
 // API 기본 URL 설정
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
+// 타입 정의
 interface Post {
     id: number
     title: string
@@ -38,143 +38,172 @@ interface Post {
     imageUrls: string[]
 }
 
-// 사용자 정보 인터페이스 추가
 interface UserInfo {
     profileImageUrl: string | null
 }
 
 interface PostContentProps {
     post: Post
-    categories?: Array<{ id: number; name: string }> // 카테고리 목록 추가
-    refreshPost?: () => void // 게시글 새로고침 함수 추가
-    loginUserId?: number // 로그인한 사용자의 ID 추가
+    categories?: Array<{ id: number; name: string }>
+    refreshPost?: () => void
+    loginUserId?: number
 }
 
-const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refreshPost, loginUserId }) => {
-    const [isLiked, setIsLiked] = useState(false)
-    const [localLikes, setLocalLikes] = useState(post.likes)
-    const [isLoading, setIsLoading] = useState(false)
-    const [isInitialized, setIsInitialized] = useState(false)
-    const { isLogin, loginUser } = useGlobalLoginUser()
-    const router = useRouter()
-
-    // 사용자 정보 상태 추가
+// 사용자 정보를 가져오는 커스텀 훅
+const useUserInfo = (userId: number) => {
     const [userInfo, setUserInfo] = useState<UserInfo>({ profileImageUrl: null })
     const [isLoadingUser, setIsLoadingUser] = useState(true)
 
-    // 수정 모달 관련 상태
-    const [showEditModal, setShowEditModal] = useState(false)
-    const [editTitle, setEditTitle] = useState(post.title || '')
-    const [editContent, setEditContent] = useState(post.content || '')
-    const [editCategoryId, setEditCategoryId] = useState(post.categoryId || 1)
-    const [editError, setEditError] = useState<string | null>(null)
-
-    // 현재 사용자가 게시글 작성자인지 확인 (loginUserId가 있으면 우선 사용)
-    const isAuthor = isLogin && (loginUserId !== undefined ? loginUserId : loginUser?.id) === post.userId
-
-    // 디버깅을 위한 로그
     useEffect(() => {
-        console.log('로그인 상태:', isLogin)
-        console.log('로그인한 사용자 ID (props):', loginUserId)
-        console.log('로그인한 사용자 ID (context):', loginUser?.id)
-        console.log('게시글 작성자 ID (post.userId):', post.userId)
-        console.log('isAuthor 결과:', isAuthor)
-    }, [isLogin, loginUser, loginUserId, post.userId, isAuthor])
-
-    // 컴포넌트 마운트 시 좋아요 상태 확인
-    useEffect(() => {
-        const fetchLikeStatus = async () => {
-            try {
-                const liked = await checkPostLikeStatus(post.id)
-                setIsLiked(liked)
-                setIsInitialized(true)
-            } catch (error) {
-                console.error('좋아요 상태 확인 중 오류:', error)
-                setIsInitialized(true)
-            }
-        }
-
-        fetchLikeStatus()
-    }, [post.id])
-
-    // 프로필 이미지 가져오기 - 인증 문제를 해결하기 위해 수정
-    useEffect(() => {
-        const fetchData = async () => {
+        const fetchUserInfo = async () => {
             setIsLoadingUser(true)
             try {
-                // 백엔드 컨트롤러에 맞게 경로 수정 (users로 변경)
-                const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/${post.userId}/profile-image`, {
-                    credentials: 'include', // 쿠키 인증을 위해 추가
+                const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/${userId}/profile-image`, {
+                    credentials: 'include',
                 })
 
                 if (userProfileResponse.ok) {
                     const profileImageUrl = await userProfileResponse.text()
+                    const isValidUrl =
+                        profileImageUrl && profileImageUrl.trim() !== '' && profileImageUrl.trim() !== 'null'
 
-                    // 유효한 URL 확인 (빈 문자열이 아니고 'null'이 아닌 경우)
-                    if (profileImageUrl && profileImageUrl.trim() !== '' && profileImageUrl.trim() !== 'null') {
-                        // URL 처리: 백엔드에서 받은 경로가 상대 경로일 경우 백엔드 기본 URL 추가
-                        if (profileImageUrl.startsWith('http')) {
-                            // 이미 절대 URL인 경우 그대로 사용
-                            setUserInfo({
-                                profileImageUrl: profileImageUrl,
-                            })
-                        } else if (profileImageUrl.startsWith('/')) {
-                            // 상대 경로인 경우 백엔드 URL에 추가
-                            // 로컬에 있는 이미지라면 그대로 사용
-                            if (profileImageUrl === '/profile.jpg' || profileImageUrl === '/default-profile.png') {
-                                setUserInfo({
-                                    profileImageUrl: profileImageUrl,
-                                })
-                            } else {
-                                // 백엔드 URL에 경로 추가
-                                setUserInfo({
-                                    profileImageUrl: `${API_BASE_URL}${profileImageUrl}`,
-                                })
-                            }
-                        } else {
-                            // 경로가 '/'로 시작하지 않는 경우 '/'를 추가
-                            setUserInfo({
-                                profileImageUrl: `${API_BASE_URL}/${profileImageUrl}`,
-                            })
-                        }
-                    } else {
-                        // 기본 프로필 이미지 사용
-                        setUserInfo({
-                            profileImageUrl: '/default-profile.png',
-                        })
-                    }
-                } else {
-                    // 401, 404 등의 에러는 정상적으로 처리 (이미지가 없는 상태로 간주)
-                    console.log(`프로필 이미지가 없거나 로드 실패: ${userProfileResponse.status}`)
                     setUserInfo({
-                        profileImageUrl: '/default-profile.png',
+                        profileImageUrl: isValidUrl ? getFormattedProfileUrl(profileImageUrl) : '/default-profile.png',
                     })
+                } else {
+                    setUserInfo({ profileImageUrl: '/default-profile.png' })
                 }
-            } catch (profileError) {
-                console.error('프로필 이미지 로드 오류:', profileError)
-                setUserInfo({
-                    profileImageUrl: '/default-profile.png',
-                })
+            } catch (error) {
+                console.error('사용자 프로필 이미지를 불러오는 중 오류 발생:', error)
+                setUserInfo({ profileImageUrl: '/default-profile.png' })
             } finally {
                 setIsLoadingUser(false)
             }
         }
 
-        fetchData()
-    }, [post.id, post.userId])
+        fetchUserInfo()
+    }, [userId])
 
-    // 내용에서 해시태그 추출 함수
-    const extractTagsFromContent = (content: string): string[] => {
-        const hashtagRegex = /#(\w+)/g
-        const matches = content.match(hashtagRegex) || []
-        const uniqueTags = [...new Set(matches.map((tag) => tag.substring(1)))]
-        return uniqueTags.slice(0, 5)
+    return { userInfo, isLoadingUser }
+}
+
+// 좋아요 상태 관리 커스텀 훅
+const useLikeStatus = (postId: number, initialLikes: number) => {
+    const [isLiked, setIsLiked] = useState(false)
+    const [localLikes, setLocalLikes] = useState(initialLikes)
+    const [isLoading, setIsLoading] = useState(false)
+    const [isInitialized, setIsInitialized] = useState(false)
+    const { isLogin } = useGlobalLoginUser()
+
+    useEffect(() => {
+        // 글 정보가 변경될 때마다 좋아요 카운트 동기화
+        setLocalLikes(initialLikes)
+    }, [initialLikes])
+
+    useEffect(() => {
+        const fetchLikeStatus = async () => {
+            // 로그인 상태가 아니면 좋아요 체크를 하지 않음
+            if (!isLogin) {
+                setIsInitialized(true)
+                return
+            }
+
+            try {
+                const liked = await checkPostLikeStatus(postId)
+                setIsLiked(liked)
+            } catch (error) {
+                console.error('좋아요 상태 확인 중 오류 발생:', error)
+            } finally {
+                setIsInitialized(true)
+            }
+        }
+
+        fetchLikeStatus()
+    }, [postId, isLogin])
+
+    const handleLikeToggle = async (e: React.MouseEvent) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        if (isLoading || !isInitialized) return
+
+        if (!isLogin) {
+            alert('좋아요를 누르려면 먼저 로그인해 주세요.')
+            return
+        }
+
+        setIsLoading(true)
+
+        try {
+            const success = await togglePostLike(postId)
+
+            if (success) {
+                setIsLiked((prev) => !prev)
+                setLocalLikes((prev) => (isLiked ? prev - 1 : prev + 1))
+            }
+        } catch (error) {
+            console.error('좋아요 상태 변경 중 오류 발생:', error)
+            alert('좋아요 처리 중 오류가 발생했습니다. 다시 시도해 주세요.')
+        } finally {
+            setIsLoading(false)
+        }
     }
+
+    return { isLiked, localLikes, isLoading, isInitialized, handleLikeToggle }
+}
+
+// 유틸리티 함수
+const getFormattedProfileUrl = (profileImageUrl: string): string => {
+    if (!profileImageUrl) return '/default-profile.png'
+
+    if (profileImageUrl.startsWith('http')) return profileImageUrl
+
+    if (profileImageUrl === '/profile.jpg' || profileImageUrl === '/default-profile.png') return profileImageUrl
+
+    // API 서버 경로 처리
+    return profileImageUrl.startsWith('/') ? `${API_BASE_URL}${profileImageUrl}` : `${API_BASE_URL}/${profileImageUrl}`
+}
+
+const formatTimeAgo = (dateString: string | null): string => {
+    if (!dateString) return ''
+
+    const now = new Date()
+    const postDate = new Date(dateString)
+    const diffTime = Math.abs(now.getTime() - postDate.getTime())
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+
+    if (diffDays === 0) {
+        const diffHours = Math.floor(diffTime / (1000 * 60 * 60))
+        if (diffHours === 0) {
+            const diffMinutes = Math.floor(diffTime / (1000 * 60))
+            return `${diffMinutes}분 전`
+        }
+        return `${diffHours}시간 전`
+    } else if (diffDays < 7) {
+        return `${diffDays}일 전`
+    } else {
+        return postDate.toLocaleDateString()
+    }
+}
+
+const extractTagsFromContent = (content: string): string[] => {
+    const hashtagRegex = /#(\w+)/g
+    const matches = content.match(hashtagRegex) || []
+    const uniqueTags = [...new Set(matches.map((tag) => tag.substring(1)))]
+    return uniqueTags.slice(0, 5) // 최대 5개 태그만 표시
+}
+
+const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refreshPost, loginUserId }) => {
+    const router = useRouter()
+    const { isLogin, loginUser } = useGlobalLoginUser()
+    const { userInfo } = useUserInfo(post.userId)
+    const { isLiked, localLikes, isLoading, isInitialized, handleLikeToggle } = useLikeStatus(post.id, post.likes)
+
+    // 현재 사용자가 게시글 작성자인지 확인
+    const isAuthor = isLogin && (loginUserId !== undefined ? loginUserId : loginUser?.id) === post.userId
 
     // 태그 추출
     const contentTags = post.content ? extractTagsFromContent(post.content) : []
-
-    // 태그가 없을 경우 기본 태그
     const defaultTags = ['Development', 'Blog', 'Article']
     const displayTags =
         contentTags.length > 0
@@ -183,108 +212,22 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
             ? [post.categoryName, ...defaultTags.slice(0, 2)]
             : defaultTags
 
-    // 좋아요 버튼 클릭 이벤트 핸들러
-    const handleLikeClick = async (e: React.MouseEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-
-        if (isLoading || !isInitialized) return
-
-        setIsLoading(true)
-
-        try {
-            const success = await togglePostLike(post.id)
-
-            if (success) {
-                setIsLiked(!isLiked)
-                setLocalLikes((prev) => (isLiked ? prev - 1 : prev + 1))
-            }
-        } catch (error) {
-            console.error('좋아요 처리 중 오류:', error)
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    const copyToClipboard = (e: React.MouseEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        navigator.clipboard.writeText(window.location.href)
-        alert('링크가 클립보드에 복사되었습니다.')
-    }
-
-    // 게시글 수정 버튼 클릭 이벤트 핸들러
+    // 게시글 수정 핸들러
     const handleEditClick = (e: React.MouseEvent) => {
         e.preventDefault()
         e.stopPropagation()
 
-        // 로그인 확인
         if (!isLogin) {
             alert('로그인이 필요합니다.')
             return
         }
 
-        // 작성자 확인
         if (loginUser?.id !== post.userId) {
             alert('본인이 작성한 게시글만 수정할 수 있습니다.')
             return
         }
 
-        // 디버깅을 위한 로그 추가
-        console.log('수정할 게시글 ID:', post.id)
-        console.log('게시글 내용:', post.content)
-        
-        // 수정 페이지로 이동 - URL 파라미터 명확하게 전달
-        const editUrl = `/post/createPost?edit=true&postId=${post.id}`
-        console.log('이동할 URL:', editUrl)
-        router.push(editUrl)
-    }
-
-    // 게시글 수정 API 호출
-    const handleUpdatePost = async () => {
-        if (!editTitle.trim()) {
-            setEditError('제목을 입력해주세요.')
-            return
-        }
-
-        if (!editContent.trim()) {
-            setEditError('내용을 입력해주세요.')
-            return
-        }
-
-        setIsLoading(true)
-        setEditError(null)
-
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/posts/${post.id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-            })
-
-            if (response.ok) {
-                alert('게시글이 성공적으로 수정되었습니다.')
-                setShowEditModal(false)
-                // 게시글 새로고침
-                if (refreshPost) {
-                    refreshPost()
-                } else {
-                    // 새로고침 함수가 없으면 페이지 새로고침
-                    window.location.reload()
-                }
-            } else {
-                const errorText = await response.text()
-                console.error('게시글 수정 실패:', errorText)
-                setEditError('게시글 수정에 실패했습니다.')
-            }
-        } catch (error) {
-            console.error('게시글 수정 중 오류:', error)
-            setEditError('게시글 수정 중 오류가 발생했습니다.')
-        } finally {
-            setIsLoading(false)
-        }
+        router.push(`/post/createPost?edit=true&postId=${post.id}`)
     }
 
     // 게시글 삭제 핸들러
@@ -295,7 +238,6 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
         if (!confirm('정말로 이 게시글을 삭제하시겠습니까?')) return
 
         try {
-            setIsLoading(true)
             const response = await fetch(`${API_BASE_URL}/api/posts/${post.id}`, {
                 method: 'DELETE',
                 credentials: 'include',
@@ -305,38 +247,12 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
                 alert('게시글이 성공적으로 삭제되었습니다.')
                 router.push('/post/postList')
             } else {
-                const errorText = await response.text()
-                console.error('게시글 삭제 실패:', errorText)
-                alert('게시글 삭제에 실패했습니다.')
+                const errorData = await response.json().catch(() => null)
+                throw new Error(errorData?.message || '게시글 삭제에 실패했습니다.')
             }
         } catch (error) {
-            console.error('게시글 삭제 중 오류:', error)
-            alert('게시글 삭제 중 오류가 발생했습니다.')
-        } finally {
-            setIsLoading(false)
-        }
-    }
-
-    // 게시물 작성 시간 포맷팅
-    const formatTimeAgo = (dateString: string | null) => {
-        if (!dateString) return ''
-
-        const now = new Date()
-        const postDate = new Date(dateString)
-        const diffTime = Math.abs(now.getTime() - postDate.getTime())
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-
-        if (diffDays === 0) {
-            const diffHours = Math.floor(diffTime / (1000 * 60 * 60))
-            if (diffHours === 0) {
-                const diffMinutes = Math.floor(diffTime / (1000 * 60))
-                return `${diffMinutes}분 전`
-            }
-            return `${diffHours}시간 전`
-        } else if (diffDays < 7) {
-            return `${diffDays}일 전`
-        } else {
-            return postDate.toLocaleDateString()
+            console.error('게시글 삭제 오류:', error)
+            alert(error instanceof Error ? error.message : '게시글 삭제 중 오류가 발생했습니다.')
         }
     }
 
@@ -354,7 +270,6 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
                                 alt={`${post.username}의 프로필`}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                    // 이미지 로드 실패 시 기본 이미지로 대체
                                     e.currentTarget.onerror = null
                                     e.currentTarget.src = '/default-profile.png'
                                 }}
@@ -420,15 +335,15 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
 
             {/* 하단 액션 바 */}
             <div className="bg-gray-50 p-4 flex items-center justify-between">
-                <div className="flex items-center space-x-4">{/* 왼쪽 영역은 비워둡니다 */}</div>
+                <div className="flex items-center space-x-4">{/* 왼쪽 영역 */}</div>
 
                 <div className="flex items-center space-x-4">
                     <button
-                        onClick={handleLikeClick}
+                        onClick={handleLikeToggle}
                         disabled={isLoading || !isInitialized}
                         className={`flex items-center space-x-1 px-3 py-1 rounded-full ${
                             isLiked ? 'bg-red-100 text-red-600' : 'bg-gray-100 hover:bg-gray-200'
-                        } transition-colors duration-200 $(
+                        } transition-colors duration-200 ${
                             isLoading || !isInitialized ? 'opacity-60 cursor-not-allowed' : ''
                         }`}
                     >
@@ -470,82 +385,6 @@ const PostContent: React.FC<PostContentProps> = ({ post, categories = [], refres
                     ))}
                 </div>
             </div>
-
-            {/* 수정 모달 */}
-            {showEditModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-lg max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold">게시글 수정</h2>
-                            <button
-                                onClick={() => setShowEditModal(false)}
-                                className="text-gray-500 hover:text-gray-700"
-                            >
-                                <FontAwesomeIcon icon={faTimes} size="lg" />
-                            </button>
-                        </div>
-
-                        {editError && <div className="bg-red-50 text-red-600 p-3 mb-4 rounded">{editError}</div>}
-
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">제목</label>
-                            <input
-                                type="text"
-                                value={editTitle}
-                                onChange={(e) => setEditTitle(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="제목을 입력하세요"
-                            />
-                        </div>
-
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">카테고리</label>
-                            <select
-                                value={editCategoryId}
-                                onChange={(e) => setEditCategoryId(Number(e.target.value))}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                                {categories.length > 0 ? (
-                                    categories.map((category) => (
-                                        <option key={category.id} value={category.id}>
-                                            {category.name}
-                                        </option>
-                                    ))
-                                ) : (
-                                    <option value={post.categoryId || 1}>{post.categoryName || '기본 카테고리'}</option>
-                                )}
-                            </select>
-                        </div>
-
-                        <div className="mb-6">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">내용</label>
-                            <textarea
-                                value={editContent}
-                                onChange={(e) => setEditContent(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[300px]"
-                                placeholder="내용을 입력하세요"
-                            />
-                        </div>
-
-                        <div className="flex justify-end space-x-3">
-                            <button
-                                onClick={() => setShowEditModal(false)}
-                                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded"
-                                disabled={isLoading}
-                            >
-                                취소
-                            </button>
-                            <button
-                                onClick={handleUpdatePost}
-                                className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded"
-                                disabled={isLoading}
-                            >
-                                {isLoading ? '수정 중...' : '수정 완료'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
         </div>
     )
 }

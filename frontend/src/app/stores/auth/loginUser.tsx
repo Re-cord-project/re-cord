@@ -1,3 +1,5 @@
+'use client'
+
 import { createContext, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -7,6 +9,7 @@ type User = {
     username: string
     bootcamp: string
     generation: number
+    profileImageUrl?: string;
 }
 
 export const LoginUserContext = createContext<{

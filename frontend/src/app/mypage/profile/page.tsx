@@ -9,7 +9,7 @@ export default function ProfilePage() {
         username: '',
         email: '',
         bootcamp: '',
-        generation: 0,
+        generation: '',
         profileImageUrl: '',
         introduction: '', // <- null 말고 빈 문자열
     })
@@ -17,9 +17,29 @@ export default function ProfilePage() {
     // 기본 프로필 이미지 URL
     const defaultProfileImageUrl = '/default-profile.png'
 
+    // // 쿠키에서 액세스 토큰 가져오기
+    // const getAccessTokenFromCookie = () => {
+    //     const cookies = document.cookie.split(';')
+    //     for (let cookie of cookies) {
+    //         const [name, value] = cookie.trim().split('=')
+    //         if (name === 'accessToken') {
+    //             return value
+    //         }
+    //     }
+    //     return null
+    // }
+
     // 유저 데이터 API에서 받아오기
     useEffect(() => {
-        fetch('/api/mypage/users') // UpdateUser API 경로로
+        // const accessToken = getAccessTokenFromCookie()
+
+        fetch('http://localhost:8090/api/mypage/users', {
+            headers: {
+                'Content-Type': 'application/json',
+                // Authorization: `Bearer ${accessToken}`,
+            },
+            credentials: 'include',
+        })
             .then((res) => res.json())
             .then((data) => {
                 setUserData(data)
@@ -39,25 +59,62 @@ export default function ProfilePage() {
 
     // 이미지 변경 처리
     // 길이가 너무 길어서 적용이 안됨, 추후 S3 필요
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const file = e.target.files?.[0]
+    //     if (file) {
+    //         if (file.size > 2 * 1024 * 1024) {
+    //             alert('파일 크기는 2MB를 초과할 수 없습니다.')
+    //             return
+    //         }
+    //         const reader = new FileReader()
+    //         reader.onloadend = () => {
+    //             setProfileImage(reader.result as string)
+    //         }
+    //         reader.readAsDataURL(file)
+    //     }
+    // }
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if (file) {
-            if (file.size > 2 * 1024 * 1024) {
-                alert('파일 크기는 2MB를 초과할 수 없습니다.')
-                return
+        if (!file) return
+
+        if (file.size > 2 * 1024 * 1024) {
+            alert('파일 크기는 2MB를 초과할 수 없습니다.')
+            return
+        }
+        const formData = new FormData()
+        formData.append('file', file)
+
+        try {
+            const response = await fetch('http://localhost:8090/api/users/upload-profile-image', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include', // 꼭 있어야 쿠키 보내짐
+            })
+
+            if (!response.ok) {
+                throw new Error('프로필 이미지 업로드 실패')
             }
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                setProfileImage(reader.result as string)
-            }
-            reader.readAsDataURL(file)
+
+            const uploadedUrl = await response.text()
+            setProfileImage(uploadedUrl)
+
+            // 유저 데이터에도 바로 넣어주자 (저장할 때 같이 보내기 위해)
+            setUserData((prev) => ({
+                ...prev,
+                profileImageUrl: uploadedUrl,
+            }))
+        } catch (err) {
+            console.error('이미지 업로드 에러:', err)
+            alert('이미지 업로드에 실패했습니다.')
         }
     }
 
     // 데이터 저장 처리
     const handleSave = () => {
+        // const accessToken = getAccessTokenFromCookie()
+
         // 수정된 데이터 저장 로직
-        fetch('/api/mypage/updateUsers', {
+        fetch('http://localhost:8090/api/mypage/updateUsers', {
             method: 'PUT',
             body: JSON.stringify({
                 username: userData.username,
@@ -69,7 +126,9 @@ export default function ProfilePage() {
             }),
             headers: {
                 'Content-Type': 'application/json',
+                // Authorization: `Bearer ${accessToken}`,
             },
+            credentials: 'include',
         }).then(async (res) => {
             const text = await res.text()
             if (!text) {
@@ -119,7 +178,6 @@ export default function ProfilePage() {
                             <p className="text-sm text-gray-700">JPG, PNG 파일 (최대 2MB)</p>
                         </div>
                     </div>
-
                     {/* 다른 입력 필드들 */}
                     <div>
                         <label className="block text-base font-medium text-gray-800 mb-2">이름</label>
@@ -130,7 +188,6 @@ export default function ProfilePage() {
                             onChange={(e) => setUserData({ ...userData, username: e.target.value })}
                         />
                     </div>
-
                     <div>
                         <label className="block text-base font-medium text-gray-800 mb-2">이메일</label>
                         <input
@@ -140,7 +197,6 @@ export default function ProfilePage() {
                             onChange={(e) => setUserData({ ...userData, email: e.target.value })}
                         />
                     </div>
-
                     <div>
                         <label className="block text-base font-medium text-gray-800 mb-2">소속</label>
                         <input
@@ -150,22 +206,20 @@ export default function ProfilePage() {
                             onChange={(e) => setUserData({ ...userData, bootcamp: e.target.value })}
                         />
                     </div>
-
                     <div>
-                        <label className="block text-base font-medium text-gray-800 mb-2">기수</label>
+                        <label className="block text-base font-medium text-gray-800 mb-2">과정/기수</label>
                         <input
                             type="number"
                             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
                             value={userData.generation}
-                            onChange={(e) => setUserData({ ...userData, generation: parseInt(e.target.value, 10) })}
+                            onChange={(e) => setUserData({ ...userData, generation: e.target.value })}
                         />
                     </div>
-
                     <div>
                         <label className="block text-base font-medium text-gray-800 mb-2">자기소개</label>
                         <textarea
                             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[100px] text-gray-800"
-                            value={userData.introduction}
+                            value={userData.introduction || ''}
                             onChange={(e) => setUserData({ ...userData, introduction: e.target.value })}
                         />
                     </div>

@@ -101,9 +101,50 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     List<Post> findByUserIdAndIdNotFetchImages(Long userId, Long excludedPostId);
 
     @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId")
+    Page<Post> findAllByUserIdWithImages(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId")
     List<Post> findAllByUserIdWithImages(@Param("userId") Long userId);
+
+    // 최근 사진 있는 포스트 4개
+    @Query("""
+    SELECT p FROM Post p
+    LEFT JOIN p.images i
+    WHERE SIZE(p.images) > 0
+    ORDER BY p.createdAt DESC
+""")
+    Page<Post> findRecentPostsWithImages(Pageable pageable);
+
+
+    // 최근 일주일간 추천순 4개
+    @Query("""
+    SELECT p FROM Post p
+    WHERE p.createdAt >= :thisMonday
+    ORDER BY p.likes DESC
+""")
+    Page<Post> findWeeklyPopularPosts(@Param("thisMonday") LocalDateTime thisMonday, Pageable pageable);
+
+//    // 내 부트캠프의 누적 추천순 4개
+//    @Query("""
+//    SELECT p FROM Post p
+//    WHERE p.user.bootcamp = :bootcamp
+//    ORDER BY p.likes DESC, p.createdAt DESC
+//""")
+//    Page<Post> findBootcampPopularPosts(@Param("bootcamp") String bootcamp, Pageable pageable);
+
+    //부트캠프 별 인기 게시물
+    @Query("""
+    SELECT p FROM Post p
+    WHERE p.user.bootcamp = :bootcamp
+    ORDER BY p.likes DESC, p.createdAt DESC
+""")
+    Page<Post> findPopularPostsByBootcamp(@Param("bootcamp") String bootcamp, Pageable pageable);
+
+
+
 
     @Query("SELECT COUNT(p) FROM Post p WHERE p.user.id = :userId")
     Long totalPostCount(@Param("userId") Long userId);
+
 
 }
