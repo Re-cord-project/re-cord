@@ -231,7 +231,6 @@ export default function ProfilePage() {
                     </div>
 
                     <div className="flex justify-between pt-4">
-                        {/* 왼쪽: 회원 탈퇴 */}
                         <button
                             onClick={handleDeleteAccount}
                             className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 font-medium"
@@ -239,7 +238,6 @@ export default function ProfilePage() {
                             회원 탈퇴
                         </button>
 
-                        {/* 오른쪽: 취소 + 저장하기 */}
                         <div className="flex space-x-2">
                             <button className="px-4 py-2 border border-gray-300 rounded text-gray-800 font-medium hover:bg-gray-50">
                                 취소
