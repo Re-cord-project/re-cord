@@ -2,13 +2,24 @@
 
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
-
+import { usePathname } from 'next/navigation'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-const SearchBar: React.FC = () => {
+interface SearchBarProps {
+    showSearchButton?: boolean
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ showSearchButton = false }) => {
     const [searchTerm, setSearchTerm] = useState('')
     const router = useRouter()
+    const pathname = usePathname()
+
+    // 홈 페이지인지 확인
+    const isHomePage = pathname === '/' || pathname === '/home'
+
+    // 검색 버튼 표시 여부: props로 받은 값 또는 홈 페이지인 경우
+    const shouldShowSearchButton = showSearchButton || isHomePage
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -37,20 +48,26 @@ const SearchBar: React.FC = () => {
 
     return (
         <div className="w-full mb-6">
-            <form onSubmit={handleSearch} className="relative">
-                <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="검색어를 입력하세요"
-                    className="w-full px-4 py-2 rounded-md border border-gray-200 focus:outline-none focus:border-blue-400 text-sm text-gray-700 bg-white"
-                />
-                <button
-                    type="submit"
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-500"
-                >
-                    <i className="fas fa-search text-sm"></i>
-                </button>
+            <form onSubmit={handleSearch} className="flex flex-row items-center">
+                <div className="flex-grow">
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="검색어를 입력하세요"
+                        className={`w-full px-4 py-2 ${
+                            shouldShowSearchButton ? 'rounded-l-md' : 'rounded-md'
+                        } border border-gray-200 focus:outline-none focus:border-blue-400 text-sm text-gray-700 bg-white h-10`}
+                    />
+                </div>
+                {shouldShowSearchButton && (
+                    <button
+                        type="submit"
+                        className="px-4 py-2 bg-[#78B3CE] text-white rounded-r-md hover:bg-[#5A8BA6] transition-colors h-10 flex items-center justify-center"
+                    >
+                        검색
+                    </button>
+                )}
             </form>
         </div>
     )
