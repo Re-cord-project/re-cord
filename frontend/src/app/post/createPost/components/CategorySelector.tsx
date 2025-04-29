@@ -22,13 +22,11 @@ export const CategorySelector: React.FC<CategorySelectorProps> = ({ categories }
                             onChange={(e) => field.onChange(Number(e.target.value))}
                             className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                            {categories
-                                .filter((category) => category.id !== 1) // ID가 1인 기본 카테고리는 제외
-                                .map((category) => (
-                                    <option key={category.id} value={category.id}>
-                                        {category.name}
-                                    </option>
-                                ))}
+                            {categories.map((category) => (
+                                <option key={category.id} value={category.id}>
+                                    {category.name}
+                                </option>
+                            ))}
                         </select>
                     )}
                 />
