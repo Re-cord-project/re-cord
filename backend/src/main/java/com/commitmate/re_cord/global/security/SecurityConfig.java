@@ -40,7 +40,7 @@ public class SecurityConfig {
                                 .permitAll()
                                 .requestMatchers("/api/auth/register", "/api/auth/login", "api/auth/logout", "api/auth/temp-token/verify")
                                 .permitAll()
-                                .requestMatchers("/register", "/login","/api/categories/**", "/api/posts/public/**")
+                                .requestMatchers("/register", "/login","/api/categories/**", "/api/posts/public/**","/api/auth/public/**","api/posts/{postId}/comments/public/**")
                                 .permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/users/*/counts","/api/auth/by-blogName/**")
                                 .permitAll()

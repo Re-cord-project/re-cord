@@ -48,8 +48,12 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
     // 프로필 이미지를 가져오는 함수
     const fetchProfileImage = async (userId: number) => {
         try {
-            // PostContent와 동일한 API 호출
-            const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/${userId}/profile-image`, {
+            // 로그인 여부에 따라 다른 API 엔드포인트 사용
+            const apiUrl = isLogin 
+                ? `${API_BASE_URL}/api/auth/${userId}/profile-image`
+                : `${API_BASE_URL}/api/auth/public/${userId}/profile-image`
+                
+            const userProfileResponse = await fetch(apiUrl, {
                 credentials: 'include', // 쿠키 인증을 위해 추가
             })
 
@@ -100,27 +104,13 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
             try {
                 setIsLoading(true)
 
-                // // 로그인한 사용자 정보를 사용하는 경우 API 호출 없이 바로 사용
-                // if (isLogin && targetUserId === loginUser.id) {
-                //     // 임시로 통계 정보 추가 (실제 데이터가 없는 경우)
-                //     setAuthor({
-                //         ...loginUser,
-                //         introduction: loginUser.bootcamp ? `${loginUser.bootcamp} ${loginUser.generation}기` : '',
-                //         profileImageUrl: '/profile.png',
-                //         provider: 'local',
-                //         role: loginUser.bootcamp || '개발자',
-                //         stats: {
-                //             followers: 0,
-                //             following: 0,
-                //             posts: 0,
-                //         },
-                //     })
-                //     setIsLoading(false)
-                //     return
-                // }
+                // 로그인 여부에 따라 다른 API 엔드포인트 사용
+                const apiUrl = isLogin 
+                    ? `${API_BASE_URL}/api/auth/${targetUserId}`
+                    : `${API_BASE_URL}/api/auth/public/${targetUserId}`
 
-                // 인증된 요청으로 사용자 정보 가져오기
-                const response = await fetch(`${API_BASE_URL}/api/auth/${targetUserId}`, {
+                // 사용자 정보 가져오기
+                const response = await fetch(apiUrl, {
                     method: 'GET',
                     credentials: 'include', // 쿠키 인증을 위해 추가
                 })
@@ -186,7 +176,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
             }
         }
         fetchUserProfile()
-    }, [targetUserId, isLogin, loginUser.id])
+    }, [targetUserId, isLogin, loginUser?.id]) // loginUser가 null일 수 있으므로 옵셔널 체이닝 추가
 
     // 사용자 정보를 불러온 후 프로필 이미지 가져오기
     useEffect(() => {
@@ -200,37 +190,6 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
     }
 
     if (error || !author) {
-        // 로그인하지 않은 경우 로그인 바를 표시
-        if (!isLogin) {
-            return (
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <div className="flex flex-col items-center">
-                        <div className="w-16 h-16 rounded-full overflow-hidden mb-3 bg-gray-100 flex items-center justify-center">
-                            <img
-                                src="/userProfile.png"
-                                alt="기본 프로필"
-                                className="w-10 h-10 object-cover opacity-50"
-                            />
-                        </div>
-                        <p className="text-gray-500 mb-4 text-sm">로그인이 필요한 서비스입니다</p>
-                        <Link
-                            href="/login"
-                            className="w-full py-2 bg-[#78B3CE] text-white rounded-md text-sm font-medium hover:bg-[#A8D5E5] transition-colors cursor-pointer !rounded-button whitespace-nowrap flex justify-center items-center"
-                        >
-                            로그인 하러 가기
-                        </Link>
-                        <Link
-                            href="/signup"
-                            className="w-full py-2 mt-2 border border-[#78B3CE] text-[#78B3CE] rounded-md text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer !rounded-button whitespace-nowrap flex justify-center items-center"
-                        >
-                            회원가입 하기
-                        </Link>
-                    </div>
-                </div>
-            )
-        }
-
-        // 다른 에러인 경우 기존 에러 메시지 표시
         return (
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <p className="text-red-500">{error || '사용자 정보를 불러올 수 없습니다.'}</p>
@@ -303,7 +262,14 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                                 )
                             }}
                         />
-                    ) : null}
+                    ) : (
+                        <Link
+                            href="/login"
+                            className="w-full py-2 border border-[#78B3CE] text-[#78B3CE] rounded-md text-sm font-medium hover:bg-gray-50 transition-colors flex justify-center items-center"
+                        >
+                            작성자 블로그 방문하기
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>

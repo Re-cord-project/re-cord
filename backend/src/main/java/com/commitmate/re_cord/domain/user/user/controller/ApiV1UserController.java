@@ -136,6 +136,12 @@ public class ApiV1UserController {
         return ResponseEntity.ok(new UserResponseDto(user));
     }
 
+    @GetMapping("/public/{userId}")
+    public ResponseEntity<UserResponseDto> getUserPublic(@PathVariable Long userId) {
+        User user = userService.getUserById(userId);
+        return ResponseEntity.ok(new UserResponseDto(user));
+    }
+
     @GetMapping("/{userId}/profile-image")
     public ResponseEntity<String> getProfileImageUrl(@PathVariable Long userId) {
         String profileImageUrl = userService.getProfileImageUrl(userId);

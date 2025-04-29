@@ -30,19 +30,36 @@ export default function CommentSection({ postId }: { postId: number }) {
   const COMMENTS_PER_PAGE = 5;
 
   const fetchComments = () => {
-    fetch(`http://localhost:8090/api/posts/${postId}/comments?page=0&size=100&sort=createdAt,asc`, {
+    fetch(`http://localhost:8090/api/posts/${postId}/comments/public?page=0&size=100&sort=createdAt,asc`, {
       credentials: 'include',
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`댓글 불러오기 실패: ${res.status}`);
+        }
+        // 응답이 비어있지 않은지 확인
+        const contentType = res.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          return res.json();
+        } else {
+          throw new Error('서버에서 유효한 JSON 응답을 받지 못했습니다');
+        }
+      })
       .then((data) => {
-        setAllComments(data.content);
+        setAllComments(data.content || []);
         
         // 전체 댓글 수 계산 (대댓글 포함)
-        const visibleCount = countVisibleComments(data.content);
+        const visibleCount = countVisibleComments(data.content || []);
         setTotalComments(visibleCount);
         
         // 총 페이지 수 계산
-        setTotalPages(Math.ceil(visibleCount / COMMENTS_PER_PAGE));
+        setTotalPages(Math.ceil(visibleCount / COMMENTS_PER_PAGE) || 1);
+      })
+      .catch(error => {
+        console.error('댓글 불러오기 오류:', error);
+        setAllComments([]);
+        setTotalComments(0);
+        setTotalPages(1);
       });
   };
 

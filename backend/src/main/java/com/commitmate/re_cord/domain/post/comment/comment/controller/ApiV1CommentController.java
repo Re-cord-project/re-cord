@@ -112,7 +112,7 @@ public class ApiV1CommentController {
     @Operation(
             summary = "댓글 조회"
     )
-    @GetMapping
+    @GetMapping("/public")
     public Page<CommentResponseDTO> getComment(
             @PathVariable Long postId,
             @RequestParam(defaultValue = "0") int page,
