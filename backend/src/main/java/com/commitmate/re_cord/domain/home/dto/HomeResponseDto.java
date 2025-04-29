@@ -10,5 +10,6 @@ import java.util.List;
 public class HomeResponseDto {
     private List<HomeDto> recentPosts;
     private List<HomeDto> weeklyPopularPosts;
-    private List<HomeDto> hotBootcampPosts;
+    private List<HomeDto> bootcampPopularPosts;
+
 }
