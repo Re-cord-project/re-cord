@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaAuditing
 @SpringBootApplication
 @EnableScheduling
-@EntityScan(basePackages = "com.commitmate.re_cord.domain")
+@EntityScan(basePackages = "com.commitmate.re_cord")
 public class ReCordApplication {
 
 	public static void main(String[] args) {
