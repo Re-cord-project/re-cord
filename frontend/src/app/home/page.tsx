@@ -7,6 +7,7 @@ import Image from 'next/image'
 import RecentPosts from '@/components/home/RecentPosts'
 import WeeklyPopularPosts from '@/components/home/WeeklyPopularPosts'
 import SearchBar from '@/components/post/SearchBar'
+import BootcampPopularPosts from '@/components/home/BootcampPopularPosts'
 
 
 export default function HomePage() {
@@ -22,17 +23,21 @@ export default function HomePage() {
             {/* Hero Section */}
             <section className="relative h-64 flex items-center bg-gradient-to-r from-[#5A8BA6] to-[#78B3CE]">
                 <div className="absolute inset-0 overflow-hidden">
-                    <div className="absolute inset-0 bg-black opacity-70"></div>
+                    
                     <Image src="/image/office-background.jpg" alt="Office background" layout="fill" objectFit="cover" />
+                    <div className="absolute inset-0 bg-black opacity-60"></div>
                 </div>
                 <div className="container mx-auto px-4 relative z-10 text-white">
                     <h2 className="text-2xl font-bold mb-2">당신의 성장을 기록하세요</h2>
-                    <p className="mb-6 text-sm">개발블로그에서의 모든 순간을 확인하고 공유하세요</p>
-                    <button className="px-4 py-2 bg-[#78B3CE] rounded-md text-sm font-medium">시작하기</button>
-                </div>
-            </section>
-
-            {/* Search Bar */}
+                    <p className="mb-6 text-sm">RE:cord에서 당신의 모든 순간을 확인하고 공유해보세요</p>
+                    <Link href="/myBlog">
+                      <button className="px-4 py-2 bg-[#78B3CE] rounded-md text-sm font-medium hover:bg-[#5A8BA6] transition-colors">
+                          시작하기
+                      </button>
+                  </Link>
+              </div>
+          </section>
+                      {/* Search Bar */}
             <div className="container mx-auto px-4 py-6 flex justify-center">
                 <div className="w-1/3">
                     <SearchBar />
@@ -44,6 +49,9 @@ export default function HomePage() {
 
             {/* 이번 주 인기 회고록 */}
             <WeeklyPopularPosts />
+
+            {/* 부트캠프 별 회고록 */}
+            <BootcampPopularPosts/>
 
 
             {/* 플로팅 버튼 */}

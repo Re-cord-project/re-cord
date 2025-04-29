@@ -10,6 +10,9 @@ export default function Header() {
     const redirectUrlAfterSocialLogin = process.env.NEXT_PUBLIC_FRONT_BASE_URL
     const { loginUser, isLogin, logoutAndHome } = useGlobalLoginUser()
     const pathname = usePathname()
+    const activePaths = ['/myblog']; // 적용할 경로들
+    const isActive = activePaths.includes(pathname.toLowerCase());
+
 
     return (
         <header className="w-full h-[60px] bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.05)]">
@@ -36,13 +39,14 @@ export default function Header() {
                                 href="/myBlog"
                                 className={`relative h-[64px] flex items-center px-1 pt-1 text-sm whitespace-nowrap
                                     ${
-                                    pathname.toLowerCase() === '/myblog' 
+                                    isActive
                                         ? 'text-black after:absolute after:bottom-0 after:left-0 after:w-full after:h-[5px] after:bg-black'
                                         : 'text-gray-400 hover:text-gray-600'
                                     }`}
                                 >
                                 내 블로그
                                 </Link>
+
 
                         </div>
                     </div>

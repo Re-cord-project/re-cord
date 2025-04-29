@@ -60,7 +60,7 @@ public class HomeService {
     }
 
 
-    public List<HomeDto> getPopularPostsByBootcamp(String bootcamp) {
+    public List<HomeDto> getPopularPublishedPostsByBootcamp(String bootcamp) {
         Pageable pageable = PageRequest.of(0, 8);
         Page<Post> posts = postRepository.findPopularPostsByBootcamp(bootcamp, pageable);
 
