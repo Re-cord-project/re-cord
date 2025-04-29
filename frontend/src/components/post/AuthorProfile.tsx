@@ -141,10 +141,9 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
 
                 // 단일 counts API 호출로 팔로우/팔로잉 통계 갱신
                 try {
-                    const resCounts = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${targetUserId}/counts`,
-                        { credentials: 'include' },
-                    )
+                    const resCounts = await fetch(`${API_BASE_URL}/api/users/${targetUserId}/counts`, {
+                        credentials: 'include',
+                    })
                     if (resCounts.ok) {
                         const { followerCount, followingCount } = await resCounts.json()
                         stats = {
@@ -168,7 +167,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
 
                 // 팔로우 상태 체크 (로그인 사용자 대상)
                 if (isLogin && loginUser.id !== targetUserId) {
-                    const resFollow = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/follow`, {
+                    const resFollow = await fetch(`${API_BASE_URL}/api/users/follow`, {
                         credentials: 'include',
                     })
                     if (resFollow.ok) {

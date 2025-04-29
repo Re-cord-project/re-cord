@@ -10,11 +10,13 @@ import Statistics from '../../../components/post/Statistics'
 import SearchBar from '../../../components/post/SearchBar'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 // HTML 태그를 제거하는 함수
 const removeHtmlTags = (str: string) => {
-    if (!str) return '';
-    return str.replace(/<[^>]*>/g, '');
-};
+    if (!str) return ''
+    return str.replace(/<[^>]*>/g, '')
+}
 
 interface Post {
     id: number
@@ -49,7 +51,7 @@ export default function CategoryListPage() {
             try {
                 // 백엔드 API를 사용하여 해당 카테고리의 게시글을 불러옵니다
                 const response = await fetch(
-                    `http://localhost:8090/api/posts/public/categories/${categoryId}?page=${currentPage}&size=10`,
+                    `${API_BASE_URL}/api/posts/public/categories/${categoryId}?page=${currentPage}&size=10`,
                     {
                         headers: {
                             'Content-Type': 'application/json',
@@ -143,8 +145,12 @@ export default function CategoryListPage() {
                                                 href={`/post/postDetail/${post.userId}/${post.id}`}
                                                 className="block hover:bg-gray-50 rounded p-3 transition"
                                             >
-                                                <h3 className="text-lg font-medium text-gray-800">{removeHtmlTags(post.title)}</h3>
-                                                <p className="text-gray-600 mt-1 line-clamp-2">{removeHtmlTags(post.content)}</p>
+                                                <h3 className="text-lg font-medium text-gray-800">
+                                                    {removeHtmlTags(post.title)}
+                                                </h3>
+                                                <p className="text-gray-600 mt-1 line-clamp-2">
+                                                    {removeHtmlTags(post.content)}
+                                                </p>
                                                 <div className="flex items-center text-sm text-gray-500 mt-2">
                                                     <span className="mr-3">{post.username}</span>
                                                     <span className="mr-3">조회 {post.views}</span>

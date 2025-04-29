@@ -19,6 +19,7 @@ export default function SignupPage() {
     const [isEmailChecked, setIsEmailChecked] = useState(false)
     const [passwordError, setPasswordError] = useState('')
 
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target
         setFormData((prev) => ({
@@ -73,7 +74,7 @@ export default function SignupPage() {
 
         try {
             const response = await fetch(
-                `http://localhost:8090/api/auth/check-email?email=${encodeURIComponent(formData.email)}`,
+                `${API_BASE_URL}/api/auth/check-email?email=${encodeURIComponent(formData.email)}`,
                 {
                     method: 'GET',
                     headers: {
@@ -131,7 +132,7 @@ export default function SignupPage() {
         }
 
         try {
-            const response = await fetch('http://localhost:8090/api/auth/register', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

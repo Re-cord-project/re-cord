@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSearchParams } from 'next/navigation'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 export default function SignupPage() {
     const router = useRouter()
     const searchParams = useSearchParams()
@@ -25,7 +27,7 @@ export default function SignupPage() {
             }
 
             try {
-                const response = await fetch('http://localhost:8090/api/auth/temp-token/verify', {
+                const response = await fetch(`${API_BASE_URL}/api/auth/temp-token/verify`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -67,15 +69,12 @@ export default function SignupPage() {
         setEmailCheckMessage('')
 
         try {
-            const response = await fetch(
-                `http://localhost:8090/api/auth/check-email?email=${encodeURIComponent(email)}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+            const response = await fetch(`${API_BASE_URL}/api/auth/check-email?email=${encodeURIComponent(email)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
-            )
+            })
 
             const data = await response.text()
 
@@ -115,7 +114,7 @@ export default function SignupPage() {
         }
 
         try {
-            const response = await fetch('http://localhost:8090/api/oauth2/complete-signup', {
+            const response = await fetch(`${API_BASE_URL}/api/oauth2/complete-signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

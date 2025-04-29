@@ -11,6 +11,8 @@ import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faThumbsUp, faComment, faEye, faClock } from '@fortawesome/free-solid-svg-icons'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 // 게시글 타입 정의
 interface Post {
     id: number
@@ -38,7 +40,7 @@ export default function AllPostListPage() {
         const fetchPosts = async () => {
             try {
                 setLoading(true)
-                const response = await fetch(`http://localhost:8090/api/posts/public?page=${currentPage}&size=10`, {
+                const response = await fetch(`${API_BASE_URL}/api/posts/public?page=${currentPage}&size=10`, {
                     credentials: 'include',
                 })
 

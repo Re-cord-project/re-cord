@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 interface PostResponseDto {
     id: number
     title: string
@@ -61,7 +63,7 @@ export const useLatestPost = (userIdOrBlogname: number | string, initialAuthor?:
             }
 
             try {
-                console.log(`API 호출 시작: http://localhost:8090/api/auth/by-blogName/${blogName}`)
+                console.log(`API 호출 시작: ${API_BASE_URL}/api/auth/by-blogName/${blogName}`)
 
                 // 타임아웃 설정 (5초)
                 const timeoutId = setTimeout(() => {
@@ -70,7 +72,7 @@ export const useLatestPost = (userIdOrBlogname: number | string, initialAuthor?:
                     setIsLoading(false)
                 }, 5000)
 
-                const response = await fetch(`http://localhost:8090/api/auth/by-blogName/${blogName}`)
+                const response = await fetch(`${API_BASE_URL}/api/auth/by-blogName/${blogName}`)
 
                 // 타임아웃 취소
                 clearTimeout(timeoutId)
@@ -123,7 +125,7 @@ export const useLatestPost = (userIdOrBlogname: number | string, initialAuthor?:
                 // 이미 author 정보가 있다면 사용자 정보를 다시 가져오지 않음
                 if (!author) {
                     // 1. 사용자 정보 가져오기 (쿠키 인증 추가)
-                    const userResponse = await fetch(`http://localhost:8090/api/auth/${userId}`, {
+                    const userResponse = await fetch(`${API_BASE_URL}/api/auth/${userId}`, {
                         credentials: 'include',
                     })
 
@@ -143,7 +145,7 @@ export const useLatestPost = (userIdOrBlogname: number | string, initialAuthor?:
                 }
 
                 // 2. 해당 사용자의 최신 게시글 가져오기
-                const postResponse = await fetch(`http://localhost:8090/api/posts/public/latest/${userId}`, {
+                const postResponse = await fetch(`${API_BASE_URL}/api/posts/public/latest/${userId}`, {
                     credentials: 'include',
                 })
 

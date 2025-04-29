@@ -10,8 +10,9 @@ export default function LoginPage() {
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
 
-    const socialLoginForKakaoUrl = 'http://localhost:8090/oauth2/authorization/kakao'
-    const socialLoginForGithubUrl = 'http://localhost:8090/oauth2/authorization/github'
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+    const socialLoginForKakaoUrl = `${API_BASE_URL}/oauth2/authorization/kakao`
+    const socialLoginForGithubUrl = `${API_BASE_URL}/oauth2/authorization/github`
 
     const redirectUrlAfterSocialLogin = 'http://localhost:3000'
 
@@ -20,7 +21,7 @@ export default function LoginPage() {
         setError('')
 
         try {
-            const response = await fetch('http://localhost:8090/api/auth/login', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
