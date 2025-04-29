@@ -42,7 +42,7 @@ export const useLatestPost = (userId: number) => {
                     // 404 상태는 게시물이 없는 정상적인 상황으로 처리
                     if (response.status === 404) {
                         setPost(null)
-                        setError(null)
+                        setError(null) // 반드시 에러를 null로 설정
                         return
                     }
 
@@ -54,10 +54,12 @@ export const useLatestPost = (userId: number) => {
                 try {
                     const data = await response.json()
                     setPost(data)
+                    setError(null) // 성공 시에도 에러를 명시적으로 null로 설정
                 } catch (jsonError) {
                     console.error('게시글 데이터 JSON 파싱 오류:', jsonError)
                     // JSON 파싱 오류 발생 시 게시글이 없는 것으로 처리 (null로 설정)
                     setPost(null)
+                    setError(null) // 파싱 오류가 발생해도 사용자에게는 표시하지 않음
                 }
             } catch (err) {
                 console.error('최신 게시글 로딩 오류:', err)
