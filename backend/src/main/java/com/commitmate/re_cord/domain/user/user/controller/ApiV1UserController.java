@@ -145,4 +145,15 @@ public class ApiV1UserController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @GetMapping("/by-blogName/{blogName}")
+    public ResponseEntity<UserIdResponseDto> getUserIdByBlogName(@PathVariable String blogName) {
+        UserIdResponseDto userIdResponseDto = userService.getUserIdByBlogName(blogName);
+
+        if (userIdResponseDto == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(userIdResponseDto);
+    }
 }

@@ -68,13 +68,9 @@ public class ApiV1PostReadController {
         Page<PostResponseDto> posts = postService.getPostsByCategory(categoryId, page, size);
         return ResponseEntity.ok(posts);
     }
-    // userId에 해당하는 제일 최신글보기
-    @GetMapping("/latest/{userId}")
-    public ResponseEntity<PostResponseDto> getLatestPostByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(postService.getLatestPostByUserId(userId));
-    }
 
-    // ✅ 작성자의 다른 게시글 조회
+
+    // 작성자의 다른 게시글 조회
     @GetMapping("/{userid}/other-posts")
     public List<PostResponseDto> getOtherPostsBySameUser(
             @PathVariable Long userid,
@@ -82,12 +78,22 @@ public class ApiV1PostReadController {
         return postService.getOtherPostsBySameUser(userid, excludePostId);
     }
 
-    // ✅ 작성자의 모든 게시글 조회
+    // 작성자의 모든 게시글 조회
     @GetMapping("/{userid}/posts")
     public List<PostResponseDto> getAllPostsBySameUser(@PathVariable Long userid) {
         return postService.getAllPostsByUser(userid);
     }
 
+    // 작성자의 모든 게시글 리스트
+    @GetMapping("/{userId}/posts/list")
+    public ResponseEntity<Page<PostResponseDto>> getAllPostsBySameUser(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<PostResponseDto> posts = postService.getAllPostsByUser(userId, page, size);
+        return ResponseEntity.ok(posts);
+    }
 
     // 특정 사용자의 게시글 조회수 총합
     @GetMapping("/views/{userId}")
@@ -107,6 +113,11 @@ public class ApiV1PostReadController {
         return postService.getTotalPostCount(userId);
     }
 
+    // userId에 해당하는 제일 최신글보기
+    @GetMapping("/latest/{userId}")
+    public ResponseEntity<PostResponseDto> getLatestPostByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(postService.getLatestPostByUserId(userId));
+    }
 
 
 }

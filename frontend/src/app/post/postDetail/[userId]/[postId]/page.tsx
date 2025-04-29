@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { useParams } from 'next/navigation'
 import AuthorProfile from '@/components/post/AuthorProfile'
 import CategoryMenu from '@/components/post/CategoryMenu'
@@ -12,12 +12,13 @@ import Banner from '@/components/post/Banner'
 import PostContent from '@/components/post/PostContent'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 
+// 타입 정의를 명확히 개선
 interface Post {
     id: number
     title: string
     content: string
     categoryName: string | null
-    categoryId?: number // categoryId 필드를 옵셔널로 추가
+    categoryId?: number
     username: string | null
     userId: number
     views: number
@@ -27,32 +28,22 @@ interface Post {
     createdAt: string | null
     updatedAt: string | null
     imageUrls: string[]
+    authorId?: number
 }
 
+// API 관련 상수
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
-const PostDetail = () => {
-    const params = useParams()
-    const [post, setPost] = useState<Post | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-    const { loginUser, isLogin } = useGlobalLoginUser()
+// 게시글 데이터 가져오는 커스텀 훅
+const usePostData = (postId: string) => {
+    const [post, setPost] = React.useState<Post | null>(null)
+    const [isLoading, setIsLoading] = React.useState(true)
+    const [error, setError] = React.useState<string | null>(null)
 
-    useEffect(() => {
-        // URL 파라미터 및 로그인 사용자 정보 로깅
-        console.log('URL params:', { userId: params.userId, postId: params.postId })
-        console.log('로그인 사용자:', { id: loginUser?.id, isLogin })
-
+    React.useEffect(() => {
         const fetchPost = async () => {
             try {
-                const postId = params.postId
-                const userId = params.userId
-                // URL에 userId와 postId가 모두 포함됨
-                const response = await fetch(`${API_BASE_URL}/api/posts/public/${postId}`, {
-                    headers: {
-                        // ...getAuthHeaders(),
-                    },
-                })
+                const response = await fetch(`${API_BASE_URL}/api/posts/public/${postId}`)
 
                 if (!response.ok) {
                     if (response.status === 404) {
@@ -65,17 +56,7 @@ const PostDetail = () => {
                 }
 
                 const data = await response.json()
-                console.log('서버에서 받아온 전체 데이터:', data)
                 setPost(data)
-
-                // 게시글 데이터 받아온 후 로그 추가
-                console.log('게시글 데이터:', {
-                    postId: data.id,
-                    authorId: data.authorId,
-                    userId: data.userId, // userId 필드도 확인
-                    loginUserId: loginUser?.id,
-                })
-                console.log('작성자 일치 여부:', loginUser?.id === data.authorId)
             } catch (err) {
                 setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.')
             } finally {
@@ -84,78 +65,84 @@ const PostDetail = () => {
         }
 
         fetchPost()
-    }, [params.userId, params.postId])
+    }, [postId])
+
+    return { post, isLoading, error }
+}
+
+// 레이아웃 컴포넌트 분리
+const PageLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+    <div className="min-h-screen bg-white">
+        <Banner />
+        <div className="h-6" />
+        <div className="max-w-7xl mx-auto px-4">{children}</div>
+    </div>
+)
+
+// 상태 메시지 컴포넌트
+const StatusMessage: React.FC<{ message: string; isError?: boolean }> = ({ message, isError }) => (
+    <div className={`text-center py-8 ${isError ? 'text-red-500' : ''}`}>{message}</div>
+)
+
+const PostDetail = () => {
+    const params = useParams()
+    const postId = params.postId as string
+    const userId = params.userId as string
+    const { post, isLoading, error } = usePostData(postId)
+    const { loginUser } = useGlobalLoginUser()
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-white">
-                <div className="h-6" />
-                <div className="max-w-7xl mx-auto px-4">
-                    <div className="text-center py-8">게시글을 불러오는 중...</div>
-                </div>
-            </div>
+            <PageLayout>
+                <StatusMessage message="게시글을 불러오는 중..." />
+            </PageLayout>
         )
     }
 
     if (error) {
         return (
-            <div className="min-h-screen bg-white">
-                <div className="h-6" />
-                <div className="max-w-7xl mx-auto px-4">
-                    <div className="text-center py-8 text-red-500">{error}</div>
-                </div>
-            </div>
+            <PageLayout>
+                <StatusMessage message={error} isError />
+            </PageLayout>
         )
     }
 
     if (!post) {
         return (
-            <div className="min-h-screen bg-white">
-                <div className="h-6" />
-                <div className="max-w-7xl mx-auto px-4">
-                    <div className="text-center py-8">게시글을 찾을 수 없습니다.</div>
-                </div>
-            </div>
+            <PageLayout>
+                <StatusMessage message="게시글을 찾을 수 없습니다." />
+            </PageLayout>
         )
     }
 
     return (
         <div className="min-h-screen bg-white">
-            {/* 배너 이미지 */}
             <Banner />
-
-            {/* 상단 여백 */}
             <div className="h-6" />
 
             <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row">
                 {/* 좌측 사이드바 */}
                 <div className="w-full md:w-56 md:mr-8">
-                    <AuthorProfile userId={Number(params.userId)} />
+                    <AuthorProfile userId={Number(userId)} />
                     <SearchBar />
-                    <CategoryMenu />
+                    <CategoryMenu userId={Number(userId)} />
                     <Statistics />
                 </div>
 
                 {/* 메인 콘텐츠 영역 */}
                 <div className="flex-1 mt-6 md:mt-0">
-                    {/* 게시물 내용 */}
-                    {post && (
-                        <PostContent
-                            post={{
-                                ...post,
-                                userId: Number(params.userId), // URL의 userId 파라미터 사용
-                                categoryId: post.categoryId || 1,
-                                imageUrls: post.imageUrls || [],
-                            }}
-                            loginUserId={loginUser?.id}
-                        />
-                    )}
+                    <PostContent
+                        post={{
+                            ...post,
+                            userId: Number(userId),
+                            categoryId: post.categoryId || 1,
+                            imageUrls: post.imageUrls || [],
+                        }}
+                        loginUserId={loginUser?.id}
+                    />
 
-                    {/* 댓글 섹션 */}
-                    <PostComments postId={Number(params.postId)} />
-
-                    {/* 작성자의 다른 게시글 */}
-                    <AuthorOtherPosts authorId={Number(params.userId)} />
+                    <PostComments postId={Number(postId)} />
+                    <AuthorOtherPosts authorId={Number(userId)} />
                 </div>
             </div>
         </div>
