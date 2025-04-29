@@ -137,29 +137,22 @@ public interface PostRepository extends JpaRepository<Post,Long> {
                                               Pageable pageable);
 
 
-    // 가장 핫한 부트캠프 이름 찾기
+//    // 내 부트캠프의 누적 추천순 4개
+//    @Query("""
+//    SELECT p FROM Post p
+//    WHERE p.user.bootcamp = :bootcamp
+//    ORDER BY p.likes DESC, p.createdAt DESC
+//""")
+//    Page<Post> findBootcampPopularPosts(@Param("bootcamp") String bootcamp, Pageable pageable);
+
+    //부트캠프 별 인기 게시물
     @Query("""
-    SELECT p.user.bootcamp
-    FROM Post p
-    GROUP BY p.user.bootcamp
-    ORDER BY COUNT(p) DESC
+    SELECT p FROM Post p
+    WHERE p.user.bootcamp = :bootcamp
+    ORDER BY p.likes DESC, p.createdAt DESC
 """)
-    Page<String> findHottestBootcamp(Pageable pageable);
+    Page<Post> findPopularPostsByBootcamp(@Param("bootcamp") String bootcamp, Pageable pageable);
 
-
-    // 핫한 부트캠프의 글 4개
-    @Query(
-            value = """
-        SELECT p FROM Post p
-        WHERE p.user.bootcamp = :bootcampName
-        ORDER BY p.createdAt DESC
-    """,
-            countQuery = """
-        SELECT COUNT(p.id) FROM Post p
-        WHERE p.user.bootcamp = :bootcampName
-    """
-    )
-    Page<Post> findTop4ByBootcamp(@Param("bootcampName") String bootcampName, Pageable pageable);
 
 
 

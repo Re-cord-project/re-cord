@@ -1,11 +1,13 @@
 'use client'
 
+
 import { useState, FormEvent } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import RecentPosts from '@/components/home/RecentPosts'
 import WeeklyPopularPosts from '@/components/home/WeeklyPopularPosts'
 import SearchBar from '@/components/post/SearchBar'
+
 
 export default function HomePage() {
     const [searchQuery, setSearchQuery] = useState('')
@@ -43,6 +45,7 @@ export default function HomePage() {
             {/* 이번 주 인기 회고록 */}
             <WeeklyPopularPosts />
 
+
             {/* 플로팅 버튼 */}
             <div className="fixed bottom-6 right-6">
                 <button className="w-12 h-12 bg-[#78B3CE] rounded-full flex items-center justify-center text-white shadow-lg hover:bg-[#5A8BA6] transition-colors">
@@ -64,4 +67,5 @@ export default function HomePage() {
             </div>
         </div>
     )
+
 }

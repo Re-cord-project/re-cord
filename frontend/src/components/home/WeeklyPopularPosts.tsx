@@ -80,9 +80,14 @@ export default function WeeklyPopularPosts() {
                     )}
                     <span className="text-xs text-gray-600">{post.username}</span>
                   </div>
-                  <div className="flex items-center text-xs text-gray-500 gap-1">
-                    <ThumbsUp size={16} /> {post.likes ?? 0}
-                  </div>
+                  {/* 작성일 + 추천수 묶음 */}
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <span>{post.createdAt.slice(0, 10)}</span>
+                        <div className="flex items-center gap-1">
+                        <ThumbsUp size={14} />
+                        <span>{post.likes}</span>
+                        </div>
+                    </div>
                 </div>
               </div>
             </div>

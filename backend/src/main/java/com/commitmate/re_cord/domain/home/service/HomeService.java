@@ -5,6 +5,8 @@ import com.commitmate.re_cord.domain.home.dto.HomeResponseDto;
 import com.commitmate.re_cord.domain.post.post.entity.Post;
 import com.commitmate.re_cord.domain.post.post.entity.PostStatus;
 import com.commitmate.re_cord.domain.post.post.repository.PostRepository;
+import com.commitmate.re_cord.domain.user.user.entity.User;
+import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class HomeService {
 
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
     public List<HomeDto> getRecentPublishedPostsWithImages() {
         Pageable pageable = PageRequest.of(0, 4); // 최근 게시글 4개만 가져오기
@@ -57,32 +60,19 @@ public class HomeService {
     }
 
 
-    public String findTopBootcampName() {
-        Pageable pageable = PageRequest.of(0, 1);
-        Page<String> result = postRepository.findHottestBootcamp(pageable);
-        return result.isEmpty() ? null : result.getContent().get(0);
-    }
+    public List<HomeDto> getPopularPostsByBootcamp(String bootcamp) {
+        Pageable pageable = PageRequest.of(0, 8);
+        Page<Post> posts = postRepository.findPopularPostsByBootcamp(bootcamp, pageable);
 
-    public List<HomeDto> getHotBootcampPosts() {
-        Pageable pageable = PageRequest.of(0, 4);
-
-        String hotBootcampName = findTopBootcampName(); // ✅ 여기 수정
-        if (hotBootcampName == null) {
-            return List.of(); // 아무것도 없으면 빈 리스트 반환
-        }
-
-        Page<Post> posts = postRepository.findTop4ByBootcamp(hotBootcampName, pageable);
         return posts.stream()
-                .map(HomeDto::from)
+                .map(post -> {
+                    HomeDto homeDto = HomeDto.from(post);
+                    if (homeDto.getThumbnailUrl() == null) {
+                        homeDto.updateThumbnailUrl("https://re-cord.s3.ap-northeast-2.amazonaws.com/user/profile/default-thumbnail.png");
+                    }
+                    return homeDto;
+                })
                 .collect(Collectors.toList());
-    }
-
-    public HomeResponseDto getHomePageData() {
-        List<HomeDto> recentPosts = getRecentPublishedPostsWithImages();
-        List<HomeDto> weeklyPopularPosts = getWeeklyPopularPublishedPosts();
-        List<HomeDto> hotBootcampPosts = getHotBootcampPosts();
-
-        return new HomeResponseDto(recentPosts, weeklyPopularPosts, hotBootcampPosts);
     }
 
 

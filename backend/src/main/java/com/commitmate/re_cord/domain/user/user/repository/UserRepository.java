@@ -25,5 +25,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
 
     Optional<User> findByBlogName(String blogName);
+
+    Optional<User> getBootcampById(Long id);
 }
 

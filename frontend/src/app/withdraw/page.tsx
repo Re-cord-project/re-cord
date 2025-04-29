@@ -19,13 +19,27 @@ export default function WithdrawPage() {
             return
         }
 
+        const getAccessTokenFromCookie = () => {
+            const cookies = document.cookie.split(';')
+
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=')
+                if (name === 'accessToken') {
+                    return value
+                }
+            }
+            return null
+        }
+
         try {
+            const accessToken = getAccessTokenFromCookie()
             const response = await fetch(
                 `http://localhost:8090/api/auth/withdraw?dataDeleteAgreed=${dataDeleteAgreed}`,
                 {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`,
                     },
                     credentials: 'include',
                 },
