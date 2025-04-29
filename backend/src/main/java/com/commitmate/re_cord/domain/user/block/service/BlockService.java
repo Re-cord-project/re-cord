@@ -102,14 +102,14 @@ public class BlockService {
     //대댓글 작성시 차단 여부 확인
     @Transactional(readOnly = true)
     public void checkIfBlockedByComment(Long parentCommentId, Long blockedId, String message) {
-        // 1) 부모 댓글 엔티티 조회
+        // 부모 댓글 엔티티 조회
         Comment parent = commentRepository.findById(parentCommentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다."));
 
-        // 2) 부모 댓글 작성자 ID를 blockerId로 사용
+        // 부모 댓글 작성자 ID를 blockerId로 사용
         Long blockerId = parent.getUser().getId();
 
-        // 3) 기존 checkIfBlocked 로직 재사용
+        // 기존 checkIfBlocked 로직 재사용
         checkIfBlocked(blockerId, blockedId, message);
     }
 }
