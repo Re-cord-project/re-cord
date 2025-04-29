@@ -1,5 +1,5 @@
 // 서버 URL 환경 변수 설정 - 기본값으로 백엔드 서버 URL 사용
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8090'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8090'
 
 /**
  * 게시글 좋아요 토글 함수
