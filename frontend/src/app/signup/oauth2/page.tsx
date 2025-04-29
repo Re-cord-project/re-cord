@@ -36,7 +36,7 @@ export default function SignupPage() {
                 if (response.ok) {
                     const data = await response.json()
                     console.log('Token verification response:', data)
-                    setEmail(data.email)
+                    setEmail(data.email || '')
                     setOauthId(data.oauthId || '')
 
                     if (data.email) {
