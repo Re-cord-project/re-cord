@@ -17,9 +17,29 @@ export default function ProfilePage() {
     // 기본 프로필 이미지 URL
     const defaultProfileImageUrl = '/default-profile.png'
 
+    // 쿠키에서 액세스 토큰 가져오기
+    const getAccessTokenFromCookie = () => {
+        const cookies = document.cookie.split(';')
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=')
+            if (name === 'accessToken') {
+                return value
+            }
+        }
+        return null
+    }
+
     // 유저 데이터 API에서 받아오기
     useEffect(() => {
-        fetch('/api/mypage/users') // UpdateUser API 경로로
+        const accessToken = getAccessTokenFromCookie()
+
+        fetch('http://localhost:8090/api/mypage/users', {
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`,
+            },
+            credentials: 'include',
+        })
             .then((res) => res.json())
             .then((data) => {
                 setUserData(data)
@@ -56,47 +76,45 @@ export default function ProfilePage() {
     const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file) return
-      
+
         if (file.size > 2 * 1024 * 1024) {
-          alert('파일 크기는 2MB를 초과할 수 없습니다.')
-          return
+            alert('파일 크기는 2MB를 초과할 수 없습니다.')
+            return
         }
         const formData = new FormData()
-            formData.append('file', file)
+        formData.append('file', file)
 
-            try {
-                const response = await fetch('http://localhost:8090/api/users/upload-profile-image', {
+        try {
+            const response = await fetch('http://localhost:8090/api/users/upload-profile-image', {
                 method: 'POST',
                 body: formData,
                 credentials: 'include', // 꼭 있어야 쿠키 보내짐
-                })
+            })
 
-                if (!response.ok) {
+            if (!response.ok) {
                 throw new Error('프로필 이미지 업로드 실패')
-                }
-
-                const uploadedUrl = await response.text()
-                setProfileImage(uploadedUrl)
-
-                // 유저 데이터에도 바로 넣어주자 (저장할 때 같이 보내기 위해)
-                setUserData((prev) => ({
-                ...prev,
-                profileImageUrl: uploadedUrl,
-                }))
-            } catch (err) {
-                console.error('이미지 업로드 에러:', err)
-                alert('이미지 업로드에 실패했습니다.')
             }
 
-        
-    }
+            const uploadedUrl = await response.text()
+            setProfileImage(uploadedUrl)
 
-    
+            // 유저 데이터에도 바로 넣어주자 (저장할 때 같이 보내기 위해)
+            setUserData((prev) => ({
+                ...prev,
+                profileImageUrl: uploadedUrl,
+            }))
+        } catch (err) {
+            console.error('이미지 업로드 에러:', err)
+            alert('이미지 업로드에 실패했습니다.')
+        }
+    }
 
     // 데이터 저장 처리
     const handleSave = () => {
+        const accessToken = getAccessTokenFromCookie()
+
         // 수정된 데이터 저장 로직
-        fetch('/api/mypage/updateUsers', {
+        fetch('http://localhost:8090/api/mypage/updateUsers', {
             method: 'PUT',
             body: JSON.stringify({
                 username: userData.username,
@@ -108,7 +126,9 @@ export default function ProfilePage() {
             }),
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`,
             },
+            credentials: 'include',
         }).then(async (res) => {
             const text = await res.text()
             if (!text) {

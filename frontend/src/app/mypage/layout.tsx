@@ -6,8 +6,11 @@ import { usePathname } from 'next/navigation'
 
 type UserInfo = {
     username: string
-    introduction: string
+    email: string
+    bootcamp: string
+    generation: string
     profileImageUrl: string
+    introduction: string
 }
 
 export default function MypageLayout({ children }: { children: React.ReactNode }) {
@@ -25,19 +28,42 @@ export default function MypageLayout({ children }: { children: React.ReactNode }
         setActivePage(page)
     }, [pathname])
 
+    // 쿠키에서 액세스 토큰 가져오기
+    const getAccessTokenFromCookie = () => {
+        const cookies = document.cookie.split(';')
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=')
+            if (name === 'accessToken') {
+                return value
+            }
+        }
+        return null
+    }
+
     useEffect(() => {
         // 유저 정보 fetch
         const fetchUser = async () => {
             try {
-                const res = await fetch('/api/mypage/users', {
+                const accessToken = getAccessTokenFromCookie()
+
+                const res = await fetch('http://localhost:8090/api/mypage/users', {
                     method: 'GET',
-                    credentials: 'include', // 쿠키 기반 인증 시 필요
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`,
+                    },
                 })
-                if (!res.ok) throw new Error('유저 정보를 불러오는 데 실패했습니다.')
+
+                if (!res.ok) {
+                    const errorData = await res.json()
+                    throw new Error(errorData.message || '유저 정보를 불러오는 데 실패했습니다.')
+                }
+
                 const data = await res.json()
                 setUser(data)
             } catch (err) {
-                console.error(err)
+                console.error('유저 정보 fetch 에러:', err)
             }
         }
         fetchUser()
