@@ -39,20 +39,59 @@ export default function ProfilePage() {
 
     // 이미지 변경 처리
     // 길이가 너무 길어서 적용이 안됨, 추후 S3 필요
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const file = e.target.files?.[0]
+    //     if (file) {
+    //         if (file.size > 2 * 1024 * 1024) {
+    //             alert('파일 크기는 2MB를 초과할 수 없습니다.')
+    //             return
+    //         }
+    //         const reader = new FileReader()
+    //         reader.onloadend = () => {
+    //             setProfileImage(reader.result as string)
+    //         }
+    //         reader.readAsDataURL(file)
+    //     }
+    // }
+    const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
-        if (file) {
-            if (file.size > 2 * 1024 * 1024) {
-                alert('파일 크기는 2MB를 초과할 수 없습니다.')
-                return
-            }
-            const reader = new FileReader()
-            reader.onloadend = () => {
-                setProfileImage(reader.result as string)
-            }
-            reader.readAsDataURL(file)
+        if (!file) return
+      
+        if (file.size > 2 * 1024 * 1024) {
+          alert('파일 크기는 2MB를 초과할 수 없습니다.')
+          return
         }
+        const formData = new FormData()
+            formData.append('file', file)
+
+            try {
+                const response = await fetch('http://localhost:8090/api/users/upload-profile-image', {
+                method: 'POST',
+                body: formData,
+                credentials: 'include', // 꼭 있어야 쿠키 보내짐
+                })
+
+                if (!response.ok) {
+                throw new Error('프로필 이미지 업로드 실패')
+                }
+
+                const uploadedUrl = await response.text()
+                setProfileImage(uploadedUrl)
+
+                // 유저 데이터에도 바로 넣어주자 (저장할 때 같이 보내기 위해)
+                setUserData((prev) => ({
+                ...prev,
+                profileImageUrl: uploadedUrl,
+                }))
+            } catch (err) {
+                console.error('이미지 업로드 에러:', err)
+                alert('이미지 업로드에 실패했습니다.')
+            }
+
+        
     }
+
+    
 
     // 데이터 저장 처리
     const handleSave = () => {

@@ -15,6 +15,7 @@ import com.commitmate.re_cord.domain.post.post.repository.PostRepository;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import com.commitmate.re_cord.global.config.S3Service;
+import com.commitmate.re_cord.global.exception.exceptions.ResourceNotFoundException;
 import com.commitmate.re_cord.global.jpa.UpdateStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,9 +23,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -341,10 +344,14 @@ public class PostService {
     }
 
     public PostResponseDto getLatestPostByUserId(Long userId) {
+        // 쿼리에서 최신 게시글을 가져오는 부분
         Post post = postRepository.findTopByUserIdWithImages(userId)
-                .orElseThrow(() -> new RuntimeException("게시글이 없습니다."));
-        return new PostResponseDto(post); // 여기서 getImages() 안전하게 접근 가능
+                .orElseThrow(() -> new ResourceNotFoundException("게시글이 없습니다."));
+
+        return new PostResponseDto(post);
     }
+
+
 
     public List<PostResponseDto> getOtherPostsBySameUser(Long userId, Long excludePostId) {
         // excludePostId가 null이어도 조회할 수 있는 메소드 사용
@@ -366,6 +373,20 @@ public class PostService {
                 .map(PostResponseDto::new)
                 .collect(Collectors.toList());
     }
+
+    // 작성자의 모든 게시글 조회 (userId 기준)
+    public Page<PostResponseDto> getAllPostsByUser(Long userId, int page, int size) {
+        // 유저 존재 여부 확인
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다. id=" + userId));
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Post> postPage = postRepository.findAllByUserIdWithImages(userId, pageable);
+
+        return postPage.map(PostResponseDto::new);
+    }
+
 
     public boolean isPostLikedByUser(Long postId, Long userId) {
         return postLikeRepository.existsByPostIdAndUserId(postId, userId);

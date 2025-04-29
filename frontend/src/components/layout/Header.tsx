@@ -1,3 +1,5 @@
+'use client'
+
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -14,53 +16,58 @@ export default function Header() {
             <div className="mx-auto h-full px-20">
                 <div className="h-full flex items-center justify-between">
                     <div className="flex items-center space-x-12">
-                        <div className="w-[107px] h-[43px]">
+                        <Link href="/home" className="w-[107px] h-[43px]">
                             <Image src="/logo.png" alt="리코드 로고" width={107} height={43} priority />
-                        </div>
+                        </Link>
                         <div className="flex items-center space-x-8">
-                            <Link
-                                href="/"
-                                className={`relative h-[64px] flex items-center px-1 pt-1 text-sm whitespace-nowrap
-                                    ${
-                                        pathname === '/'
-                                            ? 'text-black after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-black'
-                                            : 'text-gray-400 hover:text-gray-600'
-                                    }`}
+                        <Link
+                            href="/"
+                            className={`relative h-[64px] flex items-center px-1 pt-1 text-sm whitespace-nowrap
+                                ${
+                                pathname === '/home' 
+                                    ? 'text-black after:absolute after:bottom-0 after:left-0 after:w-full after:h-[5px] after:bg-black' 
+                                    : 'text-gray-400 hover:text-gray-600'
+                                }`}
                             >
-                                홈
+                            홈
                             </Link>
+
                             <Link
                                 href="/myBlog"
                                 className={`relative h-[64px] flex items-center px-1 pt-1 text-sm whitespace-nowrap
                                     ${
-                                        pathname === '/myblog'
-                                            ? 'text-black after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-black'
-                                            : 'text-gray-400 hover:text-gray-600'
+                                    pathname.toLowerCase() === '/myblog' 
+                                        ? 'text-black after:absolute after:bottom-0 after:left-0 after:w-full after:h-[5px] after:bg-black'
+                                        : 'text-gray-400 hover:text-gray-600'
                                     }`}
-                            >
+                                >
                                 내 블로그
-                            </Link>
+                                </Link>
+
                         </div>
                     </div>
                     <nav className="flex items-center">
                         {isLogin ? (
-                            <div className="flex items-center space-x-2">
-                                <Link href="/mypage" className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-3">
+                                <Link href="/mypage" className="flex items-center">
                                     <Image
-                                        src="/profile.png"
+                                        src={loginUser.profileImageUrl || '/profile.png'}
                                         alt="프로필 이미지"
-                                        width={32}
-                                        height={32}
-                                        className="rounded-full"
+                                        width={60} // 프로필 사진 크게
+                                        height={60}
+                                        className="rounded-full object-cover"
                                     />
-                                    <span className="text-sm text-gray-900">{loginUser.username}</span>
+                                    <span className="text-lg text-gray-900">{loginUser.username}</span>
                                 </Link>
-                                <button onClick={logoutAndHome} className="text-gray-900 hover:text-gray-700">
+                                <button
+                                    onClick={logoutAndHome}
+                                    className="ml-6 text-sm text-gray-500 hover:text-gray-700"
+                                >
                                     로그아웃
                                 </button>
                             </div>
                         ) : (
-                            <Link href="/login" className="text-gray-900 hover:text-gray-700">
+                            <Link href="/login" className="ml-6 text-sm text-gray-500 hover:text-gray-700">
                                 로그인
                             </Link>
                         )}
@@ -68,5 +75,6 @@ export default function Header() {
                 </div>
             </div>
         </header>
+        
     )
 }

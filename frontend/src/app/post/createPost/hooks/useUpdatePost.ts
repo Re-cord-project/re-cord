@@ -90,7 +90,7 @@ export const useUpdatePost = (postId?: number) => {
                 setCategories(categoriesData)
             }
 
-            const response = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
+            const response = await fetch(`${API_BASE_URL}/api/posts/public/${id}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -99,6 +99,15 @@ export const useUpdatePost = (postId?: number) => {
             })
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    setError('로그인이 필요합니다. 다시 로그인 해주세요.')
+                    // 로그인 페이지로 이동 (window.location 사용 또는 router 활용 가능)
+                    if (typeof window !== 'undefined') {
+                        alert('로그인이 필요합니다. 로그인 페이지로 이동합니다.')
+                        window.location.href = '/login'
+                    }
+                    return null
+                }
                 const errorText = await response.text()
                 console.error('게시글 불러오기 실패:', errorText)
                 setError('게시글을 불러오지 못했습니다.')
