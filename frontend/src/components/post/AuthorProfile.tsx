@@ -2,16 +2,19 @@
 
 import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import { useGlobalLoginUser } from '../../app/stores/auth/loginUser'
 import { FollowButton } from '@/components/follow/FollowButton'
+import LoginPrompt from '@/components/layout/LoginPrompt'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
+// 타입 정의부 개선
 interface AuthorStats {
     followers: number
     following: number
     posts: number
 }
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 interface Author {
     id: number
@@ -23,7 +26,7 @@ interface Author {
     profileImageUrl: string
     provider: string
     role: string
-    blogname: string // 추가: DB에서 가져오는 blogname 필드
+    blogname: string
     stats: AuthorStats
 }
 
@@ -31,107 +34,91 @@ interface AuthorProfileProps {
     userId?: number // 옵션: 특정 사용자 ID를 직접 전달받을 수 있음
 }
 
+const DEFAULT_PROFILE_IMAGE = '/default-profile.png'
+
+/**
+ * 작성자 프로필 컴포넌트
+ * 사용자 정보와 프로필 이미지를 표시하고, 팔로우/글 작성 기능을 제공합니다.
+ */
 const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
     const params = useParams()
+    const pathname = usePathname()
     const { loginUser, isLogin } = useGlobalLoginUser()
     const [author, setAuthor] = useState<Author | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
     const [hasFollowed, setHasFollowed] = useState(false)
-    const [followLoading, setFollowLoading] = useState(false)
-    // 프로필 이미지 URL 상태 추가
     const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null)
 
     // URL에서 사용자 ID를 가져오거나 전달받은 userId 또는 로그인한 사용자 ID를 사용
     const targetUserId = userId || (params.id ? Number(params.id) : isLogin ? loginUser.id : null)
 
-    // 프로필 이미지를 가져오는 함수
+    // 게시글 상세보기 페이지인지 확인
+    const isPostDetailPage = pathname?.includes('/post/postDetail/') || false
+
+    /**
+     * 이미지 URL 정규화 함수
+     * 다양한 형식의 URL을 일관된 형식으로 변환합니다.
+     */
+    const normalizeImageUrl = (imageUrl: string): string => {
+        if (!imageUrl || imageUrl.trim() === '' || imageUrl.trim() === 'null') {
+            return DEFAULT_PROFILE_IMAGE
+        }
+
+        if (imageUrl.startsWith('http')) {
+            return imageUrl
+        }
+
+        if (imageUrl === '/profile.jpg' || imageUrl === DEFAULT_PROFILE_IMAGE) {
+            return imageUrl
+        }
+
+        // 상대 경로 처리
+        return imageUrl.startsWith('/') ? `${API_BASE_URL}${imageUrl}` : `${API_BASE_URL}/${imageUrl}`
+    }
+
+    /**
+     * 프로필 이미지를 가져오는 함수
+     */
     const fetchProfileImage = async (userId: number) => {
         try {
-            // PostContent와 동일한 API 호출
-            const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/${userId}/profile-image`, {
-                credentials: 'include', // 쿠키 인증을 위해 추가
+            const apiUrl = `${API_BASE_URL}/api/auth/public/${userId}/profile-image`
+            const userProfileResponse = await fetch(apiUrl, {
+    
             })
 
             if (userProfileResponse.ok) {
                 const imageUrl = await userProfileResponse.text()
-
-                // 유효한 URL 확인
-                if (imageUrl && imageUrl.trim() !== '' && imageUrl.trim() !== 'null') {
-                    // URL 처리
-                    if (imageUrl.startsWith('http')) {
-                        // 이미 절대 URL인 경우 그대로 사용
-                        setProfileImageUrl(imageUrl)
-                    } else if (imageUrl.startsWith('/')) {
-                        // 상대 경로인 경우
-                        if (imageUrl === '/profile.jpg' || imageUrl === '/default-profile.png') {
-                            setProfileImageUrl(imageUrl)
-                        } else {
-                            // 백엔드 URL에 경로 추가
-                            setProfileImageUrl(`${API_BASE_URL}${imageUrl}`)
-                        }
-                    } else {
-                        // 경로가 '/'로 시작하지 않는 경우 '/'를 추가
-                        setProfileImageUrl(`${API_BASE_URL}/${imageUrl}`)
-                    }
-                } else {
-                    // 기본 프로필 이미지 사용
-                    setProfileImageUrl('/default-profile.png')
-                }
+                setProfileImageUrl(normalizeImageUrl(imageUrl))
             } else {
-                // 에러 처리
                 console.log(`프로필 이미지가 없거나 로드 실패: ${userProfileResponse.status}`)
-                setProfileImageUrl('/default-profile.png')
+                setProfileImageUrl(DEFAULT_PROFILE_IMAGE)
             }
         } catch (error) {
             console.error('프로필 이미지 로드 오류:', error)
-            setProfileImageUrl('/default-profile.png')
+            setProfileImageUrl(DEFAULT_PROFILE_IMAGE)
         }
     }
 
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-            // 조회 대상 사용자 ID 확인 및 없으면 반환
-            if (!targetUserId) {
-                setIsLoading(false)
-                return
-            }
+    /**
+     * 사용자 통계 정보(팔로워, 팔로잉, 게시글 수)를 가져오는 함수
+     */
+    const fetchUserStats = async (userId: number): Promise<AuthorStats> => {
+        try {
+            const resCounts = await fetch(`${API_BASE_URL}/api/users/${userId}/counts`, { credentials: 'include' })
 
-            try {
-                setIsLoading(true)
-
-                // // 로그인한 사용자 정보를 사용하는 경우 API 호출 없이 바로 사용
-                // if (isLogin && targetUserId === loginUser.id) {
-                //     // 임시로 통계 정보 추가 (실제 데이터가 없는 경우)
-                //     setAuthor({
-                //         ...loginUser,
-                //         introduction: loginUser.bootcamp ? `${loginUser.bootcamp} ${loginUser.generation}기` : '',
-                //         profileImageUrl: '/profile.png',
-                //         provider: 'local',
-                //         role: loginUser.bootcamp || '개발자',
-                //         stats: {
-                //             followers: 0,
-                //             following: 0,
-                //             posts: 0,
-                //         },
-                //     })
-                //     setIsLoading(false)
-                //     return
-                // }
-
-                // 인증된 요청으로 사용자 정보 가져오기
-                const response = await fetch(`${API_BASE_URL}/api/auth/${targetUserId}`, {
-                    method: 'GET',
-                    credentials: 'include', // 쿠키 인증을 위해 추가
-                })
-
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        console.warn('인증 토큰이 만료되었거나 유효하지 않습니다.')
-                        // 토큰 갱신 로직을 여기에 추가할 수 있습니다
-                    }
-                    throw new Error(`사용자 정보를 불러오는 데 실패했습니다. 상태 코드: ${response.status}`)
+            if (resCounts.ok) {
+                const { followerCount, followingCount } = await resCounts.json()
+                return {
+                    followers: followerCount,
+                    following: followingCount,
+                    posts: 0, // 필요 시 게시글 수도 업데이트
                 }
+            }
+        } catch (statsErr) {
+            console.warn('통계 정보 로드 실패 (기본값 사용):', statsErr)
+        }
+
 
                 const userData = await response.json()
                 console.log('사용자 데이터 로드 성공:', userData)
@@ -176,60 +163,106 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                             list.some((u) => u.userId === targetUserId), // 팔로우 중인지 판단
                         )
                     }
-                }
-            } catch (e: any) {
-                console.error('사용자 정보 로드 오류:', e)
-                setError(e.message) // 에러 메시지 설정
-            } finally {
-                setIsLoading(false)
-            }
-        }
-        fetchUserProfile()
-    }, [targetUserId, isLogin, loginUser.id])
 
-    // 사용자 정보를 불러온 후 프로필 이미지 가져오기
+                }
+                throw new Error(`사용자 정보를 불러오는 데 실패했습니다. 상태 코드: ${response.status}`)
+            }
+
+            const userData = await response.json()
+            const stats = await fetchUserStats(targetUserId)
+
+            setAuthor({
+                ...userData,
+                stats,
+                profileImageUrl: userData.profileImageUrl || DEFAULT_PROFILE_IMAGE,
+                role: userData.bootcamp || '개발자',
+                blogname: userData.blogname || userData.username,
+            })
+
+            // 팔로우 상태 확인
+            const isFollowed = await checkFollowStatus(targetUserId)
+            setHasFollowed(isFollowed)
+        } catch (e: any) {
+            console.error('사용자 정보 로드 오류:', e)
+            setError(e.message)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // 사용자 정보 및 프로필 이미지 로드
+    useEffect(() => {
+        fetchUserProfile()
+    }, [targetUserId, isLogin, loginUser?.id])
+
     useEffect(() => {
         if (targetUserId) {
             fetchProfileImage(targetUserId)
         }
     }, [targetUserId])
 
+    /**
+     * 팔로우 상태 변경 핸들러
+     */
+    const handleFollowStatusChange = (newStatus: boolean) => {
+        setHasFollowed(newStatus)
+        setAuthor((prev) =>
+            prev
+                ? {
+                      ...prev,
+                      stats: {
+                          ...prev.stats,
+                          followers: prev.stats.followers + (newStatus ? 1 : -1),
+                      },
+                  }
+                : prev,
+        )
+    }
+
+    /**
+     * 프로필 액션 버튼 렌더링 함수
+     */
+    const renderProfileAction = () => {
+        if (isLogin && loginUser.id === author?.id) {
+            return (
+                <Link
+                    href="/post/createPost"
+                    className="w-full py-2 bg-[#78B3CE] text-white rounded-md text-sm font-medium hover:bg-[#A8D5E5] transition-colors cursor-pointer !rounded-button whitespace-nowrap flex justify-center items-center"
+                >
+                    글 작성하기
+                </Link>
+            )
+        } else if (isLogin) {
+            return (
+                <FollowButton
+                    userId={author?.id.toString() || ''}
+                    initialHasFollowed={hasFollowed}
+                    onFollowStatusChange={handleFollowStatusChange}
+                />
+            )
+        } else {
+            return (
+                <Link
+                    href="/login"
+                    className="w-full py-2 border border-[#78B3CE] text-[#78B3CE] rounded-md text-sm font-medium hover:bg-gray-50 transition-colors flex justify-center items-center"
+                >
+                    작성자 블로그 방문하기
+                </Link>
+            )
+        }
+    }
+
+    // 로딩 중 상태 표시
     if (isLoading) {
         return <div className="bg-white rounded-lg shadow-sm p-6 mb-6">프로필 로딩 중...</div>
     }
 
+    // 에러 상태 또는 작성자 정보가 없는 경우
     if (error || !author) {
-        // 로그인하지 않은 경우 로그인 바를 표시
-        if (!isLogin) {
-            return (
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <div className="flex flex-col items-center">
-                        <div className="w-16 h-16 rounded-full overflow-hidden mb-3 bg-gray-100 flex items-center justify-center">
-                            <img
-                                src="/userProfile.png"
-                                alt="기본 프로필"
-                                className="w-10 h-10 object-cover opacity-50"
-                            />
-                        </div>
-                        <p className="text-gray-500 mb-4 text-sm">로그인이 필요한 서비스입니다</p>
-                        <Link
-                            href="/login"
-                            className="w-full py-2 bg-[#78B3CE] text-white rounded-md text-sm font-medium hover:bg-[#A8D5E5] transition-colors cursor-pointer !rounded-button whitespace-nowrap flex justify-center items-center"
-                        >
-                            로그인 하러 가기
-                        </Link>
-                        <Link
-                            href="/signup"
-                            className="w-full py-2 mt-2 border border-[#78B3CE] text-[#78B3CE] rounded-md text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer !rounded-button whitespace-nowrap flex justify-center items-center"
-                        >
-                            회원가입 하기
-                        </Link>
-                    </div>
-                </div>
-            )
+        // 게시글 상세보기 페이지가 아니고 로그인하지 않은 경우 로그인 유도 UI 표시
+        if (!isLogin && !isPostDetailPage) {
+            return <LoginPrompt />
         }
-
-        // 다른 에러인 경우 기존 에러 메시지 표시
         return (
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
                 <p className="text-red-500">{error || '사용자 정보를 불러올 수 없습니다.'}</p>
@@ -237,21 +270,29 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
         )
     }
 
+    // 게시글 상세보기 페이지가 아니고 로그인하지 않은 경우 로그인 유도 UI 표시
+    if (!isLogin && !isPostDetailPage) {
+        return <LoginPrompt />
+    }
+
+    // 정상 렌더링
     return (
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
             <div className="flex flex-col items-center">
+                {/* 프로필 이미지 */}
                 <div className="w-16 h-16 rounded-full overflow-hidden mb-3">
                     <img
-                        src={profileImageUrl || '/default-profile.png'}
+                        src={profileImageUrl || DEFAULT_PROFILE_IMAGE}
                         alt={`${author.username}의 프로필`}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                            // 이미지 로드 실패 시 기본 이미지로 대체
                             e.currentTarget.onerror = null
-                            e.currentTarget.src = '/default-profile.png'
+                            e.currentTarget.src = DEFAULT_PROFILE_IMAGE
                         }}
                     />
                 </div>
+
+                {/* 사용자 이름 및 역할 */}
                 <Link
                     href={isLogin && loginUser.id === author.id ? '/myBlog' : `/Blog/${author.blogname}`}
                     className="font-bold text-gray-800 hover:text-blue-600 cursor-pointer"
@@ -259,6 +300,8 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                     {author.username}
                 </Link>
                 <p className="text-xs text-gray-500 mt-1">{author.role}</p>
+
+                {/* 통계 정보 */}
                 <div className="flex justify-between w-full mt-4 text-xs text-gray-600">
                     <div className="text-center">
                         <div className="font-bold">{author.stats.following}</div>
@@ -274,6 +317,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                     </div>
                 </div>
 
+
                 <div className="w-full mt-4 border-t border-gray-200 pt-4">
                     {isLogin && loginUser.id === author.id ? (
                         <Link
@@ -284,6 +328,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                         </Link>
                     ) : isLogin ? (
                         <FollowButton
+                            variant="fullWidth"
                             userId={author.id.toString()}
                             initialHasFollowed={hasFollowed}
                             onFollowStatusChange={(newStatus) => {
@@ -304,6 +349,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                         />
                     ) : null}
                 </div>
+
             </div>
         </div>
     )

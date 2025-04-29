@@ -126,7 +126,10 @@ const PostDetail = () => {
                     <AuthorProfile userId={Number(userId)} />
                     <SearchBar />
                     <CategoryMenu userId={Number(userId)} />
-                    <Statistics />
+                    {/* userId가 숫자로 있을 때만 렌더 */}
+                    {userId != null && (
+                      <Statistics userId={Number(userId)} />
+                   )}
                 </div>
 
                 {/* 메인 콘텐츠 영역 */}

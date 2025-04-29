@@ -58,8 +58,8 @@ const useUserInfo = (userId: number) => {
         const fetchUserInfo = async () => {
             setIsLoadingUser(true)
             try {
-                const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/${userId}/profile-image`, {
-                    credentials: 'include',
+                const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/public/${userId}/profile-image`, {
+                    
                 })
 
                 if (userProfileResponse.ok) {

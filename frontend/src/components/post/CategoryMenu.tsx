@@ -294,6 +294,16 @@ const CategoryMenu: React.FC<CategoryMenuProps> = ({ userId }) => {
         }
     }
 
+    // 로그인 상태 확인
+    if (!isLogin && !userId) {
+        return (
+            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+                <h3 className="text-sm font-bold text-gray-800 mb-3">카테고리</h3>
+                <div className="text-sm text-gray-500 text-center py-4">카테고리가 없습니다.</div>
+            </div>
+        )
+    }
+
     if (isLoading) {
         return (
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
