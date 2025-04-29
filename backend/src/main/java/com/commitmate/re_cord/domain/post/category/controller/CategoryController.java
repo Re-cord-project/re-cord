@@ -4,6 +4,7 @@ package com.commitmate.re_cord.domain.post.category.controller;
 import com.commitmate.re_cord.domain.post.category.dto.CategoryRequest;
 import com.commitmate.re_cord.domain.post.category.entity.Category;
 import com.commitmate.re_cord.domain.post.category.service.CategoryService;
+import com.commitmate.re_cord.domain.user.user.dto.UserResponseDto;
 import com.commitmate.re_cord.global.security.SecurityUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -61,5 +62,11 @@ public class CategoryController {
         } else {
             return ResponseEntity.status(403).body("삭제 권한이 없습니다.");
         }
+    }
+    @GetMapping("/user/{categoryId}")
+    public ResponseEntity<List<UserResponseDto>> getUsersByCategoryId(
+            @RequestParam("id") Long categoryId) {
+        List<UserResponseDto> users = categoryService.findUsersByCategoryId(categoryId);
+        return ResponseEntity.ok(users);
     }
 }

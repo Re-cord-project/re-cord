@@ -394,7 +394,7 @@ public class PostService {
     }
 
     public Long getTotalPostCount(Long userId) {
-        return postRepository.totalPostCount(userId);
+        return postRepository.countByUserIdAndStatus(userId, PostStatus.PUBLISHED);
     }
 
     @Transactional

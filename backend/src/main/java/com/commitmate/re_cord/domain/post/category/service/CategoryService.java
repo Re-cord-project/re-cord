@@ -5,6 +5,7 @@ import com.commitmate.re_cord.domain.post.category.dto.CategoryRequest;
 import com.commitmate.re_cord.domain.post.category.entity.Category;
 import com.commitmate.re_cord.domain.post.category.repository.CategoryRepository;
 import com.commitmate.re_cord.domain.post.post.entity.Post;
+import com.commitmate.re_cord.domain.user.user.dto.UserResponseDto;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
 import com.commitmate.re_cord.global.security.SecurityUser;
@@ -13,7 +14,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -76,4 +79,16 @@ public class CategoryService {
         categoryRepository.delete(category);
         return true; // 삭제 완료
     }
+
+    public List<UserResponseDto> findUsersByCategoryId(Long categoryId) {
+        List<User> users = userRepository.findUsersByCategoryId(categoryId);
+        List<UserResponseDto> result = new ArrayList<>();
+
+        for (User user : users) {
+            result.add(UserResponseDto.from(user));
+        }
+
+        return result;
+    }
+
 }

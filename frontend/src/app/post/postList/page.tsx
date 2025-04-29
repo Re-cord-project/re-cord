@@ -53,7 +53,7 @@ export default function PostListPage() {
                     <div className="w-full md:w-56 flex-shrink-0 md:mr-8">
                         <AuthorProfile userId={currentUserId} />
                         <SearchBar />
-                        <CategoryMenu />
+                        <CategoryMenu userId={currentUserId} />
                         {/* currentUserId가 undefined가 아닌 경우에만 렌더 */}
                         {currentUserId != null && (
                             <Statistics userId={currentUserId} />
