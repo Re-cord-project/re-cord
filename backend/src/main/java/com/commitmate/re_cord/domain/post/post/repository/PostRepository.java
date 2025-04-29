@@ -89,13 +89,18 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     SELECT p 
     FROM Post p 
     LEFT JOIN FETCH p.images 
-    WHERE p.user.id = :userId AND p.createdAt = (
-        SELECT MAX(p2.createdAt) 
-        FROM Post p2 
-        WHERE p2.user.id = :userId
-    )
-    """)
-    Optional<Post> findTopByUserIdWithImages(@Param("userId") Long userId);
+    WHERE p.user.id = :userId 
+      AND p.status = :status
+      AND p.createdAt = (
+          SELECT MAX(p2.createdAt) 
+          FROM Post p2 
+          WHERE p2.user.id = :userId 
+            AND p2.status = :status
+      )
+""")
+    Optional<Post> findTopByUserIdWithImagesAndStatus(@Param("userId") Long userId,
+                                                      @Param("status") PostStatus status);
+
 
     @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId AND p.id <> :excludedPostId")
     List<Post> findByUserIdAndIdNotFetchImages(Long userId, Long excludedPostId);
@@ -111,18 +116,24 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     SELECT p FROM Post p
     LEFT JOIN p.images i
     WHERE SIZE(p.images) > 0
+      AND p.status = :status
     ORDER BY p.createdAt DESC
 """)
-    Page<Post> findRecentPostsWithImages(Pageable pageable);
+    Page<Post> findRecentPostsWithImagesByStatus(@Param("status") PostStatus status, Pageable pageable);
+
 
 
     // 최근 일주일간 추천순 4개
     @Query("""
     SELECT p FROM Post p
     WHERE p.createdAt >= :thisMonday
+      AND p.status = :status
     ORDER BY p.likes DESC
 """)
-    Page<Post> findWeeklyPopularPosts(@Param("thisMonday") LocalDateTime thisMonday, Pageable pageable);
+    Page<Post> findWeeklyPopularPostsByStatus(@Param("thisMonday") LocalDateTime thisMonday,
+                                              @Param("status") PostStatus status,
+                                              Pageable pageable);
+
 
     // 가장 핫한 부트캠프 이름 찾기
     @Query("""

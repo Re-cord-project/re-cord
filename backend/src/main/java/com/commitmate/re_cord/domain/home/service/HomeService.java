@@ -3,6 +3,7 @@ package com.commitmate.re_cord.domain.home.service;
 import com.commitmate.re_cord.domain.home.dto.HomeDto;
 import com.commitmate.re_cord.domain.home.dto.HomeResponseDto;
 import com.commitmate.re_cord.domain.post.post.entity.Post;
+import com.commitmate.re_cord.domain.post.post.entity.PostStatus;
 import com.commitmate.re_cord.domain.post.post.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
@@ -24,24 +26,25 @@ public class HomeService {
 
     private final PostRepository postRepository;
 
-    public List<HomeDto> getRecentPostsWithImages() {
-        Pageable pageable = PageRequest.of(0, 4); // 4개만 가져오기
-        Page<Post> posts = postRepository.findRecentPostsWithImages(pageable);
+    public List<HomeDto> getRecentPublishedPostsWithImages() {
+        Pageable pageable = PageRequest.of(0, 4); // 최근 게시글 4개만 가져오기
+        Page<Post> posts = postRepository.findRecentPostsWithImagesByStatus(PostStatus.PUBLISHED, pageable);
         return posts.stream()
                 .map(HomeDto::from)
                 .collect(Collectors.toList());
     }
 
 
-    public List<HomeDto> getWeeklyPopularPosts() {
+
+    public List<HomeDto> getWeeklyPopularPublishedPosts() {
         Pageable pageable = PageRequest.of(0, 4);
 
-
         LocalDateTime thisMonday = LocalDate.now()
-                .with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+                .with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
                 .atStartOfDay();
 
-        Page<Post> posts = postRepository.findWeeklyPopularPosts(thisMonday, pageable);
+        Page<Post> posts = postRepository.findWeeklyPopularPostsByStatus(thisMonday, PostStatus.PUBLISHED, pageable);
+
         return posts.stream()
                 .map(post -> {
                     HomeDto homeDto = HomeDto.from(post);
@@ -51,8 +54,8 @@ public class HomeService {
                     return homeDto;
                 })
                 .collect(Collectors.toList());
-
     }
+
 
     public String findTopBootcampName() {
         Pageable pageable = PageRequest.of(0, 1);
@@ -75,8 +78,8 @@ public class HomeService {
     }
 
     public HomeResponseDto getHomePageData() {
-        List<HomeDto> recentPosts = getRecentPostsWithImages();
-        List<HomeDto> weeklyPopularPosts = getWeeklyPopularPosts();
+        List<HomeDto> recentPosts = getRecentPublishedPostsWithImages();
+        List<HomeDto> weeklyPopularPosts = getWeeklyPopularPublishedPosts();
         List<HomeDto> hotBootcampPosts = getHotBootcampPosts();
 
         return new HomeResponseDto(recentPosts, weeklyPopularPosts, hotBootcampPosts);

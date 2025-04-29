@@ -25,17 +25,19 @@ public class ApiV1HomeController {
 
     // 1. 최근 사진 있는 포스트 4개
     @GetMapping("/recent-posts")
-    public ResponseEntity<List<HomeDto>> getRecentPosts() {
-        List<HomeDto> posts = homeService.getRecentPostsWithImages();
+    public ResponseEntity<List<HomeDto>> getRecentPublishedPosts() {
+        List<HomeDto> posts = homeService.getRecentPublishedPostsWithImages();
         return ResponseEntity.ok(posts);
     }
 
+
     // 2. 이번 주 인기 포스트 4개
     @GetMapping("/weekly-popular")
-    public ResponseEntity<List<HomeDto>> getWeeklyPopularPosts() {
-        List<HomeDto> posts = homeService.getWeeklyPopularPosts();
+    public ResponseEntity<List<HomeDto>> getWeeklyPopularPublishedPosts() {
+        List<HomeDto> posts = homeService.getWeeklyPopularPublishedPosts();
         return ResponseEntity.ok(posts);
     }
+
 
     // 3. 핫한 부트캠프 포스트 4개
     @GetMapping("/hot-bootcamp")

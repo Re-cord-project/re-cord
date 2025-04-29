@@ -113,11 +113,11 @@ public class ApiV1PostReadController {
         return postService.getTotalPostCount(userId);
     }
 
-    // userId에 해당하는 제일 최신글보기
-    @GetMapping("/latest/{userId}")
-    public ResponseEntity<PostResponseDto> getLatestPostByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(postService.getLatestPostByUserId(userId));
-    }
 
+    // userId에 해당하는 최신 PUBLISHED 게시글 가져오기
+    @GetMapping("/latest/{userId}")
+    public ResponseEntity<PostResponseDto> getLatestPublishedPostByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(postService.getLatestPublishedPostByUserId(userId));
+    }
 
 }

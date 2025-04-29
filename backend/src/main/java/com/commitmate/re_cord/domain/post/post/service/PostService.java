@@ -343,13 +343,13 @@ public class PostService {
         postRepository.save(post);
     }
 
-    public PostResponseDto getLatestPostByUserId(Long userId) {
-        // 쿼리에서 최신 게시글을 가져오는 부분
-        Post post = postRepository.findTopByUserIdWithImages(userId)
+    public PostResponseDto getLatestPublishedPostByUserId(Long userId) {
+        Post post = postRepository.findTopByUserIdWithImagesAndStatus(userId, PostStatus.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("게시글이 없습니다."));
 
         return new PostResponseDto(post);
     }
+
 
 
 
