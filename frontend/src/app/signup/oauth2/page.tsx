@@ -38,8 +38,14 @@ export default function SignupPage() {
                     console.log('Token verification response:', data)
                     setEmail(data.email)
                     setOauthId(data.oauthId || '')
-                    setIsEmailChecked(true)
-                    setEmailCheckMessage('이메일이 확인되었습니다.')
+
+                    if (data.email) {
+                        setIsEmailChecked(true)
+                        setEmailCheckMessage('이메일이 확인되었습니다.')
+                    } else {
+                        setIsEmailChecked(false)
+                        setEmailCheckMessage('')
+                    }
                 } else {
                     setError('토큰이 만료되었거나 유효하지 않습니다. 다시 로그인해주세요.')
                 }
@@ -124,6 +130,7 @@ export default function SignupPage() {
             })
 
             if (response.ok) {
+                alert('회원가입이 완료되었습니다')
                 router.push('/login')
             } else {
                 const error = await response.text()

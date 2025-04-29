@@ -17,29 +17,9 @@ export default function ProfilePage() {
     // 기본 프로필 이미지 URL
     const defaultProfileImageUrl = '/default-profile.png'
 
-    // 쿠키에서 액세스 토큰 가져오기
-    const getAccessTokenFromCookie = () => {
-        const cookies = document.cookie.split(';')
-        for (let cookie of cookies) {
-            const [name, value] = cookie.trim().split('=')
-            if (name === 'accessToken') {
-                return value
-            }
-        }
-        return null
-    }
-
     // 유저 데이터 API에서 받아오기
     useEffect(() => {
-        const accessToken = getAccessTokenFromCookie()
-
-        fetch('http://localhost:8090/api/mypage/users', {
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`,
-            },
-            credentials: 'include',
-        })
+        fetch('http://localhost:8090/api/mypage/users') // UpdateUser API 경로로
             .then((res) => res.json())
             .then((data) => {
                 setUserData(data)
@@ -111,10 +91,8 @@ export default function ProfilePage() {
 
     // 데이터 저장 처리
     const handleSave = () => {
-        const accessToken = getAccessTokenFromCookie()
-
         // 수정된 데이터 저장 로직
-        fetch('http://localhost:8090/api/mypage/updateUsers', {
+        fetch('/api/mypage/updateUsers', {
             method: 'PUT',
             body: JSON.stringify({
                 username: userData.username,
@@ -126,9 +104,7 @@ export default function ProfilePage() {
             }),
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`,
             },
-            credentials: 'include',
         }).then(async (res) => {
             const text = await res.text()
             if (!text) {
