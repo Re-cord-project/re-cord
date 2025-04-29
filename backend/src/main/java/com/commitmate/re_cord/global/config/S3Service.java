@@ -20,31 +20,23 @@ import java.util.UUID;
 
 
 @Service
-@RequiredArgsConstructor
 public class S3Service {
 
-    @Value("${cloud.aws.credentials.access-key}")
-    private String accessKey;
-
-    @Value("${cloud.aws.credentials.secret-key}")
-    private String secretKey;
-
-    @Value("${cloud.aws.region.static}")
+    @Value("${aws.region}")
     private String region;
 
-    @Value("${cloud.aws.s3.bucket}")
+    @Value("${aws.s3.bucket}")
     private String bucket;
 
     private AmazonS3 amazonS3;
 
     @PostConstruct
     public void init() {
-        BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
         this.amazonS3 = AmazonS3ClientBuilder.standard()
                 .withRegion(region)
-                .withCredentials(new AWSStaticCredentialsProvider(credentials))
-                .build();
+                .build();  // IAM Role 또는 환경변수 기반 인증
     }
+
 
     public String uploadImage(MultipartFile file, Long userId) throws IOException {
         System.out.println("uploadImage 진입 - 파일명: " + (file != null ? file.getOriginalFilename() : "파일 없음"));
