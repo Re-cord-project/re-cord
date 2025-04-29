@@ -48,40 +48,37 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
     // 프로필 이미지를 가져오는 함수
     const fetchProfileImage = async (userId: number) => {
         try {
-            // PostContent와 동일한 API 호출
-            const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/${userId}/profile-image`, {
-                credentials: 'include', // 쿠키 인증을 위해 추가
+            const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/public/${userId}/profile-image`, {
+                credentials: 'include',
             })
 
-            if (userProfileResponse.ok) {
-                const imageUrl = await userProfileResponse.text()
-
-                // 유효한 URL 확인
-                if (imageUrl && imageUrl.trim() !== '' && imageUrl.trim() !== 'null') {
-                    // URL 처리
-                    if (imageUrl.startsWith('http')) {
-                        // 이미 절대 URL인 경우 그대로 사용
-                        setProfileImageUrl(imageUrl)
-                    } else if (imageUrl.startsWith('/')) {
-                        // 상대 경로인 경우
-                        if (imageUrl === '/profile.jpg' || imageUrl === '/default-profile.png') {
-                            setProfileImageUrl(imageUrl)
-                        } else {
-                            // 백엔드 URL에 경로 추가
-                            setProfileImageUrl(`${API_BASE_URL}${imageUrl}`)
-                        }
-                    } else {
-                        // 경로가 '/'로 시작하지 않는 경우 '/'를 추가
-                        setProfileImageUrl(`${API_BASE_URL}/${imageUrl}`)
-                    }
-                } else {
-                    // 기본 프로필 이미지 사용
-                    setProfileImageUrl('/default-profile.png')
-                }
-            } else {
-                // 에러 처리
-                console.log(`프로필 이미지가 없거나 로드 실패: ${userProfileResponse.status}`)
+            if (!userProfileResponse.ok) {
+                console.log(`프로필 이미지 로드 실패: ${userProfileResponse.status}`)
                 setProfileImageUrl('/default-profile.png')
+                return
+            }
+
+            const imageUrl = await userProfileResponse.text()
+
+            // 유효하지 않은 URL인 경우 기본 이미지 사용
+            if (!imageUrl || imageUrl.trim() === '' || imageUrl.trim() === 'null') {
+                setProfileImageUrl('/default-profile.png')
+                return
+            }
+
+            // URL 포맷에 따른 처리
+            if (imageUrl.startsWith('http')) {
+                // 이미 절대 URL인 경우 그대로 사용
+                setProfileImageUrl(imageUrl)
+            } else if (imageUrl === '/profile.jpg' || imageUrl === '/default-profile.png') {
+                // 기본 프로필 이미지인 경우
+                setProfileImageUrl(imageUrl)
+            } else {
+                // 백엔드 URL과 결합하여 사용
+                const formattedUrl = imageUrl.startsWith('/')
+                    ? `${API_BASE_URL}${imageUrl}`
+                    : `${API_BASE_URL}/${imageUrl}`
+                setProfileImageUrl(formattedUrl)
             }
         } catch (error) {
             console.error('프로필 이미지 로드 오류:', error)
@@ -89,102 +86,111 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
         }
     }
 
-    useEffect(() => {
-        const fetchUserProfile = async () => {
-            // 조회 대상 사용자 ID 확인 및 없으면 반환
-            if (!targetUserId) {
-                setIsLoading(false)
-                return
+    // 사용자 데이터 가져오기
+    const fetchUserData = async (userId: number) => {
+        const response = await fetch(`${API_BASE_URL}/api/auth/public/${userId}`, {
+            method: 'GET',
+            credentials: 'include',
+        })
+
+        if (!response.ok) {
+            if (response.status === 401) {
+                console.warn('인증 토큰이 만료되었거나 유효하지 않습니다.')
             }
-
-            try {
-                setIsLoading(true)
-
-                // // 로그인한 사용자 정보를 사용하는 경우 API 호출 없이 바로 사용
-                // if (isLogin && targetUserId === loginUser.id) {
-                //     // 임시로 통계 정보 추가 (실제 데이터가 없는 경우)
-                //     setAuthor({
-                //         ...loginUser,
-                //         introduction: loginUser.bootcamp ? `${loginUser.bootcamp} ${loginUser.generation}기` : '',
-                //         profileImageUrl: '/profile.png',
-                //         provider: 'local',
-                //         role: loginUser.bootcamp || '개발자',
-                //         stats: {
-                //             followers: 0,
-                //             following: 0,
-                //             posts: 0,
-                //         },
-                //     })
-                //     setIsLoading(false)
-                //     return
-                // }
-
-                // 인증된 요청으로 사용자 정보 가져오기
-                const response = await fetch(`${API_BASE_URL}/api/auth/${targetUserId}`, {
-                    method: 'GET',
-                    credentials: 'include', // 쿠키 인증을 위해 추가
-                })
-
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        console.warn('인증 토큰이 만료되었거나 유효하지 않습니다.')
-                        // 토큰 갱신 로직을 여기에 추가할 수 있습니다
-                    }
-                    throw new Error(`사용자 정보를 불러오는 데 실패했습니다. 상태 코드: ${response.status}`)
-                }
-
-                const userData = await response.json()
-                console.log('사용자 데이터 로드 성공:', userData)
-
-                // 기본 통계 정보 설정
-                let stats = { followers: 0, following: 0, posts: 0 }
-
-                // 단일 counts API 호출로 팔로우/팔로잉 통계 갱신
-                try {
-                    const resCounts = await fetch(
-                        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/${targetUserId}/counts`,
-                        { credentials: 'include' },
-                    )
-                    if (resCounts.ok) {
-                        const { followerCount, followingCount } = await resCounts.json()
-                        stats = {
-                            followers: followerCount,
-                            following: followingCount,
-                            posts: stats.posts, // 필요 시 게시글 수도 업데이트
-                        }
-                    }
-                } catch (statsErr) {
-                    console.warn('통계 정보 로드 실패 (기본값 사용):', statsErr)
-                }
-
-                setAuthor({
-                    ...userData,
-                    stats,
-                    profileImageUrl: userData.profileImageUrl || '/profile.png',
-                    role: userData.bootcamp || '개발자',
-                    // blogname이 없을 경우 username을 사용
-                    blogname: userData.blogname || userData.username,
-                })
-
-                // 팔로우 상태 체크 (로그인 사용자 대상)
-                if (isLogin && loginUser.id !== targetUserId) {
-                    const resFollow = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/users/follow`, {
-                        credentials: 'include',
-                    })
-                    if (resFollow.ok) {
-                        const list: Array<{ userId: number }> = await resFollow.json()
-                        setHasFollowed(
-                            list.some((u) => u.userId === targetUserId), // 팔로우 중인지 판단
-                        )
-                    }
-                }
-            } catch (e: any) {
-                console.error('사용자 정보 로드 오류:', e)
-                setError(e.message) // 에러 메시지 설정
-            } finally {
-                setIsLoading(false)
-            }
+            throw new Error(`사용자 정보를 불러오는 데 실패했습니다. 상태 코드: ${response.status}`)
         }
+
+        const userData = await response.json()
+        console.log('사용자 데이터 로드 성공:', userData)
+        return userData
+    }
+
+    // 사용자 통계 정보 가져오기
+    const fetchUserStats = async (userId: number) => {
+        // 기본 통계 정보
+        const defaultStats = { followers: 0, following: 0, posts: 0 }
+
+        try {
+            const resCounts = await fetch(`${API_BASE_URL}/api/users/${userId}/counts`, { credentials: 'include' })
+
+            if (resCounts.ok) {
+                const { followerCount, followingCount } = await resCounts.json()
+                return {
+                    followers: followerCount,
+                    following: followingCount,
+                    posts: defaultStats.posts, // 필요 시 게시글 수도 업데이트
+                }
+            }
+
+            return defaultStats
+        } catch (statsErr) {
+            console.warn('통계 정보 로드 실패 (기본값 사용):', statsErr)
+            return defaultStats
+        }
+    }
+
+    // 팔로우 상태 확인하기
+    const checkFollowStatus = async (userId: number) => {
+        try {
+            const resFollow = await fetch(`${API_BASE_URL}/api/users/follow`, {
+                credentials: 'include',
+            })
+
+            if (resFollow.ok) {
+                const list: Array<{ userId: number }> = await resFollow.json()
+                setHasFollowed(list.some((u) => u.userId === userId))
+            }
+        } catch (error) {
+            console.error('팔로우 상태 확인 오류:', error)
+        }
+    }
+
+    // 사용자 정보를 가져오는 함수
+    const fetchUserProfile = async () => {
+        // 조회 대상 사용자 ID 확인 및 없으면 반환
+        if (!targetUserId) {
+            setIsLoading(false)
+            return
+        }
+
+        try {
+            setIsLoading(true)
+
+            // 사용자 정보 가져오기
+            const userData = await fetchUserData(targetUserId)
+
+            // 통계 정보 가져오기
+            const stats = await fetchUserStats(targetUserId)
+
+            // 사용자 정보 설정
+            setAuthor({
+                ...userData,
+                stats,
+                profileImageUrl: userData.profileImageUrl || '/profile.png',
+                role: userData.bootcamp || '개발자',
+                // blogname이 없을 경우 username을 사용
+                blogname: userData.blogname || userData.username,
+            })
+
+            // 로그인 사용자라면 팔로우 상태 체크
+            if (isLogin && loginUser.id !== targetUserId) {
+                await checkFollowStatus(targetUserId)
+            }
+
+            // 디버깅: 사용자 정보 및 로그인 상태 로깅
+            console.log('로그인 상태:', isLogin)
+            console.log('로그인 사용자 ID:', loginUser.id)
+            console.log('타겟 사용자 ID:', targetUserId)
+            console.log('팔로우 상태:', hasFollowed)
+        } catch (e: any) {
+            console.error('사용자 정보 로드 오류:', e)
+            setError(e.message)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    useEffect(() => {
         fetchUserProfile()
     }, [targetUserId, isLogin, loginUser.id])
 
@@ -207,7 +213,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                     <div className="flex flex-col items-center">
                         <div className="w-16 h-16 rounded-full overflow-hidden mb-3 bg-gray-100 flex items-center justify-center">
                             <img
-                                src="/userProfile.png"
+                                src="/default-profile.png"
                                 alt="기본 프로필"
                                 className="w-10 h-10 object-cover opacity-50"
                             />
@@ -276,6 +282,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                 </div>
 
                 <div className="w-full mt-4 border-t border-gray-200 pt-4">
+                    {/* 현재 사용자가 글 작성자인 경우: 글 작성하기 버튼 */}
                     {isLogin && loginUser.id === author.id ? (
                         <Link
                             href="/post/createPost"
@@ -283,7 +290,8 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                         >
                             글 작성하기
                         </Link>
-                    ) : isLogin ? (
+                    ) : /* 현재 사용자가 로그인 상태이고 글 작성자가 아닌 경우: 팔로우/언팔로우 버튼 */
+                    isLogin && loginUser.id !== author.id ? (
                         <FollowButton
                             variant="fullWidth"
                             userId={author.id.toString()}
@@ -302,6 +310,8 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                                           }
                                         : prev,
                                 )
+                                // 디버깅용 로그 추가
+                                console.log('팔로우 상태 변경:', newStatus)
                             }}
                         />
                     ) : null}

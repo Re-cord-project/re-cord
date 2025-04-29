@@ -26,7 +26,7 @@ export default function WeeklyPopularPosts() {
     useEffect(() => {
         const fetchWeeklyPopularPosts = async () => {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/posts/weekly-popular`)
+                const response = await fetch(`${API_BASE_URL}/api/home/weekly-popular`)
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`)
                 }
