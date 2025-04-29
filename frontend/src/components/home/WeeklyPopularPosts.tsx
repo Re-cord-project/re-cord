@@ -21,10 +21,12 @@ export default function WeeklyPopularPosts() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
     useEffect(() => {
         const fetchWeeklyPopularPosts = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/posts/weekly-popular`)
+                const response = await fetch(`${API_BASE_URL}/api/posts/weekly-popular`)
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`)
                 }
