@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 export interface Post {
     id: number
     userId: number
@@ -66,7 +68,7 @@ export const usePosts = () => {
         try {
             // 컨트롤러 매핑에 맞게 URL 수정
             const response = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/posts/public/${userId}/posts?page=${currentPage}&size=5&includeUsername=true`,
+                `${API_BASE_URL}/api/posts/public/${userId}/posts?page=${currentPage}&size=5&includeUsername=true`,
                 {
                     method: 'GET',
                     headers: {

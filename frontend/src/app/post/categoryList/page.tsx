@@ -10,6 +10,8 @@ import Statistics from '../../../components/post/Statistics'
 import SearchBar from '../../../components/post/SearchBar'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 // HTML 태그를 제거하는 함수
 const removeHtmlTags = (str: string) => {
     if (!str) return ''
@@ -49,7 +51,7 @@ export default function CategoryListPage() {
             try {
                 // 백엔드 API를 사용하여 해당 카테고리의 게시글을 불러옵니다
                 const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/posts/public/categories/${categoryId}?page=${currentPage}&size=10`,
+                    `${API_BASE_URL}/api/posts/public/categories/${categoryId}?page=${currentPage}&size=10`,
                     {
                         headers: {
                             'Content-Type': 'application/json',

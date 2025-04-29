@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { ThumbsUp, CornerDownRight } from 'lucide-react'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 type Comment = {
     id: number
     content: string
@@ -30,7 +32,7 @@ export default function CommentSection({ postId }: { postId: number }) {
     const COMMENTS_PER_PAGE = 5
 
     const fetchComments = () => {
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${postId}/comments?page=0&size=100&sort=createdAt,asc`, {
+        fetch(`${API_BASE_URL}/api/posts/${postId}/comments?page=0&size=100&sort=createdAt,asc`, {
             credentials: 'include',
         })
             .then((res) => res.json())
@@ -80,7 +82,7 @@ export default function CommentSection({ postId }: { postId: number }) {
     const handleSubmit = async () => {
         if (!newComment.trim()) return
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${postId}/comments`, {
+        const res = await fetch(`${API_BASE_URL}/api/posts/${postId}/comments`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -116,7 +118,7 @@ export default function CommentSection({ postId }: { postId: number }) {
         const confirmDelete = confirm('정말 이 댓글을 삭제하시겠습니까?')
         if (!confirmDelete) return
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${postId}/comments/${commentId}`, {
+        const res = await fetch(`${API_BASE_URL}/api/posts/${postId}/comments/${commentId}`, {
             method: 'DELETE',
             credentials: 'include',
         })
@@ -129,7 +131,7 @@ export default function CommentSection({ postId }: { postId: number }) {
     }
 
     const handleUpdate = async (commentId: number) => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${postId}/comments/${commentId}`, {
+        const res = await fetch(`${API_BASE_URL}/api/posts/${postId}/comments/${commentId}`, {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
@@ -150,7 +152,7 @@ export default function CommentSection({ postId }: { postId: number }) {
     const handleReplySubmit = async (parentId: number) => {
         if (!replyContent.trim()) return
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${postId}/comments`, {
+        const res = await fetch(`${API_BASE_URL}/api/posts/${postId}/comments`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -169,7 +171,7 @@ export default function CommentSection({ postId }: { postId: number }) {
     }
 
     const handleToggleLike = async (commentId: number) => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/posts/${postId}/comments/${commentId}/likes`, {
+        const res = await fetch(`${API_BASE_URL}/api/posts/${postId}/comments/${commentId}/likes`, {
             method: 'POST',
             credentials: 'include',
         })

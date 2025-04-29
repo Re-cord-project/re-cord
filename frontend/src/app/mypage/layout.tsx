@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react'
 import ProfileSidebar from '@/app/mypage/components/ProfileSidebar'
 import { usePathname } from 'next/navigation'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 type UserInfo = {
     username: string
     email: string
@@ -45,7 +47,7 @@ export default function MypageLayout({ children }: { children: React.ReactNode }
         const fetchUser = async () => {
             try {
                 // const accessToken = getAccessTokenFromCookie()
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/mypage/users`, {
+                const res = await fetch(`${API_BASE_URL}/api/mypage/users`, {
                     method: 'GET',
                     credentials: 'include',
                     headers: {

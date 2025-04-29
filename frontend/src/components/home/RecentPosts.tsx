@@ -5,6 +5,8 @@ import { ThumbsUp } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 interface HomeDto {
     id: number
     title: string
@@ -24,7 +26,7 @@ export default function RecentPosts() {
     useEffect(() => {
         const fetchRecentPosts = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/home/recent-posts`)
+                const response = await fetch(`${API_BASE_URL}/api/home/recent-posts`)
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`)
                 }

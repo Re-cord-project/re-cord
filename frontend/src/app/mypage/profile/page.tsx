@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 export default function ProfilePage() {
     const [profileImage, setProfileImage] = useState<string | null>(null)
     const [userData, setUserData] = useState({
@@ -33,7 +35,7 @@ export default function ProfilePage() {
     useEffect(() => {
         // const accessToken = getAccessTokenFromCookie()
 
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/mypage/users`, {
+        fetch(`${API_BASE_URL}/api/mypage/users`, {
             headers: {
                 'Content-Type': 'application/json',
                 // Authorization: `Bearer ${accessToken}`,
@@ -85,7 +87,7 @@ export default function ProfilePage() {
         formData.append('file', file)
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/upload-profile-image`, {
+            const response = await fetch(`${API_BASE_URL}/api/users/upload-profile-image`, {
                 method: 'POST',
                 body: formData,
                 credentials: 'include', // 꼭 있어야 쿠키 보내짐
@@ -114,7 +116,7 @@ export default function ProfilePage() {
         // const accessToken = getAccessTokenFromCookie()
 
         // 수정된 데이터 저장 로직
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/mypage/updateUsers`, {
+        fetch(`${API_BASE_URL}/api/mypage/updateUsers`, {
             method: 'PUT',
             body: JSON.stringify({
                 username: userData.username,
