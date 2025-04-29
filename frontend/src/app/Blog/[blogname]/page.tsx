@@ -141,7 +141,7 @@ export default function BlogPage() {
                                 <div>
                                     <p className="text-sm text-gray-500 font-medium">자신을 개발하는 개발자의 기록</p>
                                     <h2 className="text-2xl font-bold text-gray-800">
-                                        <span className="text-[#78B3CE]">{blogname}</span>님의 회고 블로그
+                                        <span className="text-[#78B3CE]">{author?.username || blogname}</span>님의 회고 블로그
                                     </h2>
                                 </div>
                             </div>

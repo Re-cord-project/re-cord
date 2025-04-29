@@ -105,11 +105,13 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId AND p.id <> :excludedPostId")
     List<Post> findByUserIdAndIdNotFetchImages(Long userId, Long excludedPostId);
 
-    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId")
-    Page<Post> findAllByUserIdWithImages(@Param("userId") Long userId, Pageable pageable);
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId AND p.status = :status")
+    Page<Post> findAllByUserIdWithImagesAndStatus(@Param("userId") Long userId, @Param("status") PostStatus status, Pageable pageable);
 
-    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId")
-    List<Post> findAllByUserIdWithImages(@Param("userId") Long userId);
+
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId AND p.status = :status")
+    List<Post> findAllByUserIdWithImagesAndStatus(@Param("userId") Long userId, @Param("status") PostStatus status);
+
 
     // 최근 사진 있는 포스트 4개
     @Query("""

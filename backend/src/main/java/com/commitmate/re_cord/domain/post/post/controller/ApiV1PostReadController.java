@@ -81,7 +81,7 @@ public class ApiV1PostReadController {
     // 작성자의 모든 게시글 조회
     @GetMapping("/{userid}/posts")
     public List<PostResponseDto> getAllPostsBySameUser(@PathVariable Long userid) {
-        return postService.getAllPostsByUser(userid);
+        return postService.getAllPublishedPostsByUser(userid);
     }
 
     // 작성자의 모든 게시글 리스트
@@ -91,7 +91,7 @@ public class ApiV1PostReadController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<PostResponseDto> posts = postService.getAllPostsByUser(userId, page, size);
+        Page<PostResponseDto> posts = postService.getAllPublishedPostsByUser(userId, page, size);
         return ResponseEntity.ok(posts);
     }
 
