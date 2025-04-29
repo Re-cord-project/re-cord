@@ -23,7 +23,12 @@ export default function HomePage() {
             <section className="relative h-64 flex items-center bg-gradient-to-r from-[#5A8BA6] to-[#78B3CE]">
                 <div className="absolute inset-0 overflow-hidden">
                     <div className="absolute inset-0 bg-black opacity-70"></div>
-                    <Image src="/image/office-background.jpg" alt="Office background" layout="fill" objectFit="cover" />
+                    <Image
+                        src="https://re-cord.s3.ap-northeast-2.amazonaws.com/etc/banner/asd.png"
+                        alt="Office background"
+                        layout="fill"
+                        objectFit="cover"
+                    />
                 </div>
                 <div className="container mx-auto px-4 relative z-10 text-white">
                     <h2 className="text-2xl font-bold mb-2">당신의 성장을 기록하세요</h2>
@@ -44,7 +49,6 @@ export default function HomePage() {
 
             {/* 이번 주 인기 회고록 */}
             <WeeklyPopularPosts />
-
 
             {/* 플로팅 버튼 */}
             <div className="fixed bottom-6 right-6">
