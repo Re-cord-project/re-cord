@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Post } from '@/app/post/postList/hooks/usePosts'
+import { Post } from '@/app/post/allPostList/hooks/usePosts'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faHeart, faCalendarAlt, faCircleCheck, faUser } from '@fortawesome/free-solid-svg-icons'
-import Image from 'next/image'
+import { fetchWithAuth } from '../../../../utils/auth' // fetchWithAuth 함수 import 추가
 
 interface PostContentProps {
     post: Post
@@ -14,7 +14,6 @@ interface PostContentProps {
 interface UserInfo {
     profileImageUrl: string | null
 }
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
 const PostContent: React.FC<PostContentProps> = ({ post }) => {
     const router = useRouter()
@@ -23,57 +22,43 @@ const PostContent: React.FC<PostContentProps> = ({ post }) => {
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
     const [isLoadingUser, setIsLoadingUser] = useState<boolean>(true)
 
-    // HTML 태그를 제거하는 함수
-    const stripHtmlTags = (html: string): string => {
-        const doc = new DOMParser().parseFromString(html, 'text/html')
-        return doc.body.textContent || ''
-    }
-
     useEffect(() => {
         const fetchData = async () => {
             try {
                 // 좋아요 수와 조회수 가져오기
-                const likesResponse = await fetch(`${API_BASE_URL}/api/posts/public/${post.id}/likes`, {
-        
-                })
+                const likesResponse = await fetchWithAuth(`http://localhost:8090/api/posts/${post.id}/likes`)
                 if (!likesResponse.ok) {
                     throw new Error('Failed to fetch likes')
                 }
                 const likeCount = await likesResponse.json()
                 setLikes(likeCount)
 
-                const viewsResponse = await fetch(`${API_BASE_URL}/api/posts/public/${post.id}/views`, {
-                    
-                })
+                // 조회수 가져오기
+                const viewsResponse = await fetchWithAuth(`http://localhost:8090/api/posts/${post.id}/views`)
                 if (!viewsResponse.ok) {
                     throw new Error('Failed to fetch views')
                 }
                 const viewCount = await viewsResponse.json()
                 setViews(viewCount)
 
-                // 프로필 이미지 가져오기 - 인증 문제를 해결하기 위해 수정
-                try {
-                    // 백엔드 컨트롤러에 맞게 경로 수정 (users로 변경)
-                    const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/public/${post.userId}/profile-image`, {
-                        
-                    })
-
-                    if (userProfileResponse.ok) {
-                        const profileImageUrl = await userProfileResponse.text()
-                        setUserInfo({
-                            profileImageUrl: profileImageUrl && profileImageUrl.trim() !== '' ? profileImageUrl : null,
-                        })
-                    } else {
-                        // 404 에러는 정상적으로 처리 (이미지가 없는 상태로 간주)
-                        console.log(`프로필 이미지가 없거나 로드 실패: ${userProfileResponse.status}`)
-                        setUserInfo({
-                            profileImageUrl: null,
-                        })
+                // 프로필 이미지만 가져오기 - 오류 수정된 API 엔드포인트 사용
+                const userProfileResponse = await fetchWithAuth(
+                    `http://localhost:8090/api/auth/${post.userId}/profile-image`,
+                )
+                if (!userProfileResponse.ok) {
+                    // 첫 번째 시도가 실패하면 대체 경로 시도
+                    const fallbackResponse = await fetchWithAuth(`http://localhost:8090/api/users/${post.userId}`)
+                    if (!fallbackResponse.ok) {
+                        throw new Error('Failed to fetch user profile image')
                     }
-                } catch (profileError) {
-                    console.error('프로필 이미지 로드 오류:', profileError)
+                    const userData = await fallbackResponse.json()
                     setUserInfo({
-                        profileImageUrl: null,
+                        profileImageUrl: userData.profileImage || null,
+                    })
+                } else {
+                    const profileImageUrl = await userProfileResponse.text() // 응답이 단순 문자열이므로 .text() 사용
+                    setUserInfo({
+                        profileImageUrl: profileImageUrl || null,
                     })
                 }
             } catch (error) {
@@ -89,16 +74,14 @@ const PostContent: React.FC<PostContentProps> = ({ post }) => {
         fetchData()
     }, [post.id, post.userId])
 
-    const handlePostClick = (postId: number) => {
-        // 새로운 URL 구조: /post/postDetail/{userId}/{postId}
-        const userId = post.userId
-        router.push(`/post/postDetail/${userId}/${postId}`)
+    const handlePostClick = (post: Post) => {
+        router.push(`/post/postDetail/${post.userId}/${post.id}`)
     }
 
     return (
         <div
             className="border-b pb-6 last:border-b-0 last:pb-0 cursor-pointer hover:bg-gray-50 p-4 rounded transition-colors"
-            onClick={() => handlePostClick(post.id)}
+            onClick={() => handlePostClick(post)}
         >
             <div className="flex items-center mb-3">
                 <div className="w-8 h-8 rounded-full overflow-hidden mr-2 bg-gray-200 flex items-center justify-center">
@@ -118,9 +101,7 @@ const PostContent: React.FC<PostContentProps> = ({ post }) => {
             </div>
 
             <h2 className="text-xl font-bold mb-2">{post.title}</h2>
-            <div className="text-gray-600 text-sm mb-4 line-clamp-2 overflow-hidden">
-                {typeof window !== 'undefined' && stripHtmlTags(post.content)}
-            </div>
+            <p className="text-gray-600 text-sm mb-4 line-clamp-2">{post.content}</p>
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                     <span className="text-sm text-gray-500">
