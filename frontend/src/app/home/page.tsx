@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import RecentPosts from '@/components/home/RecentPosts'; 
 import WeeklyPopularPosts from '@/components/home/WeeklyPopularPosts';
+import BootcampPopularPosts from '@/components/home/BootcampPopularPosts';
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -65,6 +66,9 @@ export default function HomePage() {
 
       {/* 이번 주 인기 회고록 */}
       <WeeklyPopularPosts />
+
+      {/* 부트캠프 별 인기 회고록 */}
+      <BootcampPopularPosts/>
 
       {/* 플로팅 버튼 */}
       <div className="fixed bottom-6 right-6">
