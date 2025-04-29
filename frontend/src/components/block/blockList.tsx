@@ -84,41 +84,48 @@ export function BlockList() {
   return (
     <div>
       <div className="border border-gray-200 rounded-lg overflow-hidden">
-        {currentBlockedUsers.map((user, idx) => (
-          <div
-            key={`blocked-${user.id}-${idx}`}
-            className={`flex items-center justify-between p-4 bg-white ${
-              idx !== currentBlockedUsers.length - 1 ? 'border-b border-gray-200' : ''
-            }`}
-          >
-            <div className="flex items-center space-x-4">
-              {/* 프로필 이미지 */}
-              <Link href={`/blog/${user.id}`} className="relative w-12 h-12 rounded-full overflow-hidden">
-                <Image
-                  src={user.imageUrl}
-                  alt={`${user.name}의 프로필`}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 48px"
-                  className="object-cover"
-                  priority
-                />
-              </Link>
-
-              <Link href={`/blog/${user.id}`}>
-                <h3 className="font-medium text-gray-900 hover:text-[#78B3CE] transition-colors cursor-pointer">
-                  {user.name}
-                </h3>
-              </Link>
-            </div>
-
-            {/* 차단 버튼 컴포넌트 */}
-            <BlockButton 
-              userId={user.id} 
-              initialIsBlocked={user.isBlocked}
-              onBlockStatusChange={(isBlocked) => handleBlockStatusChange(user.id, isBlocked)}
-            />
+        {currentBlockedUsers.length === 0 ? (
+          <div className="flex items-center justify-center p-4 h-[72px]">
+            <p className="text-gray-500">차단 목록이 없습니다.</p>
           </div>
-        ))}
+        ) : (
+          currentBlockedUsers.map((user, idx) => (
+            <div
+              key={`blocked-${user.id}-${idx}`}
+              className={`flex items-center justify-between p-4 bg-white ${
+                idx !== currentBlockedUsers.length - 1 ? 'border-b border-gray-200' : ''
+              }`}
+            >
+              <div className="flex items-center space-x-4">
+                {/* 프로필 이미지 */}
+                <Link href={`/blog/${user.id}`} className="relative w-12 h-12 rounded-full overflow-hidden">
+                  <Image
+                    src={user.imageUrl}
+                    alt={`${user.name}의 프로필`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 48px"
+                    className="object-cover"
+                    priority
+                  />
+                </Link>
+
+                <Link href={`/blog/${user.id}`}>
+                  <h3 className="font-medium text-gray-900 hover:text-[#78B3CE] transition-colors cursor-pointer">
+                    {user.name}
+                  </h3>
+                </Link>
+              </div>
+
+              {/* 차단 버튼 컴포넌트 */}
+              <BlockButton 
+                userId={Number(user.id)} 
+                isBlocked={user.isBlocked}
+                variant="button"
+                onBlockChange={(isBlocked) => handleBlockStatusChange(user.id, isBlocked)}
+              />
+            </div>
+          ))
+        )}
       </div>
 
       {/* 페이징 */}   

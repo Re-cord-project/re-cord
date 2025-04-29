@@ -23,8 +23,11 @@ export default function PostListPage() {
     const { posts, isLoading, error, currentPage, totalPages, goToNextPage, goToPreviousPage, goToPage } =
         usePosts(userId)
 
-    // 현재 보고 있는 사용자 ID (URL의 userId 또는 기본값)
-    const currentUserId = userId || loginUser?.id || 0
+    // // 현재 보고 있는 사용자 ID (URL의 userId 또는 기본값)
+    // const currentUserId = userId || loginUser?.id || 0
+
+    // 현재 보고 있는 사용자 ID (URL의 userId 또는 로그인된 ID, 없으면 undefined)
+    const currentUserId = userId ?? loginUser?.id
 
     if (isLoading) return <div>로딩 중...</div>
     if (error) return <div>에러: {error}</div>
@@ -54,7 +57,10 @@ export default function PostListPage() {
                         <AuthorProfile userId={currentUserId} />
                         <SearchBar />
                         <CategoryMenu />
-                        <Statistics />
+                        {/* currentUserId가 undefined가 아닌 경우에만 렌더 */}
+                        {currentUserId != null && (
+                            <Statistics userId={currentUserId} />
+                        )}
                     </div>
 
                     {/* 메인 콘텐츠 영역 */}

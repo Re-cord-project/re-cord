@@ -125,7 +125,7 @@ export default function CategoryListPage() {
                         <AuthorProfile userId={loginUser?.id || 0} />
                         <SearchBar />
                         <CategoryMenu />
-                        <Statistics />
+                        <Statistics userId={loginUser?.id || 0} />
                     </div>
 
                     {/* 메인 콘텐츠 영역 */}

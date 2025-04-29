@@ -6,9 +6,15 @@ interface FollowButtonProps {
   userId: string;
   initialHasFollowed: boolean;
   onFollowStatusChange?: (hasFollowed: boolean) => void;
+  variant?: 'default' | 'fullWidth';
 }
 
-export function FollowButton({ userId, initialHasFollowed, onFollowStatusChange }: FollowButtonProps) {
+export function FollowButton({ 
+  userId, 
+  initialHasFollowed, 
+  onFollowStatusChange,
+  variant = 'default'
+}: FollowButtonProps) {
   const [hasFollowed, setHasFollowed] = useState(initialHasFollowed);
   const [isLoading, setIsLoading] = useState(false);
   const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
@@ -71,13 +77,21 @@ export function FollowButton({ userId, initialHasFollowed, onFollowStatusChange 
     }
   };
 
+  const baseClasses = "h-[36px] py-2 text-sm font-medium rounded-md transition-colors focus:outline-none disabled:opacity-50 flex items-center justify-center";
+  const defaultClasses = "px-4 min-w-[85px]";
+  const fullWidthClasses = "w-full min-w-[85px]";
+
   return (
     <>
       {hasFollowed ? (
         <button
           onClick={handleUnfollow}
           disabled={isLoading}
-          className="px-4 py-2 min-w-[85px] text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-[#78B3CE] hover:text-white transition-colors focus:outline-none disabled:opacity-50"
+          className={`${baseClasses} ${variant === 'default' ? defaultClasses : fullWidthClasses} ${
+            variant === 'default' 
+              ? 'text-gray-700 bg-gray-100 hover:bg-[#78B3CE] hover:text-white' 
+              : 'border border-[#78B3CE] text-[#78B3CE] hover:bg-gray-50'
+          }`}
         >
           {isLoading ? '처리 중...' : '언팔로우'}
         </button>
@@ -85,7 +99,11 @@ export function FollowButton({ userId, initialHasFollowed, onFollowStatusChange 
         <button
           onClick={handleFollow}
           disabled={isLoading}
-          className="px-4 py-2 min-w-[85px] text-sm font-medium text-white bg-[#78B3CE] rounded-md hover:bg-[#5c9bb8] transition-colors focus:outline-none disabled:opacity-50"
+          className={`${baseClasses} ${variant === 'default' ? defaultClasses : fullWidthClasses} ${
+            variant === 'default'
+              ? 'text-white bg-[#78B3CE] hover:bg-[#5c9bb8]'
+              : 'bg-[#78B3CE] text-white hover:bg-[#A8D5E5]'
+          }`}
         >
           {isLoading ? '처리 중...' : '팔로우'}
         </button>

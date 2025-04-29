@@ -1,5 +1,10 @@
+"use client";
+
 import React, { useEffect, useState } from 'react'
 import { useGlobalLoginUser } from '@/app/stores/auth/loginUser'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBan } from '@fortawesome/free-solid-svg-icons'
+import { BlockButton } from '@/components/block/BlockButton'
 
 interface StatisticsProps {
     userId?: number
@@ -13,6 +18,59 @@ const Statistics: React.FC<StatisticsProps> = ({ userId }) => {
     const [totalPosts, setTotalPosts] = useState<number>(0)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [isBlockedByMe, setIsBlockedByMe] = useState<boolean>(false)
+
+    // 디버깅을 위한 로그 추가
+    console.log('Statistics Debug:', {
+        isLogin,
+        userId,
+        loginUser,
+        isBlockedByMe,
+        condition: isLogin && userId && userId !== loginUser.id
+    })
+
+    // 차단 상태 확인
+    useEffect(() => {
+        const checkBlockStatus = async () => {
+            if (!isLogin || !userId) return
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/users/${userId}/block-status`, {
+                    credentials: 'include'
+                })
+                if (response.ok) {
+                    const data = await response.json()
+                    setIsBlockedByMe(data.isBlocked)
+                }
+            } catch (err) {
+                console.error('차단 상태 확인 오류:', err)
+            }
+        }
+
+        checkBlockStatus()
+    }, [isLogin, userId])
+
+    // 차단/차단해제 처리
+    const handleBlockToggle = async () => {
+        if (!isLogin || !userId) return;
+
+        try {
+          const response = await fetch(`${API_BASE_URL}/api/users/block`, {
+                method: isBlockedByMe ? 'DELETE' : 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ blockedId: Number(userId) }),
+          });
+
+            if (response.ok) {
+            setIsBlockedByMe(!isBlockedByMe);
+          } else {
+            console.error('차단 처리 실패:', response.status);
+            }
+        } catch (err) {
+          console.error('차단 처리 오류:', err);
+        }
+      };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -101,6 +159,7 @@ const Statistics: React.FC<StatisticsProps> = ({ userId }) => {
     }
 
     return (
+        <div>
         <div className="bg-white rounded-lg shadow-sm p-6">
             <h3 className="text-sm font-bold text-gray-800 mb-3">통계</h3>
             <ul className="text-sm">
@@ -117,6 +176,21 @@ const Statistics: React.FC<StatisticsProps> = ({ userId }) => {
                     <span className="text-gray-500">{totalPosts.toLocaleString()}</span>
                 </li>
             </ul>
+            </div>
+            
+            {/* 차단하기 버튼 */}
+            {isLogin && userId && userId !== loginUser.id && (
+                <div className="mt-4 pr-1">
+                    <div className="flex justify-end">
+                        <BlockButton 
+                            userId={userId}
+                            isBlocked={isBlockedByMe}
+                            variant="text"
+                            onBlockChange={(isBlocked) => setIsBlockedByMe(isBlocked)}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
