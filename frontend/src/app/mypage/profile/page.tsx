@@ -178,7 +178,6 @@ export default function ProfilePage() {
                             <p className="text-sm text-gray-700">JPG, PNG 파일 (최대 2MB)</p>
                         </div>
                     </div>
-
                     {/* 다른 입력 필드들 */}
                     <div>
                         <label className="block text-base font-medium text-gray-800 mb-2">이름</label>
@@ -189,7 +188,6 @@ export default function ProfilePage() {
                             onChange={(e) => setUserData({ ...userData, username: e.target.value })}
                         />
                     </div>
-
                     <div>
                         <label className="block text-base font-medium text-gray-800 mb-2">이메일</label>
                         <input
@@ -199,7 +197,6 @@ export default function ProfilePage() {
                             onChange={(e) => setUserData({ ...userData, email: e.target.value })}
                         />
                     </div>
-
                     <div>
                         <label className="block text-base font-medium text-gray-800 mb-2">소속</label>
                         <input
@@ -209,7 +206,6 @@ export default function ProfilePage() {
                             onChange={(e) => setUserData({ ...userData, bootcamp: e.target.value })}
                         />
                     </div>
-
                     <div>
                         <label className="block text-base font-medium text-gray-800 mb-2">기수</label>
                         <input
@@ -219,16 +215,15 @@ export default function ProfilePage() {
                             onChange={(e) => setUserData({ ...userData, generation: parseInt(e.target.value, 10) })}
                         />
                     </div>
-
                     <div>
                         <label className="block text-base font-medium text-gray-800 mb-2">자기소개</label>
                         <textarea
                             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[100px] text-gray-800"
-                            value={userData.introduction}
+                            value={userData.introduction || ''}
                             onChange={(e) => setUserData({ ...userData, introduction: e.target.value })}
                         />
                     </div>
-
+                    f
                     <div className="flex justify-end space-x-2 pt-4">
                         <button className="px-4 py-2 border border-gray-300 rounded text-gray-800 font-medium hover:bg-gray-50">
                             취소
