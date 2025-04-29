@@ -35,13 +35,3 @@ custom:
   genFile:
     dirPath: /gen
 
-cloud:
-  aws:
-    credentials:
-      access-key: ${aws.access-key}
-      secret-key: ${aws.secret-key}
-    region:
-      static: ${aws.region}
-    s3:
-      bucket: ${aws.s3.bucket}
-
