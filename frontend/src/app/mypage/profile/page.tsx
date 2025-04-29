@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
-
+const API_FRONT_URL = process.env.NEXT_PUBLIC_FRONT_BASE_URL
 export default function ProfilePage() {
     const [profileImage, setProfileImage] = useState<string | null>(null)
     const [userData, setUserData] = useState({
@@ -149,6 +149,9 @@ export default function ProfilePage() {
             }
         })
     }
+    const handleDeleteAccount = () => {
+        window.location.href = `${API_FRONT_URL}/withdraw`
+    }
 
     return (
         <div className="bg-white rounded-lg shadow-sm p-8">
@@ -227,16 +230,27 @@ export default function ProfilePage() {
                         />
                     </div>
 
-                    <div className="flex justify-end space-x-2 pt-4">
-                        <button className="px-4 py-2 border border-gray-300 rounded text-gray-800 font-medium hover:bg-gray-50">
-                            취소
-                        </button>
+                    <div className="flex justify-between pt-4">
+                        {/* 왼쪽: 회원 탈퇴 */}
                         <button
-                            onClick={handleSave}
-                            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 font-medium"
+                            onClick={handleDeleteAccount}
+                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 font-medium"
                         >
-                            저장하기
+                            회원 탈퇴
                         </button>
+
+                        {/* 오른쪽: 취소 + 저장하기 */}
+                        <div className="flex space-x-2">
+                            <button className="px-4 py-2 border border-gray-300 rounded text-gray-800 font-medium hover:bg-gray-50">
+                                취소
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 font-medium"
+                            >
+                                저장하기
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
