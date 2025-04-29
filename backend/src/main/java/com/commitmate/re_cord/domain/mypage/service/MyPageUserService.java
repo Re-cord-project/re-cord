@@ -3,10 +3,14 @@ package com.commitmate.re_cord.domain.mypage.service;
 import com.commitmate.re_cord.domain.user.user.dto.UpdateUserDTO;
 import com.commitmate.re_cord.domain.user.user.entity.User;
 import com.commitmate.re_cord.domain.user.user.repository.UserRepository;
+import com.commitmate.re_cord.global.config.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -14,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MyPageUserService {
 
     private final UserRepository userRepository;
-
+    private final S3Service s3Service;
 
     @Transactional(readOnly = true)
     public UpdateUserDTO getUserInfo(Long userId) {
@@ -57,4 +61,29 @@ public class MyPageUserService {
         userRepository.save(user);
         return dto;
     }
+
+    public String updateProfileImage(Long userId, MultipartFile file) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다. id=" + userId));
+
+        // 기존 이미지 삭제 (선택)
+        if (user.getProfileImageUrl() != null) {
+            s3Service.delete(user.getProfileImageUrl());
+        }
+
+        // 프로필 이미지 업로드 (userId 경로 사용)
+        String imageUrl;
+        try {
+            imageUrl = s3Service.uploadImage(file, userId);
+        } catch (IOException e) {
+            throw new RuntimeException("프로필 이미지 업로드 실패", e);
+        }
+
+        user.setProfileImageUrl(imageUrl);
+        userRepository.save(user);
+
+        return imageUrl;
+    }
+
+
 }

@@ -140,10 +140,10 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     @Query("""
     SELECT p FROM Post p
     WHERE p.user.bootcamp = :bootcamp
-    AND p.status = 'PUBLISHED' 
+      AND p.status = :status 
     ORDER BY p.likes DESC, p.createdAt DESC
 """)
-    Page<Post> findPopularPostsByBootcamp(@Param("bootcamp") String bootcamp, Pageable pageable);
+    Page<Post> findPopularPostsByBootcamp(@Param("bootcamp") String bootcamp, @Param("status") PostStatus status, Pageable pageable);
 
 
 

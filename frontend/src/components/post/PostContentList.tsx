@@ -54,8 +54,8 @@ const PostContent: React.FC<PostContentProps> = ({ post }) => {
                 // 프로필 이미지 가져오기 - 인증 문제를 해결하기 위해 수정
                 try {
                     // 백엔드 컨트롤러에 맞게 경로 수정 (users로 변경)
-                    const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/${post.userId}/profile-image`, {
-                        credentials: 'include', // 쿠키 인증을 위해 추가
+                    const userProfileResponse = await fetch(`${API_BASE_URL}/api/auth/public/${post.userId}/profile-image`, {
+                        
                     })
 
                     if (userProfileResponse.ok) {

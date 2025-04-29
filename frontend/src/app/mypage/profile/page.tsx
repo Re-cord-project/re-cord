@@ -87,8 +87,9 @@ export default function ProfilePage() {
         formData.append('file', file)
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/users/upload-profile-image`, {
-                method: 'POST',
+            const response = await fetch('http://localhost:8090/api/mypage/me/profile-image', {
+                method: 'PUT',
+
                 body: formData,
                 credentials: 'include', // 꼭 있어야 쿠키 보내짐
             })

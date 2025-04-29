@@ -45,8 +45,8 @@ const AuthorOtherPosts: React.FC<AuthorOtherPostsProps> = ({ authorId, limit = 5
                 if (isPostDetailPage) {
                     // postDetail 페이지에서 사용할 때는 기존 API 호출
                     apiUrl = currentPostId
-                        ? `${API_BASE_URL}/api/posts/public/${authorId}/other-posts?excludePostId=${currentPostId}`
-                        : `${API_BASE_URL}/api/posts/public/${authorId}/other-posts`
+                        ? `${API_BASE_URL}/api/posts/public/${authorId}/posts?excludePostId=${currentPostId}`
+                        : `${API_BASE_URL}/api/posts/public/${authorId}/posts`
                 } else {
                     // postHome이나 otherBlogHome 페이지에서 사용할 때는 새 API 호출
                     apiUrl = `${API_BASE_URL}/api/posts/public/${authorId}/posts`

@@ -62,7 +62,7 @@ public class HomeService {
 
     public List<HomeDto> getPopularPublishedPostsByBootcamp(String bootcamp) {
         Pageable pageable = PageRequest.of(0, 8);
-        Page<Post> posts = postRepository.findPopularPostsByBootcamp(bootcamp, pageable);
+        Page<Post> posts = postRepository.findPopularPostsByBootcamp(bootcamp,PostStatus.PUBLISHED, pageable);
 
         return posts.stream()
                 .map(post -> {

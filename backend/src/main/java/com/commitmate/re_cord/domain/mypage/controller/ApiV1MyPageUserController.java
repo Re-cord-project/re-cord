@@ -3,6 +3,7 @@ package com.commitmate.re_cord.domain.mypage.controller;
 
 import com.commitmate.re_cord.domain.mypage.service.MyPageUserService;
 import com.commitmate.re_cord.domain.user.user.dto.UpdateUserDTO;
+import com.commitmate.re_cord.domain.user.user.service.UserService;
 import com.commitmate.re_cord.global.security.SecurityUser;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("api/mypage")
@@ -19,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 public class ApiV1MyPageUserController {
 
     private final MyPageUserService myPageUserService;
-
 
     @GetMapping("/users")
     public ResponseEntity<UpdateUserDTO> getUserInfo(@AuthenticationPrincipal SecurityUser userDetails) {
@@ -41,4 +42,12 @@ public class ApiV1MyPageUserController {
         UpdateUserDTO updatedUser = myPageUserService.updateUser(userId, updateUserDTO);
         return ResponseEntity.ok(updatedUser);
     }
+
+    @PutMapping("/me/profile-image")
+    public ResponseEntity<String> updateMyProfileImage(@AuthenticationPrincipal SecurityUser userDetail,
+                                                       @RequestPart("file") MultipartFile file) {
+        String imageUrl = myPageUserService.updateProfileImage(userDetail.getId(), file);
+        return ResponseEntity.ok(imageUrl);
+    }
+
 }
