@@ -233,7 +233,7 @@ export default function ProfilePage() {
                     <div className="flex justify-between pt-4">
                         <button
                             onClick={handleDeleteAccount}
-                            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 font-medium"
+                            className="px-4 py-2 bg-[#F96E2A] text-white rounded hover:bg-[#e65c15] font-medium"
                         >
                             회원 탈퇴
                         </button>
