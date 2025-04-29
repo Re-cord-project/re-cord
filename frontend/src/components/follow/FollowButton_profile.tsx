@@ -77,7 +77,7 @@ export function FollowButton({ userId, initialHasFollowed, onFollowStatusChange 
         <button
           onClick={handleUnfollow}
           disabled={isLoading}
-          className="px-4 py-2 min-w-[85px] text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-[#78B3CE] hover:text-white transition-colors focus:outline-none disabled:opacity-50"
+          className="w-full py-2 border border-[#78B3CE] text-[#78B3CE] rounded-md text-sm font-medium hover:bg-gray-50 transition-colors cursor-pointer !rounded-button whitespace-nowrap flex justify-center items-center"
         >
           {isLoading ? '처리 중...' : '언팔로우'}
         </button>
@@ -85,7 +85,7 @@ export function FollowButton({ userId, initialHasFollowed, onFollowStatusChange 
         <button
           onClick={handleFollow}
           disabled={isLoading}
-          className="px-4 py-2 min-w-[85px] text-sm font-medium text-white bg-[#78B3CE] rounded-md hover:bg-[#5c9bb8] transition-colors focus:outline-none disabled:opacity-50"
+          className="w-full py-2 bg-[#78B3CE] text-white rounded-md text-sm font-medium hover:bg-[#A8D5E5] transition-colors cursor-pointer !rounded-button whitespace-nowrap flex justify-center items-center"
         >
           {isLoading ? '처리 중...' : '팔로우'}
         </button>
