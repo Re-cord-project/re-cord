@@ -9,7 +9,7 @@ type User = {
     username: string
     bootcamp: string
     generation: number
-    profileImageUrl?: string;
+    profileImageUrl?: string
 }
 
 export const LoginUserContext = createContext<{
@@ -61,7 +61,7 @@ export function useLoginUser() {
     const isLogin = loginUser.id !== 0
 
     const logout = (callback: () => void) => {
-        fetch('http://localhost:8090/api/auth/logout', {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
             method: 'DELETE',
             credentials: 'include',
         }).then(() => {

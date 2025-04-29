@@ -38,9 +38,12 @@ export default function AllPostListPage() {
         const fetchPosts = async () => {
             try {
                 setLoading(true)
-                const response = await fetch(`http://localhost:8090/api/posts/public?page=${currentPage}&size=10`, {
-                    credentials: 'include',
-                })
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/posts/public?page=${currentPage}&size=10`,
+                    {
+                        credentials: 'include',
+                    },
+                )
 
                 if (!response.ok) {
                     throw new Error('게시글을 불러오는데 실패했습니다')

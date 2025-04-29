@@ -73,7 +73,9 @@ export default function SignupPage() {
 
         try {
             const response = await fetch(
-                `http://localhost:8090/api/auth/check-email?email=${encodeURIComponent(formData.email)}`,
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/check-email?email=${encodeURIComponent(
+                    formData.email,
+                )}`,
                 {
                     method: 'GET',
                     headers: {
@@ -131,7 +133,7 @@ export default function SignupPage() {
         }
 
         try {
-            const response = await fetch('http://localhost:8090/api/auth/register', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

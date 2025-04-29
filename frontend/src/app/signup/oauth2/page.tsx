@@ -25,7 +25,7 @@ export default function SignupPage() {
             }
 
             try {
-                const response = await fetch('http://localhost:8090/api/auth/temp-token/verify', {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/temp-token/verify`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ export default function SignupPage() {
 
         try {
             const response = await fetch(
-                `http://localhost:8090/api/auth/check-email?email=${encodeURIComponent(email)}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/api/auth/check-email?email=${encodeURIComponent(email)}`,
                 {
                     method: 'GET',
                     headers: {
@@ -115,7 +115,7 @@ export default function SignupPage() {
         }
 
         try {
-            const response = await fetch('http://localhost:8090/api/oauth2/complete-signup', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/oauth2/complete-signup`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -34,7 +34,7 @@ export default function WithdrawPage() {
         try {
             const accessToken = getAccessTokenFromCookie()
             const response = await fetch(
-                `http://localhost:8090/api/auth/withdraw?dataDeleteAgreed=${dataDeleteAgreed}`,
+                `${process.env.NEXT_PUBLIC_API_URL}/api/auth/withdraw?dataDeleteAgreed=${dataDeleteAgreed}`,
                 {
                     method: 'DELETE',
                     headers: {

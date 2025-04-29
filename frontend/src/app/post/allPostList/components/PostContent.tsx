@@ -26,7 +26,9 @@ const PostContent: React.FC<PostContentProps> = ({ post }) => {
         const fetchData = async () => {
             try {
                 // 좋아요 수와 조회수 가져오기
-                const likesResponse = await fetchWithAuth(`http://localhost:8090/api/posts/${post.id}/likes`)
+                const likesResponse = await fetchWithAuth(
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/posts/${post.id}/likes`,
+                )
                 if (!likesResponse.ok) {
                     throw new Error('Failed to fetch likes')
                 }
@@ -34,7 +36,9 @@ const PostContent: React.FC<PostContentProps> = ({ post }) => {
                 setLikes(likeCount)
 
                 // 조회수 가져오기
-                const viewsResponse = await fetchWithAuth(`http://localhost:8090/api/posts/${post.id}/views`)
+                const viewsResponse = await fetchWithAuth(
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/posts/${post.id}/views`,
+                )
                 if (!viewsResponse.ok) {
                     throw new Error('Failed to fetch views')
                 }
@@ -43,11 +47,13 @@ const PostContent: React.FC<PostContentProps> = ({ post }) => {
 
                 // 프로필 이미지만 가져오기 - 오류 수정된 API 엔드포인트 사용
                 const userProfileResponse = await fetchWithAuth(
-                    `http://localhost:8090/api/auth/${post.userId}/profile-image`,
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/${post.userId}/profile-image`,
                 )
                 if (!userProfileResponse.ok) {
                     // 첫 번째 시도가 실패하면 대체 경로 시도
-                    const fallbackResponse = await fetchWithAuth(`http://localhost:8090/api/users/${post.userId}`)
+                    const fallbackResponse = await fetchWithAuth(
+                        `${process.env.NEXT_PUBLIC_API_URL}/api/users/${post.userId}`,
+                    )
                     if (!fallbackResponse.ok) {
                         throw new Error('Failed to fetch user profile image')
                     }

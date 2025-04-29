@@ -24,7 +24,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         setIsMounted(true)
 
-        fetch('http://localhost:8090/api/auth/me', {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
             credentials: 'include',
         })
             .then(async (response) => {
