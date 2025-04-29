@@ -23,6 +23,7 @@ interface Author {
     profileImageUrl: string
     provider: string
     role: string
+    blogname: string // 추가: DB에서 가져오는 blogname 필드
     stats: AuthorStats
 }
 
@@ -161,6 +162,8 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                     stats,
                     profileImageUrl: userData.profileImageUrl || '/profile.png',
                     role: userData.bootcamp || '개발자',
+                    // blogname이 없을 경우 username을 사용
+                    blogname: userData.blogname || userData.username,
                 })
 
                 // 팔로우 상태 체크 (로그인 사용자 대상)
@@ -251,11 +254,7 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                     />
                 </div>
                 <Link
-                    href={
-                        isLogin && loginUser.id === author.id
-                            ? '/post/postHome'
-                            : `/post/otherBlogHome?userId=${author.id}`
-                    }
+                    href={isLogin && loginUser.id === author.id ? '/myBlog' : `/Blog/${author.blogname}`}
                     className="font-bold text-gray-800 hover:text-blue-600 cursor-pointer"
                 >
                     {author.username}

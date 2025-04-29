@@ -8,11 +8,13 @@ public class UserResponseDto {
     private Long id;
     private String username;
     private String email;
+    private String blogname;
     // 필요한 필드만
 
     public UserResponseDto(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
         this.email = user.getEmail();
+        this.blogname = user.getBlogName();
     }
 }
