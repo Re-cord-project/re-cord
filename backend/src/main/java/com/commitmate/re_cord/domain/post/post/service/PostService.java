@@ -343,13 +343,13 @@ public class PostService {
         postRepository.save(post);
     }
 
-    public PostResponseDto getLatestPostByUserId(Long userId) {
-        // 쿼리에서 최신 게시글을 가져오는 부분
-        Post post = postRepository.findTopByUserIdWithImages(userId)
+    public PostResponseDto getLatestPublishedPostByUserId(Long userId) {
+        Post post = postRepository.findTopByUserIdWithImagesAndStatus(userId, PostStatus.PUBLISHED)
                 .orElseThrow(() -> new ResourceNotFoundException("게시글이 없습니다."));
 
         return new PostResponseDto(post);
     }
+
 
 
 
@@ -363,26 +363,27 @@ public class PostService {
     }
 
     // 작성자의 모든 게시글 조회 (userId 기준)
-    public List<PostResponseDto> getAllPostsByUser(Long userId) {
+    public List<PostResponseDto> getAllPublishedPostsByUser(Long userId) {
         // 유저 존재 여부 확인 (옵션)
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다. id=" + userId));
 
-        List<Post> posts = postRepository.findAllByUserIdWithImages(userId);
+        List<Post> posts = postRepository.findAllByUserIdWithImagesAndStatus(userId, PostStatus.PUBLISHED);
         return posts.stream()
                 .map(PostResponseDto::new)
                 .collect(Collectors.toList());
     }
 
+
     // 작성자의 모든 게시글 조회 (userId 기준)
-    public Page<PostResponseDto> getAllPostsByUser(Long userId, int page, int size) {
+    public Page<PostResponseDto> getAllPublishedPostsByUser(Long userId, int page, int size) {
         // 유저 존재 여부 확인
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다. id=" + userId));
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
-        Page<Post> postPage = postRepository.findAllByUserIdWithImages(userId, pageable);
+        Page<Post> postPage = postRepository.findAllByUserIdWithImagesAndStatus(userId, PostStatus.PUBLISHED, pageable);
 
         return postPage.map(PostResponseDto::new);
     }

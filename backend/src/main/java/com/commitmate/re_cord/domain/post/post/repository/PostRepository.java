@@ -89,40 +89,53 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     SELECT p 
     FROM Post p 
     LEFT JOIN FETCH p.images 
-    WHERE p.user.id = :userId AND p.createdAt = (
-        SELECT MAX(p2.createdAt) 
-        FROM Post p2 
-        WHERE p2.user.id = :userId
-    )
-    """)
-    Optional<Post> findTopByUserIdWithImages(@Param("userId") Long userId);
+    WHERE p.user.id = :userId 
+      AND p.status = :status
+      AND p.createdAt = (
+          SELECT MAX(p2.createdAt) 
+          FROM Post p2 
+          WHERE p2.user.id = :userId 
+            AND p2.status = :status
+      )
+""")
+    Optional<Post> findTopByUserIdWithImagesAndStatus(@Param("userId") Long userId,
+                                                      @Param("status") PostStatus status);
+
 
     @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId AND p.id <> :excludedPostId")
     List<Post> findByUserIdAndIdNotFetchImages(Long userId, Long excludedPostId);
 
-    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId")
-    Page<Post> findAllByUserIdWithImages(@Param("userId") Long userId, Pageable pageable);
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId AND p.status = :status")
+    Page<Post> findAllByUserIdWithImagesAndStatus(@Param("userId") Long userId, @Param("status") PostStatus status, Pageable pageable);
 
-    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId")
-    List<Post> findAllByUserIdWithImages(@Param("userId") Long userId);
+
+    @Query("SELECT p FROM Post p LEFT JOIN FETCH p.images WHERE p.user.id = :userId AND p.status = :status")
+    List<Post> findAllByUserIdWithImagesAndStatus(@Param("userId") Long userId, @Param("status") PostStatus status);
+
 
     // 최근 사진 있는 포스트 4개
     @Query("""
     SELECT p FROM Post p
     LEFT JOIN p.images i
     WHERE SIZE(p.images) > 0
+      AND p.status = :status
     ORDER BY p.createdAt DESC
 """)
-    Page<Post> findRecentPostsWithImages(Pageable pageable);
+    Page<Post> findRecentPostsWithImagesByStatus(@Param("status") PostStatus status, Pageable pageable);
+
 
 
     // 최근 일주일간 추천순 4개
     @Query("""
     SELECT p FROM Post p
     WHERE p.createdAt >= :thisMonday
+      AND p.status = :status
     ORDER BY p.likes DESC
 """)
-    Page<Post> findWeeklyPopularPosts(@Param("thisMonday") LocalDateTime thisMonday, Pageable pageable);
+    Page<Post> findWeeklyPopularPostsByStatus(@Param("thisMonday") LocalDateTime thisMonday,
+                                              @Param("status") PostStatus status,
+                                              Pageable pageable);
+
 
 //    // 내 부트캠프의 누적 추천순 4개
 //    @Query("""

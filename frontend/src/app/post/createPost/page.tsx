@@ -187,19 +187,10 @@ const CreatePostPage = () => {
                 return
             }
 
-            // 기본 카테고리(ID 1)인 경우 사용자 카테고리로 변경
-            let categoryId = postData.categoryId
-            if (categoryId === 1 && categories.length > 0) {
-                const userCategories = categories.filter((cat) => cat.id !== 1)
-                if (userCategories.length > 0) {
-                    categoryId = userCategories[0].id
-                }
-            }
-
             // 게시글 정보 폼에 설정
             setValue('title', postData.title)
             setValue('content', postData.content)
-            setValue('categoryId', categoryId)
+            setValue('categoryId', postData.categoryId)
 
             // 작성자 확인 (보안 검사)
             if (postData.userId && loginUser && postData.userId !== loginUser.id) {
