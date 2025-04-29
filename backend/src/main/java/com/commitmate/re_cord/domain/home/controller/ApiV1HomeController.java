@@ -2,10 +2,13 @@ package com.commitmate.re_cord.domain.home.controller;
 
 import com.commitmate.re_cord.domain.home.dto.HomeDto;
 import com.commitmate.re_cord.domain.home.service.HomeService;
+import com.commitmate.re_cord.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -37,10 +40,16 @@ public class ApiV1HomeController {
         return ResponseEntity.ok(posts);
     }
 
-    // 3. 핫한 부트캠프 포스트 4개
-    @GetMapping("/hot-bootcamp")
-    public ResponseEntity<List<HomeDto>> getHotBootcampPosts() {
-        List<HomeDto> posts = homeService.getHotBootcampPosts();
+
+    // 3. 부트캠프 별 인기 포스트 8개
+    @GetMapping("/popular-posts")
+    public ResponseEntity<List<HomeDto>> getPopularPostsByBootcamp(
+            @RequestParam String bootcamp
+    ) {
+        List<HomeDto> posts = homeService.getPopularPostsByBootcamp(bootcamp);
         return ResponseEntity.ok(posts);
     }
+
+
+
 }
