@@ -12,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CommentResponseDTO {
     private Long id;
+    private Long userId;
     private String content;
     private String username;
     private String createdAt;
@@ -23,6 +24,7 @@ public class CommentResponseDTO {
 
     public CommentResponseDTO(Comment comment) {
         this.id = comment.getId();
+        this.userId = comment.getUser().getId();
         this.content = comment.isDeleted() ? "삭제된 댓글입니다." : comment.getContent(); //Soft Delete
         this.username = comment.getUser().getUsername();
         this.createdAt = comment.getCreatedAt().toString();

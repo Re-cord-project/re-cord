@@ -5,6 +5,8 @@ import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentRequestDTO;
 import com.commitmate.re_cord.domain.post.comment.comment.dto.CommentResponseDTO;
 import com.commitmate.re_cord.domain.post.comment.comment.service.CommentService;
 import com.commitmate.re_cord.domain.post.comment.commentVote.service.CommentVoteService;
+import com.commitmate.re_cord.domain.post.post.service.PostService;
+import com.commitmate.re_cord.domain.user.block.service.BlockService;
 import com.commitmate.re_cord.global.security.SecurityUser;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,9 @@ public class ApiV1CommentController {
 
     private final CommentService commentService;
     private final CommentVoteService commentVoteService;
+    private final BlockService blockService;
+    private final PostService postService;
+
 
     @Operation(
             summary = "댓글 작성"
@@ -36,7 +41,22 @@ public class ApiV1CommentController {
             ){
         Long userId = userDetails.getId();
 
-        CommentResponseDTO response = commentService.registerComment(requestDTO,postId,userId);
+        // 게시글 작성자가 나를 차단했는지 검사
+        Long postAuthorId = postService.getPostById(postId).getUserId();
+        blockService.checkIfBlocked(postAuthorId, userId, "댓글을 작성할 수 없습니다.");
+
+        // 대댓글인 경우, 부모 댓글 작성자가 나를 차단했는지 검사
+        Long parentId = requestDTO.getParentId();
+        if (parentId != null) {
+            blockService.checkIfBlockedByComment(
+                    parentId,
+                    userId,
+                    "대댓글을 작성할 수 없습니다."
+            );
+        }
+
+        // 검사 통과 후 등록
+        CommentResponseDTO response = commentService.registerComment(requestDTO, postId, userId);
         return ResponseEntity.ok(response);
     }
 

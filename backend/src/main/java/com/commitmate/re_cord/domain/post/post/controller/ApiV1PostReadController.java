@@ -35,17 +35,17 @@ public class ApiV1PostReadController {
             @PathVariable Long postId,
             @AuthenticationPrincipal SecurityUser currentUser) {
 
-        // 1) 게시글 DTO 조회
+        // 게시글 DTO 조회
         PostResponseDto dto = postService.getPostById(postId);
         Long authorId = dto.getUserId();    // 작성자 ID
 
-        // 2) 로그인한 사용자라면(=currentUser != null) 차단 검사
+        // 로그인한 사용자라면(=currentUser != null) 차단 검사
         if (currentUser != null) {
             Long viewerId = currentUser.getId();
             blockService.checkIfBlocked(authorId, viewerId, "게시물을 사용할 수 없습니다.");
         }
 
-        // 3) 차단이 아니거나 비로그인 상태라면 정상 리턴
+        // 차단이 아니거나 비로그인 상태라면 정상 리턴
         return ResponseEntity.ok(dto);
     }
 
