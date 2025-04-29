@@ -54,7 +54,10 @@ export default function PostListPage() {
                         <AuthorProfile userId={currentUserId} />
                         <SearchBar />
                         <CategoryMenu />
-                        <Statistics />
+                        {/* currentUserId가 undefined가 아닌 경우에만 렌더 */}
+                        {currentUserId != null && (
+                            <Statistics userId={currentUserId} />
+                        )}
                     </div>
 
                     {/* 메인 콘텐츠 영역 */}

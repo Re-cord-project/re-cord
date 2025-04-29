@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGlobalLoginUser } from '../stores/auth/loginUser'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 export default function WithdrawPage() {
     const router = useRouter()
     const { loginUser } = useGlobalLoginUser()
@@ -33,17 +35,14 @@ export default function WithdrawPage() {
 
         try {
             const accessToken = getAccessTokenFromCookie()
-            const response = await fetch(
-                `http://localhost:8090/api/auth/withdraw?dataDeleteAgreed=${dataDeleteAgreed}`,
-                {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                    credentials: 'include',
+            const response = await fetch(`${API_BASE_URL}/api/auth/withdraw?dataDeleteAgreed=${dataDeleteAgreed}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`,
                 },
-            )
+                credentials: 'include',
+            })
 
             if (response.ok) {
                 window.location.href = '/'

@@ -83,45 +83,51 @@ export function FollowerList() {
     }
   };
 
-  // 팔로워 목록 렌더링
+  // 팔로워 목록
   return (
     <div>
       <div className="border border-gray-200 rounded-lg overflow-hidden">
-        {currentFollowers.map((f, idx) => (
-          <div
-            key={`follower-${f.id}-${idx}`}
-            className={`flex items-center justify-between p-4 bg-white ${
-              idx !== currentFollowers.length - 1 ? 'border-b border-gray-200' : ''
-            }`}
-          >
-            <div className="flex items-center space-x-4">
-              {/* 프로필 이미지 */}
-              <Link href={`/blog/${f.id}`} className="relative w-12 h-12 rounded-full overflow-hidden">
-                <Image
-                  src={f.imageUrl}
-                  alt={`${f.name}의 프로필`}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 48px"
-                  className="object-cover"
-                  priority
-                />
-              </Link>
-
-              <Link href={`/blog/${f.id}`}>  {/* 유저 이름 클릭 시 상세 페이지로 이동 */}
-                <h3 className="font-medium text-gray-900 hover:text-[#78B3CE] transition-colors cursor-pointer">
-                  {f.name}
-                </h3>
-              </Link>
-            </div>
-
-            {/* 팔로우 버튼 컴포넌트 */}
-            <FollowButton 
-              userId={f.id} 
-              initialHasFollowed={f.hasFollowed}
-              onFollowStatusChange={(hasFollowed) => handleFollowStatusChange(f.id, hasFollowed)}
-            />
+        {currentFollowers.length === 0 ? (
+          <div className="flex items-center justify-center p-4 h-[72px]">
+            <p className="text-gray-500">팔로워 목록이 없습니다.</p>
           </div>
-        ))}
+        ) : (
+          currentFollowers.map((f, idx) => (
+            <div
+              key={`follower-${f.id}-${idx}`}
+              className={`flex items-center justify-between p-4 bg-white ${
+                idx !== currentFollowers.length - 1 ? 'border-b border-gray-200' : ''
+              }`}
+            >
+              <div className="flex items-center space-x-4">
+                {/* 프로필 이미지 */}
+                <Link href={`/blog/${f.id}`} className="relative w-12 h-12 rounded-full overflow-hidden">
+                  <Image
+                    src={f.imageUrl}
+                    alt={`${f.name}의 프로필`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 48px"
+                    className="object-cover"
+                    priority
+                  />
+                </Link>
+
+                <Link href={`/blog/${f.id}`}>  {/* 유저 이름 클릭 시 상세 페이지로 이동 */}
+                  <h3 className="font-medium text-gray-900 hover:text-[#78B3CE] transition-colors cursor-pointer">
+                    {f.name}
+                  </h3>
+                </Link>
+              </div>
+
+              {/* 팔로우 버튼 컴포넌트 */}
+              <FollowButton 
+                userId={f.id} 
+                initialHasFollowed={f.hasFollowed}
+                onFollowStatusChange={(hasFollowed) => handleFollowStatusChange(f.id, hasFollowed)}
+              />
+            </div>
+          ))
+        )}
       </div>
 
       {/* 페이징 */}   

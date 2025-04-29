@@ -3,13 +3,15 @@
 import { createContext, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 type User = {
     id: number
     email: string
     username: string
     bootcamp: string
     generation: number
-    profileImageUrl?: string;
+    profileImageUrl?: string
 }
 
 export const LoginUserContext = createContext<{
@@ -61,7 +63,7 @@ export function useLoginUser() {
     const isLogin = loginUser.id !== 0
 
     const logout = (callback: () => void) => {
-        fetch('http://localhost:8090/api/auth/logout', {
+        fetch(`${API_BASE_URL}/api/auth/logout`, {
             method: 'DELETE',
             credentials: 'include',
         }).then(() => {

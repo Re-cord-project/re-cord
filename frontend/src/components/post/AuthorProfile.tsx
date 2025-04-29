@@ -119,58 +119,51 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
             console.warn('통계 정보 로드 실패 (기본값 사용):', statsErr)
         }
 
-        return { followers: 0, following: 0, posts: 0 }
-    }
 
-    /**
-     * 사용자 팔로우 상태를 확인하는 함수
-     */
-    const checkFollowStatus = async (userId: number): Promise<boolean> => {
-        if (!isLogin || loginUser.id === userId) {
-            return false
-        }
+                const userData = await response.json()
+                console.log('사용자 데이터 로드 성공:', userData)
 
-        try {
-            const resFollow = await fetch(`${API_BASE_URL}/api/users/follow`, {
-                credentials: 'include',
-            })
+                // 기본 통계 정보 설정
+                let stats = { followers: 0, following: 0, posts: 0 }
 
-            if (resFollow.ok) {
-                const list: Array<{ userId: number }> = await resFollow.json()
-                return list.some((u) => u.userId === userId)
-            }
-        } catch (error) {
-            console.error('팔로우 상태 확인 실패:', error)
-        }
+                // 단일 counts API 호출로 팔로우/팔로잉 통계 갱신
+                try {
+                    const resCounts = await fetch(`${API_BASE_URL}/api/users/${targetUserId}/counts`, {
+                        credentials: 'include',
+                    })
+                    if (resCounts.ok) {
+                        const { followerCount, followingCount } = await resCounts.json()
+                        stats = {
+                            followers: followerCount,
+                            following: followingCount,
+                            posts: stats.posts, // 필요 시 게시글 수도 업데이트
+                        }
+                    }
+                } catch (statsErr) {
+                    console.warn('통계 정보 로드 실패 (기본값 사용):', statsErr)
+                }
 
-        return false
-    }
+                setAuthor({
+                    ...userData,
+                    stats,
+                    profileImageUrl: userData.profileImageUrl || '/profile.png',
+                    role: userData.bootcamp || '개발자',
+                    // blogname이 없을 경우 username을 사용
+                    blogname: userData.blogname || userData.username,
+                })
 
-    /**
-     * 사용자 프로필 정보를 가져오는 함수
-     */
-    const fetchUserProfile = async () => {
-        if (!targetUserId) {
-            setIsLoading(false)
-            return
-        }
+                // 팔로우 상태 체크 (로그인 사용자 대상)
+                if (isLogin && loginUser.id !== targetUserId) {
+                    const resFollow = await fetch(`${API_BASE_URL}/api/users/follow`, {
+                        credentials: 'include',
+                    })
+                    if (resFollow.ok) {
+                        const list: Array<{ userId: number }> = await resFollow.json()
+                        setHasFollowed(
+                            list.some((u) => u.userId === targetUserId), // 팔로우 중인지 판단
+                        )
+                    }
 
-        try {
-            setIsLoading(true)
-
-            // 로그인 여부에 따라 다른 API 엔드포인트 사용
-            const apiUrl = isLogin
-                ? `${API_BASE_URL}/api/auth/${targetUserId}`
-                : `${API_BASE_URL}/api/auth/public/${targetUserId}`
-
-            const response = await fetch(apiUrl, {
-                method: 'GET',
-                credentials: 'include',
-            })
-
-            if (!response.ok) {
-                if (response.status === 401) {
-                    console.warn('인증 토큰이 만료되었거나 유효하지 않습니다.')
                 }
                 throw new Error(`사용자 정보를 불러오는 데 실패했습니다. 상태 코드: ${response.status}`)
             }
@@ -324,8 +317,39 @@ const AuthorProfile: React.FC<AuthorProfileProps> = ({ userId }) => {
                     </div>
                 </div>
 
-                {/* 액션 버튼 영역 */}
-                <div className="w-full mt-4 border-t border-gray-200 pt-4">{renderProfileAction()}</div>
+
+                <div className="w-full mt-4 border-t border-gray-200 pt-4">
+                    {isLogin && loginUser.id === author.id ? (
+                        <Link
+                            href="/post/createPost"
+                            className="w-full py-2 bg-[#78B3CE] text-white rounded-md text-sm font-medium hover:bg-[#A8D5E5] transition-colors cursor-pointer !rounded-button whitespace-nowrap flex justify-center items-center"
+                        >
+                            글 작성하기
+                        </Link>
+                    ) : isLogin ? (
+                        <FollowButton
+                            variant="fullWidth"
+                            userId={author.id.toString()}
+                            initialHasFollowed={hasFollowed}
+                            onFollowStatusChange={(newStatus) => {
+                                // 부모 컴포넌트 state 업데이트
+                                setHasFollowed(newStatus)
+                                setAuthor((prev) =>
+                                    prev
+                                        ? {
+                                              ...prev,
+                                              stats: {
+                                                  ...prev.stats,
+                                                  followers: prev.stats.followers + (newStatus ? 1 : -1),
+                                              },
+                                          }
+                                        : prev,
+                                )
+                            }}
+                        />
+                    ) : null}
+                </div>
+
             </div>
         </div>
     )

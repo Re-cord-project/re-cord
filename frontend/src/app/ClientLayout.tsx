@@ -5,6 +5,8 @@ import { LoginUserContext, useLoginUser } from './stores/auth/loginUser'
 import Footer from '@/components/layout/Footer'
 import Header from '@/components/layout/Header'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 export function ClientLayout({ children }: { children: React.ReactNode }) {
     const [isMounted, setIsMounted] = useState(false)
     const { loginUser, setLoginUser, isLoginUserPending, setNoLoginUser, isLogin, logout, logoutAndHome } =
@@ -24,7 +26,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         setIsMounted(true)
 
-        fetch('http://localhost:8090/api/auth/me', {
+        fetch(`${API_BASE_URL}/api/auth/me`, {
             credentials: 'include',
         })
             .then(async (response) => {
