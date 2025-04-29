@@ -211,10 +211,11 @@ export default function ProfilePage() {
                     <div>
                         <label className="block text-base font-medium text-gray-800 mb-2">과정/기수</label>
                         <input
-                            type="number"
+                            type="text"
                             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
                             value={userData.generation}
                             onChange={(e) => setUserData({ ...userData, generation: e.target.value })}
+                            placeholder="멋쟁이사자처럼/13기"
                         />
                     </div>
                     <div>
