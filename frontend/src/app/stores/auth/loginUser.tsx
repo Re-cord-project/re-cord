@@ -9,6 +9,7 @@ type User = {
     username: string
     bootcamp: string
     generation: number
+    profileImageUrl?: string;
 }
 
 export const LoginUserContext = createContext<{
