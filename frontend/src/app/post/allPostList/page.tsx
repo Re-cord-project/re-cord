@@ -34,6 +34,11 @@ export default function AllPostListPage() {
     const [currentPage, setCurrentPage] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
 
+    // HTML 태그를 제거하는 함수
+    const removeHtmlTags = (text: string) => {
+        return text.replace(/<\/?[^>]+(>|$)/g, "");
+    }
+
     useEffect(() => {
         const fetchPosts = async () => {
             try {
@@ -131,11 +136,11 @@ export default function AllPostListPage() {
                                         <div key={post.id} className="border-b border-gray-200 pb-4">
                                             <Link href={`/post/postDetail/${post.userId}/${post.id}`}>
                                                 <h2 className="text-xl font-semibold text-gray-800 hover:text-blue-600 cursor-pointer">
-                                                    {post.title}
+                                                    {removeHtmlTags(post.title)}
                                                 </h2>
                                             </Link>
                                             <div className="mt-2">
-                                                <p className="text-gray-600 line-clamp-2">{post.content}</p>
+                                                <p className="text-gray-600 line-clamp-2">{removeHtmlTags(post.content)}</p>
                                             </div>
                                             <div className="flex flex-wrap items-center text-sm text-gray-500 mt-3">
                                                 <span className="mr-4">
