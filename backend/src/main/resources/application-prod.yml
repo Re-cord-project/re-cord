@@ -38,10 +38,10 @@ custom:
 cloud:
   aws:
     credentials:
-      access-key: ${custom.prod.aws.access-key}
-      secret-key: ${custom.prod.aws.secret-key}
+      access-key: ${aws.access-key}
+      secret-key: ${aws.secret-key}
     region:
-      static: ${custom.prod.aws.region}
+      static: ${aws.region}
     s3:
-      bucket: ${custom.prod.aws.s3.bucket}
+      bucket: ${aws.s3.bucket}
 
