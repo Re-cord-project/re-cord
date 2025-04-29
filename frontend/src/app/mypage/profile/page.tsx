@@ -9,7 +9,7 @@ export default function ProfilePage() {
         username: '',
         email: '',
         bootcamp: '',
-        generation: 0,
+        generation: '',
         profileImageUrl: '',
         introduction: '', // <- null 말고 빈 문자열
     })
@@ -17,26 +17,26 @@ export default function ProfilePage() {
     // 기본 프로필 이미지 URL
     const defaultProfileImageUrl = '/default-profile.png'
 
-    // 쿠키에서 액세스 토큰 가져오기
-    const getAccessTokenFromCookie = () => {
-        const cookies = document.cookie.split(';')
-        for (let cookie of cookies) {
-            const [name, value] = cookie.trim().split('=')
-            if (name === 'accessToken') {
-                return value
-            }
-        }
-        return null
-    }
+    // // 쿠키에서 액세스 토큰 가져오기
+    // const getAccessTokenFromCookie = () => {
+    //     const cookies = document.cookie.split(';')
+    //     for (let cookie of cookies) {
+    //         const [name, value] = cookie.trim().split('=')
+    //         if (name === 'accessToken') {
+    //             return value
+    //         }
+    //     }
+    //     return null
+    // }
 
     // 유저 데이터 API에서 받아오기
     useEffect(() => {
-        const accessToken = getAccessTokenFromCookie()
+        // const accessToken = getAccessTokenFromCookie()
 
         fetch('http://localhost:8090/api/mypage/users', {
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`,
+                // Authorization: `Bearer ${accessToken}`,
             },
             credentials: 'include',
         })
@@ -111,7 +111,7 @@ export default function ProfilePage() {
 
     // 데이터 저장 처리
     const handleSave = () => {
-        const accessToken = getAccessTokenFromCookie()
+        // const accessToken = getAccessTokenFromCookie()
 
         // 수정된 데이터 저장 로직
         fetch('http://localhost:8090/api/mypage/updateUsers', {
@@ -126,7 +126,7 @@ export default function ProfilePage() {
             }),
             headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`,
+                // Authorization: `Bearer ${accessToken}`,
             },
             credentials: 'include',
         }).then(async (res) => {
@@ -207,12 +207,12 @@ export default function ProfilePage() {
                         />
                     </div>
                     <div>
-                        <label className="block text-base font-medium text-gray-800 mb-2">기수</label>
+                        <label className="block text-base font-medium text-gray-800 mb-2">과정/기수</label>
                         <input
                             type="number"
                             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
                             value={userData.generation}
-                            onChange={(e) => setUserData({ ...userData, generation: parseInt(e.target.value, 10) })}
+                            onChange={(e) => setUserData({ ...userData, generation: e.target.value })}
                         />
                     </div>
                     <div>
@@ -223,7 +223,7 @@ export default function ProfilePage() {
                             onChange={(e) => setUserData({ ...userData, introduction: e.target.value })}
                         />
                     </div>
-                    f
+
                     <div className="flex justify-end space-x-2 pt-4">
                         <button className="px-4 py-2 border border-gray-300 rounded text-gray-800 font-medium hover:bg-gray-50">
                             취소

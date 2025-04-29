@@ -28,29 +28,29 @@ export default function MypageLayout({ children }: { children: React.ReactNode }
         setActivePage(page)
     }, [pathname])
 
-    // 쿠키에서 액세스 토큰 가져오기
-    const getAccessTokenFromCookie = () => {
-        const cookies = document.cookie.split(';')
-        for (let cookie of cookies) {
-            const [name, value] = cookie.trim().split('=')
-            if (name === 'accessToken') {
-                return value
-            }
-        }
-        return null
-    }
+    // // 쿠키에서 액세스 토큰 가져오기
+    // const getAccessTokenFromCookie = () => {
+    //     const cookies = document.cookie.split(';')
+    //     for (let cookie of cookies) {
+    //         const [name, value] = cookie.trim().split('=')
+    //         if (name === 'accessToken') {
+    //             return value
+    //         }
+    //     }
+    //     return null
+    // }
 
     useEffect(() => {
         // 유저 정보 fetch
         const fetchUser = async () => {
             try {
-                const accessToken = getAccessTokenFromCookie()
+                // const accessToken = getAccessTokenFromCookie()
                 const res = await fetch('http://localhost:8090/api/mypage/users', {
                     method: 'GET',
                     credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${accessToken}`,
+                        // Authorization: `Bearer ${accessToken}`,
                     },
                 })
 
