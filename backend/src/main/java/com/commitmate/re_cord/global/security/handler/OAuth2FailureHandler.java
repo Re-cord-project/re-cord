@@ -14,7 +14,7 @@ import java.io.IOException;
 @Component
 public class OAuth2FailureHandler implements AuthenticationFailureHandler {
 
-    @Value("https://www.re-cord.site/home")
+    @Value("https://www.re-cord.site")
     private String frontendUrl;
 
     @Override
