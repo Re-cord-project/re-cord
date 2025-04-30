@@ -95,7 +95,7 @@ custom:
   prod:
     cookieDomain: blog.sik2.site
     frontUrl: "https://www.${custom.prod.cookieDomain}"
-    backUrl: "https://api.${custom.prod.cookieDomain}"
+    backUrl: "https://api.blog.${custom.prod.cookieDomain}"
   site:
     name: "BLOG DEV"
     cookieDomain: "${custom.dev.cookieDomain}"
