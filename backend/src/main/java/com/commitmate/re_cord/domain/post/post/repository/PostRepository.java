@@ -60,8 +60,7 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     WHERE p.status = 'PUBLISHED'
       AND (
         p.title LIKE CONCAT('%', :keyword, '%') OR
-        p.content LIKE CONCAT('%', :keyword, '%') OR
-        p.user.username LIKE CONCAT('%', :keyword, '%')
+        p.content LIKE CONCAT('%', :keyword, '%')
       )
 """)
     Page<Post> searchVisiblePosts(@Param("keyword") String keyword, Pageable pageable);
