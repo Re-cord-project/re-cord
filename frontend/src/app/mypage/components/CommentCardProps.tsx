@@ -17,20 +17,28 @@ interface CommentCardProps {
 }
 
 export default function CommentCard({ comment, showEditDelete, onDelete }: CommentCardProps) {
-    console.log(comment) // 각 댓글의 데이터 구조 확인
+    // 기본 API_BASE_URL을 지정
+
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
     return (
         <div className="bg-white p-4 rounded shadow">
             <div>
-                <Link
+                {/* 코멘트로 바로 연결되는 기능 삭제
+                 <Link
                     href={`/post/${comment.postId}#comment-${comment.id}`}
                     className="hover:text-blue-600 transition-colors"
-                >
-                    <p className="text-lg font-bold mb-1 text-black hover:underline">{comment.content}</p>
-                </Link>
+                > */}
+                <p className="text-lg font-bold mb-1 text-black hover:underline">{comment.content}</p>
+                {/* </Link> */}
                 <div className="flex items-center mt-2">
                     <div className="flex items-center text-xs text-gray-500">
-                        <img src={comment.WriterProfileImg} className="w-5 h-5 rounded-full mr-1" />
+                        {/* 프로필 이미지의 URL이 서버 주소와 결합된 절대 경로로 설정 */}
+                        <img
+                            src={`${API_BASE_URL}${comment.WriterProfileImg}`}
+                            className="w-5 h-5 rounded-full mr-1"
+                            alt={`${comment.writerName}'s profile`}
+                        />
                         <span className="font-semibold text-black mr-1">{comment.writerName}</span>
                         <span className="text-xs text-gray-500 mr-2">· {comment.date}</span>
                         <div className="flex items-center ml-2">
@@ -54,9 +62,9 @@ export default function CommentCard({ comment, showEditDelete, onDelete }: Comme
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
                     <span className="font-medium">게시글: </span>
-                    <Link href={`/post/${comment.postId}`} className="text-blue-600 hover:underline">
-                        {comment.postTitle}
-                    </Link>
+                    {/* <Link href={`/post/${comment.postId}`} className="text-blue-600 hover:underline"> */}
+                    {comment.postTitle}
+                    {/* </Link> */}
                 </p>
             </div>
         </div>
