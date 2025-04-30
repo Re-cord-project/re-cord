@@ -55,15 +55,30 @@ public interface PostRepository extends JpaRepository<Post,Long> {
     Page<Post> findAllByCategoryIdAndStatus(Long categoryId, PostStatus status, Pageable pageable);
 
     // 제목, 내용, 작성자 이름을 기준으로 검색하고, 상태가 EDITED 인 게시물만 가져오는 메서드
-    @Query("""
-    SELECT p FROM Post p
-    WHERE p.status = 'PUBLISHED'
-      AND (
-        p.title LIKE CONCAT('%', :keyword, '%') OR
-        p.content LIKE CONCAT('%', :keyword, '%')
-      )
-""")
+    @Query(
+            value = """
+        SELECT * FROM post
+        WHERE status = 'PUBLISHED'
+          AND (
+            title LIKE CONCAT('%', :keyword, '%') OR
+            REGEXP_REPLACE(content, '<img[^>]*>', '') LIKE CONCAT('%', :keyword, '%')
+          )
+        ORDER BY created_at DESC
+        """,
+            countQuery = """
+        SELECT COUNT(*) FROM post
+        WHERE status = 'PUBLISHED'
+          AND (
+            title LIKE CONCAT('%', :keyword, '%') OR
+            REGEXP_REPLACE(content, '<img[^>]*>', '') LIKE CONCAT('%', :keyword, '%')
+          )
+        """,
+            nativeQuery = true
+    )
     Page<Post> searchVisiblePosts(@Param("keyword") String keyword, Pageable pageable);
+
+
+
 
 
     // 상태가 EDITED 인 게시물만 가져오는 메서드
