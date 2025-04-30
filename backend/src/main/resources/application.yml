@@ -11,13 +11,14 @@ spring:
     ansi:
       enabled: ALWAYS
   profiles:
-    active: prod
+    active: dev
     include: secret
   datasource:
 
+
     url: jdbc:mysql://localhost:3307/recorddb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-#    url: jdbc:mysql://localhost:3333/recorddb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-#    url: jdbc:mysql://localhost:3306/recorddb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+#   url: jdbc:mysql://localhost:3333/recorddb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+#   url: jdbc:mysql://localhost:3306/recorddb?serverTimezone=Asia/Seoul&characterEncoding=UTF-8
 
     username: commitmate
     password: commitmate
@@ -41,7 +42,6 @@ spring:
             scope: profile_nickname, account_email
             client-name: Kakao
             authorization-grant-type: authorization_code
-#            redirect-uri: "https://api.blog.re-cord.site/login/oauth2/code/kakao"
             redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
           #            redirect-uri: "http://localhost:8090/login/oauth2/code/kakao"
 
@@ -53,7 +53,6 @@ spring:
               - user:email
             client-name: Github
             authorization-grant-type: authorization_code
-#            redirect-uri: "https://api.blog.re-cord.site/login/oauth2/code/github"
             redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
 
           google:
@@ -94,11 +93,11 @@ custom:
     frontUrl: "http://${custom.dev.cookieDomain}:3000"
     backUrl: "http://${custom.dev.cookieDomain}:${server.port}"
   prod:
-    cookieDomain: re-cord.site
+    cookieDomain: blog.sik2.site
     frontUrl: "https://www.${custom.prod.cookieDomain}"
-    backUrl: "https://api.blog.${custom.prod.cookieDomain}"
+    backUrl: "https://api.${custom.prod.cookieDomain}"
   site:
     name: "BLOG DEV"
-    cookieDomain: "${custom.prod.cookieDomain}"
-    frontUrl: "${custom.prod.frontUrl}"
-    backUrl: "${custom.prod.backUrl}"
+    cookieDomain: "${custom.dev.cookieDomain}"
+    frontUrl: "${custom.dev.frontUrl}"
+    backUrl: "${custom.dev.backUrl}"
