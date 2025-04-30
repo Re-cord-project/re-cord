@@ -275,13 +275,14 @@ public class PostService {
     // 게시글 검색
     @Transactional(readOnly = true)
     public Page<PostResponseDto> searchPosts(String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        // 정렬 제거 (nativeQuery 사용 시 JPA 정렬을 쓰면 충돌 발생함!)
+        Pageable pageable = PageRequest.of(page, size);
 
-        // PUBLISHED 상태이고, 제목/내용/작성자 기준 검색
         Page<Post> postPage = postRepository.searchVisiblePosts(keyword, pageable);
 
         return postPage.map(PostResponseDto::new);
     }
+
 
 
     // 게시글 상세 보기
@@ -394,7 +395,7 @@ public class PostService {
     }
 
     public Long getTotalPostCount(Long userId) {
-        return postRepository.totalPostCount(userId);
+        return postRepository.countByUserIdAndStatus(userId, PostStatus.PUBLISHED);
     }
 
     @Transactional

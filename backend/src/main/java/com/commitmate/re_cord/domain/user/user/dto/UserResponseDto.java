@@ -10,7 +10,6 @@ public class UserResponseDto {
     private String email;
     private String blogname;
     private String profileImage;
-    // 필요한 필드만
 
     public UserResponseDto(User user) {
         this.id = user.getId();
@@ -18,5 +17,10 @@ public class UserResponseDto {
         this.email = user.getEmail();
         this.blogname = user.getBlogName();
         this.profileImage = user.getProfileImageUrl();
+    }
+
+    // ✅ 정적 팩토리 메서드 추가
+    public static UserResponseDto from(User user) {
+        return new UserResponseDto(user);
     }
 }

@@ -44,6 +44,44 @@ export default function CategoryListPage() {
     const [error, setError] = useState<string | null>(null)
     const [currentPage, setCurrentPage] = useState(0)
     const [totalPages, setTotalPages] = useState(0)
+    const [categoryOwnerId, setCategoryOwnerId] = useState<number | null>(null)
+    
+    // 카테고리 소유자 정보 가져오기
+    const fetchCategoryOwner = async () => {
+        if (!categoryId) return;
+        
+        try {
+            // API 엔드포인트와 파라미터 형식에 맞게 요청
+            const response = await fetch(
+                `${API_BASE_URL}/api/categories/user/${categoryId}?id=${categoryId}`,
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Accept: 'application/json',
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                console.error('카테고리 정보를 가져오는데 실패했습니다.', response.status);
+                return;
+            }
+
+            const userData = await response.json();
+            console.log('카테고리 소유자 데이터:', userData); // 디버깅용 로그
+            
+            // 응답이 배열인 경우 (여러 사용자를 반환하는 경우) 첫 번째 사용자를 가져옵니다
+            if (Array.isArray(userData) && userData.length > 0) {
+                setCategoryOwnerId(userData[0].id);
+            } 
+            // 응답이 객체인 경우 (단일 사용자를 반환하는 경우)
+            else if (userData && userData.id) {
+                setCategoryOwnerId(userData.id);
+            }
+        } catch (err) {
+            console.error('카테고리 소유자 정보 로딩 오류:', err);
+        }
+    };
 
     useEffect(() => {
         const fetchCategoryPosts = async () => {
@@ -78,6 +116,8 @@ export default function CategoryListPage() {
 
         if (categoryId) {
             fetchCategoryPosts()
+            // 카테고리 소유자 정보 가져오기
+            fetchCategoryOwner()
         } else {
             // 카테고리 ID가 없으면 빈 목록 표시
             setPosts([])
@@ -124,10 +164,10 @@ export default function CategoryListPage() {
                 <div className="flex flex-col md:flex-row">
                     {/* 좌측 사이드바 */}
                     <div className="w-full md:w-56 flex-shrink-0 md:mr-8">
-                        <AuthorProfile userId={loginUser?.id || 0} />
+                        <AuthorProfile userId={categoryOwnerId || loginUser?.id || 0} />
                         <SearchBar />
-                        <CategoryMenu />
-                        <Statistics userId={loginUser?.id || 0} />
+                        <CategoryMenu userId={categoryOwnerId || loginUser?.id || 0} />
+                        <Statistics userId={categoryOwnerId || loginUser?.id || 0} />
                     </div>
 
                     {/* 메인 콘텐츠 영역 */}
