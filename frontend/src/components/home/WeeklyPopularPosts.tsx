@@ -16,12 +16,12 @@ interface HomeDto {
     userId: number
 }
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
 export default function WeeklyPopularPosts() {
     const [posts, setPosts] = useState<HomeDto[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 
     useEffect(() => {
         const fetchWeeklyPopularPosts = async () => {
@@ -30,16 +30,69 @@ export default function WeeklyPopularPosts() {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`)
                 }
-                const data = await response.json()
+                const data: HomeDto[] = await response.json()
                 setPosts(data)
-                setLoading(false)
-            } catch (e) {
-                setError(e instanceof Error ? e.message : 'An error occurred')
+            } catch (e: any) {
+                console.error('인기 회고 가져오기 실패:', e)
+                setError(e.message)
+            } finally {
                 setLoading(false)
             }
         }
+
         fetchWeeklyPopularPosts()
     }, [])
 
-    return <div>{/* Render your component content here */}</div>
+    if (loading) return <div className="text-center py-10">로딩 중...</div>
+    if (error) return <div className="text-center py-10 text-red-500">에러 발생: {error}</div>
+
+    return (
+        <section className="container mx-auto px-4 py-6">
+            <h3 className="text-xl font-bold mb-6">이번 주 인기 회고</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {posts.map((post) => (
+                    <Link key={post.id} href={`/post/postDetail/${post.userId}/${post.id}`}>
+                        <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                            <div className="h-44 bg-gray-200 relative">
+                                {post.thumbnailUrl && (
+                                    <Image
+                                        src={post.thumbnailUrl.replace('https://s3-bucket-url.com/', '')}
+                                        alt="thumbnail"
+                                        layout="fill"
+                                        objectFit="cover"
+                                    />
+                                )}
+                            </div>
+                            <div className="p-4">
+                                <h4 className="font-medium text-sm mb-4">{post.title}</h4>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        {post.profileImageUrl ? (
+                                            <Image
+                                                src={post.profileImageUrl}
+                                                alt="프로필 이미지"
+                                                width={24}
+                                                height={24}
+                                                className="rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-6 h-6 rounded-full bg-gray-300" />
+                                        )}
+                                        <span className="text-xs text-gray-600">{post.username}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                        <span>{post.createdAt.slice(0, 10)}</span>
+                                        <div className="flex items-center gap-1">
+                                            <ThumbsUp size={14} />
+                                            <span>{post.likes}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        </section>
+    )
 }
