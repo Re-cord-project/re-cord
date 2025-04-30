@@ -54,8 +54,8 @@ spring:
               - user:email
             client-name: Github
             authorization-grant-type: authorization_code
-            redirect-uri: "https://api.blog.re-cord.site/login/oauth2/code/github"
-          #            redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
+#            redirect-uri: "https://api.blog.re-cord.site/login/oauth2/code/github"
+            redirect-uri: "${custom.site.backUrl}/{action}/oauth2/code/{registrationId}"
 
           google:
             clientId: ON_SECRET
