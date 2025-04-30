@@ -408,7 +408,7 @@ const CategoryMenu: React.FC<CategoryMenuProps> = ({ userId }) => {
                     {!isFormVisible ? (
                         <button
                             onClick={toggleForm}
-                            className="w-full py-1.5 px-3 text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition"
+                            className="w-full py-1.5 px-3 text-xs bg-blue-50 text-[#78B3CE] hover:text-[#5A8BA6] hover:bg-blue-100 rounded-md transition"
                         >
                             + 카테고리 추가하기
                         </button>
@@ -431,7 +431,7 @@ const CategoryMenu: React.FC<CategoryMenuProps> = ({ userId }) => {
                                 <button
                                     type="submit"
                                     disabled={isCreating}
-                                    className="flex-1 py-1 px-3 text-xs bg-blue-500 text-white hover:bg-blue-600 rounded-md transition disabled:opacity-50"
+                                    className="flex-1 py-1 px-3 text-xs bg-[#78B3CE] text-white hover:bg-blue-600 rounded-md transition disabled:opacity-50"
                                 >
                                     {isCreating ? '생성중...' : '생성하기'}
                                 </button>

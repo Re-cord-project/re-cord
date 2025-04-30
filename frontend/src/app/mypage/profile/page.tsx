@@ -5,6 +5,17 @@ import Image from 'next/image'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 const API_FRONT_URL = process.env.NEXT_PUBLIC_FRONT_BASE_URL
+const bootcampOptions = [
+    '멋쟁이 사자처럼',
+    'SSAFY',
+    '우아한 테크코스',
+    '항해 99',
+    '네이버 부스트캠프',
+    '스파르타',
+    '프로그래머스 데브코스',
+    '한화시스템 BEYOND SW캠프',
+    '그 외',
+]
 export default function ProfilePage() {
     const [profileImage, setProfileImage] = useState<string | null>(null)
     const [userData, setUserData] = useState({
@@ -186,7 +197,17 @@ export default function ProfilePage() {
                     </div>
                     {/* 다른 입력 필드들 */}
                     <div>
-                        <label className="block text-base font-medium text-gray-800 mb-2">이름</label>
+                        <label className="block text-base font-medium text-gray-800 mb-2">이메일</label>
+                        <input
+                            type="email"
+                            className="w-full px-3 py-2 border border-gray-300 rounded bg-gray-100 text-gray-500 cursor-not-allowed"
+                            value={userData.email}
+                            disabled
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-base font-medium text-gray-800 mb-2">닉네임</label>
                         <input
                             type="text"
                             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
@@ -194,24 +215,23 @@ export default function ProfilePage() {
                             onChange={(e) => setUserData({ ...userData, username: e.target.value })}
                         />
                     </div>
+
                     <div>
-                        <label className="block text-base font-medium text-gray-800 mb-2">이메일</label>
-                        <input
-                            type="email"
-                            className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
-                            value={userData.email}
-                            onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-base font-medium text-gray-800 mb-2">소속</label>
-                        <input
-                            type="text"
+                        <label className="block text-base font-medium text-gray-800 mb-2">부트캠프</label>
+                        <select
                             className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800"
                             value={userData.bootcamp}
                             onChange={(e) => setUserData({ ...userData, bootcamp: e.target.value })}
-                        />
+                        >
+                            <option value="">선택하세요</option>
+                            {bootcampOptions.map((option) => (
+                                <option key={option} value={option}>
+                                    {option}
+                                </option>
+                            ))}
+                        </select>
                     </div>
+
                     <div>
                         <label className="block text-base font-medium text-gray-800 mb-2">과정/기수</label>
                         <input
@@ -245,7 +265,7 @@ export default function ProfilePage() {
                             </button>
                             <button
                                 onClick={handleSave}
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 font-medium"
+                                className="px-4 py-2 bg-[#78B3CE] text-white rounded hover:bg-[#5A8BA6] font-medium"
                             >
                                 저장하기
                             </button>
