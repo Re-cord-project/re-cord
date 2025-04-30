@@ -24,20 +24,49 @@ repositories {
 }
 
 dependencies {
+	implementation ("org.springframework.boot:spring-boot-starter-security") //2025-04-14 테스트로 추가
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	runtimeOnly("com.h2database:h2")
+	implementation ("com.mysql:mysql-connector-j:8.0.33")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	runtimeOnly("com.mysql:mysql-connector-j")
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+	implementation ("com.mysql:mysql-connector-j:8.0.33")
 
 
+	// jwt & json
+	// jwts
+	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+
+	// swagger
+	implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5")
+
+
+	//gson - json 메시지를 다루기 위한 라이브러리
+	implementation("com.google.code.gson:gson")
+
+	implementation("jakarta.validation:jakarta.validation-api:3.0.2")
+	// security
+	implementation("org.springframework.boot:spring-boot-starter-security")
+
+	// Oauth2
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+
+	// AWS S3 SDK (S3 사용을 위한 핵심 의존성)
+	implementation("com.amazonaws:aws-java-sdk-s3:1.12.683")
 
 }
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+//
+tasks.withType<JavaCompile> {
+	options.compilerArgs.add("-parameters")
 }

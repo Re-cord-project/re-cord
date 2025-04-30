@@ -1,0 +1,34 @@
+package com.commitmate.re_cord.domain.user.user.dto;
+
+import jakarta.persistence.Column;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Data
+@Builder
+@NoArgsConstructor
+@Setter
+public class UpdateUserDTO {
+
+    private String username;
+    private String email;
+    private String bootcamp;
+    private String generation;
+
+    @Column(columnDefinition = "TEXT")
+    private String profileImageUrl;
+
+    @Column(length = 500)  // 자기소개 길이
+    private String introduction;
+
+    public UpdateUserDTO(String username, String email, String bootcamp, String generation, String profileImageUrl, String introduction) {
+        this.username = username;
+        this.email = email;
+        this.bootcamp = bootcamp;
+        this.generation = generation;
+        this.profileImageUrl = profileImageUrl;
+        this.introduction = introduction;
+    }
+}

@@ -1,0 +1,41 @@
+package com.commitmate.re_cord.domain.post.comment.comment.dto;
+
+import com.commitmate.re_cord.domain.post.comment.comment.entity.Comment;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@AllArgsConstructor
+public class CommentDTO {
+    private Long id;
+    private Long userId;
+    private String writerName;
+    private String content;
+    private LocalDateTime createdAt;
+    private Long postId;
+    private String postTitle;
+    private int likes;
+    private String WriterProfileImg;
+
+
+
+    public static CommentDTO getEntity(Comment comment){
+        return new CommentDTO(
+                comment.getId(),
+                comment.getUser().getId(),
+                comment.getUser().getUsername(),
+                comment.getContent(),
+                comment.getCreatedAt(),
+                comment.getPost().getId(),
+                comment.getPost().getTitle(),
+                comment.getLikes(),
+                comment.getPost().getUser().getProfileImageUrl()
+        );
+    }
+
+
+
+
+}
