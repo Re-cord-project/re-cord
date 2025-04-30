@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { BlockButton } from './blockButton';
+import { BlockButton } from './BlockButton';
 
 interface BlockedUser {
   id: string;
