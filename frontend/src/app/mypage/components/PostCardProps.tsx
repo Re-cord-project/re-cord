@@ -3,6 +3,7 @@ import Link from 'next/link'
 interface PostCardProps {
     post: {
         id: number
+        userId: number
         title: string
         content: string
         createdAt: string
@@ -16,13 +17,22 @@ interface PostCardProps {
 export default function PostCard({ post, showEditDelete, onDelete }: PostCardProps) {
     console.log(post) // 각 게시글의 데이터 구조 확인
 
+    const API_FRONT_URL = process.env.NEXT_PUBLIC_FRONT_BASE_URL
+
+    const mypostlink = () => {
+        window.location.href = `${API_FRONT_URL}/post/postDetail/${post.userId}/${post.id}`
+    }
+
     return (
         <div className="bg-white p-4 rounded shadow">
             <div className="flex items-start">
                 <div className="flex-1 pr-6">
-                    <Link href={`/post/${post.id}`} className="hover:text-blue-600 transition-colors">
-                        <p className="text-lg font-semibold mb-2 text-black hover:underline">{post.title}</p>
-                    </Link>
+                    <div
+                        onClick={mypostlink}
+                        className="text-lg font-semibold mb-2 text-black hover:underline hover:text-blue-600 transition-colors cursor-pointer"
+                    >
+                        {post.title}
+                    </div>
                     <div className="flex items-center mt-2 gap-6">
                         <span className="text-xs text-gray-400 w-[88px] inline-block">
                             {new Date(post.createdAt).toLocaleDateString('ko-KR', {
@@ -71,7 +81,7 @@ export default function PostCard({ post, showEditDelete, onDelete }: PostCardPro
                         </div>
                     </div>
                 </div>
-                {showEditDelete && (
+                {/* {showEditDelete && (
                     <div className="flex gap-4">
                         <Link
                             href={`/edit-post/${post.id}`}
@@ -86,7 +96,7 @@ export default function PostCard({ post, showEditDelete, onDelete }: PostCardPro
                             삭제
                         </button>
                     </div>
-                )}
+                )} */}
             </div>
         </div>
     )

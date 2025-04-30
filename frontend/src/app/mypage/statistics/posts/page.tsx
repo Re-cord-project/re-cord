@@ -19,6 +19,8 @@ export default function UserPostsPage() {
     const [totalPages, setTotalPages] = useState(1)
     const [totalElements, setTotalElements] = useState(0)
 
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
     useEffect(() => {
         fetchPosts(sortType, page)
     }, [sortType, page])
@@ -35,20 +37,26 @@ export default function UserPostsPage() {
         try {
             let endpoint = ''
             let params: any = { page, size: 5 }
+
             switch (sort) {
                 case 'views':
-                    endpoint = `/api/mypage/posts/views`
+                    endpoint = '/api/mypage/posts/views'
                     params.type = 'ordered'
                     break
                 case 'likes':
-                    endpoint = `/api/mypage/posts/likes`
+                    endpoint = '/api/mypage/posts/likes'
                     params.type = 'ordered'
                     break
                 case 'date':
                 default:
-                    endpoint = `/api/mypage/posts`
+                    endpoint = '/api/mypage/posts'
             }
-            const response = await axios.get<PostResponse>(endpoint, { params })
+
+            const response = await axios.get<PostResponse>(`${API_BASE_URL}${endpoint}`, {
+                params,
+                withCredentials: true, // ✅ 쿠키 인증이 필요한 경우
+            })
+
             setPosts(response.data.content)
             setTotalPages(response.data.totalPages)
             setTotalElements(response.data.totalElements)

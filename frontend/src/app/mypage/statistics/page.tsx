@@ -10,6 +10,8 @@ import { Comment } from '@/app/types/comment'
 import { Post } from '@/app/types/post'
 
 export default function StatisticsPage() {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
     // 인기 게시물, 댓글
     const [posts, setPosts] = useState<Post[]>([])
     const [comments, setComments] = useState<Comment[]>([])
@@ -23,34 +25,44 @@ export default function StatisticsPage() {
     const [monthlyViews, setMonthlyViews] = useState<{ month: string; totalViews: number }[]>([])
 
     useEffect(() => {
+        const config = { withCredentials: true }
+
         // ✅ 인기 게시글
         axios
-            .get<{ content: Post[] }>('/api/mypage/posts/likes?type=ordered')
+            .get<{ content: Post[] }>(`${API_BASE_URL}/api/mypage/posts/likes?type=ordered`, config)
             .then((res) => setPosts(Array.isArray(res.data.content) ? res.data.content : []))
 
         // ✅ 인기 댓글
         axios
-            .get<{ content: Comment[] }>('/api/mypage/comments/likes?type=ordered')
+            .get<{ content: Comment[] }>(`${API_BASE_URL}/api/mypage/comments/likes?type=ordered`, config)
             .then((res) => setComments(Array.isArray(res.data.content) ? res.data.content : []))
 
         // ✅ 총 글 수
         axios
-            .get<{ totalElements: number }>('/api/mypage/posts', { params: { page: 0, size: 1 } })
+            .get<{ totalElements: number }>(`${API_BASE_URL}/api/mypage/posts`, {
+                params: { page: 0, size: 1 },
+                ...config,
+            })
             .then((res) => setPostCount(res.data.totalElements || 0))
             .catch(console.error)
 
         // ✅ 총 댓글 수
         axios
-            .get<{ totalElements: number }>('/api/mypage/comments', { params: { page: 0, size: 1 } })
+            .get<{ totalElements: number }>(`${API_BASE_URL}/api/mypage/comments`, {
+                params: { page: 0, size: 1 },
+                ...config,
+            })
             .then((res) => setCommentCount(res.data.totalElements || 0))
             .catch(console.error)
 
         // ✅ 총 조회수 (숫자 하나)
-        axios.get<number>('/api/mypage/posts/views?type=total').then((res) => setTotalViews(res.data || 0))
+        axios
+            .get<number>(`${API_BASE_URL}/api/mypage/posts/views?type=total`, config)
+            .then((res) => setTotalViews(res.data || 0))
 
         // ✅ 월간 조회수 (배열)
         axios
-            .get<{ month: string; totalViews: number }[]>('/api/mypage/posts/views?type=monthly')
+            .get<{ month: string; totalViews: number }[]>(`${API_BASE_URL}/api/mypage/posts/views?type=monthly`, config)
             .then((res) => setMonthlyViews(res.data || []))
     }, [])
 

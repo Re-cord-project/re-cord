@@ -19,6 +19,8 @@ export default function UserCommentsPage() {
     const [totalPages, setTotalPages] = useState(1)
     const [totalElements, setTotalElements] = useState(0)
 
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
+
     useEffect(() => {
         fetchComments(sortType, page)
     }, [sortType, page])
@@ -39,16 +41,21 @@ export default function UserCommentsPage() {
 
             switch (sort) {
                 case 'likes': {
-                    endpoint = `/api/mypage/comments/likes`
+                    endpoint = '/api/mypage/comments/likes'
                     params.type = 'ordered'
                     break
                 }
                 case 'date':
                 default: {
-                    endpoint = `/api/mypage/comments`
+                    endpoint = '/api/mypage/comments'
                 }
             }
-            const response = await axios.get<CommentResponse>(endpoint, { params })
+
+            const response = await axios.get<CommentResponse>(`${API_BASE_URL}${endpoint}`, {
+                params,
+                withCredentials: true, // ✅ 쿠키 포함하여 인증 필요 시
+            })
+
             setComments(response.data.content)
             setTotalPages(response.data.totalPages)
             setTotalElements(response.data.totalElements)
