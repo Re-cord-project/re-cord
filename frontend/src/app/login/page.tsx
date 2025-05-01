@@ -111,7 +111,7 @@ export default function LoginPage() {
 
                     <div className="mt-6 space-y-3">
                         <a
-                            href={socialLoginForKakaoUrl}
+                            href={`${socialLoginForKakaoUrl}?redirectUrl=${redirectUrlAfterSocialLogin}`}
                             className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-[#391B1B] bg-[#FEE500] hover:bg-[#FEE500]/90"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#391B1B">
@@ -123,7 +123,7 @@ export default function LoginPage() {
                             카카오톡으로 로그인
                         </a>
                         <a
-                            href={socialLoginForGithubUrl}
+                            href={`${socialLoginForGithubUrl}?redirectUrl=${redirectUrlAfterSocialLogin}`}
                             className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-white bg-black hover:bg-gray-900"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

@@ -131,9 +131,11 @@ export default function SignupPage() {
                 router.push('/login')
             } else {
                 const error = await response.text()
+                console.error('회원가입 오류:', error)
                 setError('회원가입 중 오류가 발생했습니다.')
             }
         } catch (error) {
+            console.error('회원가입 오류:', error)
             setError('회원가입 중 오류가 발생했습니다.')
         }
     }
