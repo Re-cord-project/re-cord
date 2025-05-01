@@ -46,7 +46,7 @@ export function BlockList() {
             role: 'Unknown',
             imageUrl: user.profileImage || '/default-profile.png',
             isBlocked: true,
-            blogName: user.blogName || '알 수 없음',
+            blogName: user.blogName || user.username || 'unknown',
           }))
         );
       } catch (error) {
@@ -111,7 +111,7 @@ export function BlockList() {
                   />
                 </Link>
 
-                <Link href={`/blog/${user.blogName}`}>
+                <Link href={user.blogName ? `/Blog/${user.blogName}` : '#'}>
                   <h3 className="font-medium text-gray-900 hover:text-[#78B3CE] transition-colors cursor-pointer">
                     {user.name}
                   </h3>

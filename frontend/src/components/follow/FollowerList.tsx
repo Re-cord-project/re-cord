@@ -48,7 +48,7 @@ export function FollowerList() {
             role: 'Unknown',
             imageUrl: '/default-profile.png',
             hasFollowed: true, // 팔로워는 기본적으로 팔로우 중
-            blogName: f.blogName || f.username, // blogName 추가
+            blogName: f.blogName || '알 수 없음', // blogName 추가
           }))
         );
       } catch (error) {
@@ -103,7 +103,7 @@ export function FollowerList() {
             >
               <div className="flex items-center space-x-4">
                 {/* 프로필 이미지 */}
-                <Link href={`/blog/${f.blogName}`} className="relative w-12 h-12 rounded-full overflow-hidden">
+                <Link href={f.blogName ? `/Blog/${f.blogName}` : '#'} className="relative w-12 h-12 rounded-full overflow-hidden">
                   <Image
                     src={f.imageUrl}
                     alt={`${f.name}의 프로필`}
@@ -114,7 +114,7 @@ export function FollowerList() {
                   />
                 </Link>
 
-                <Link href={`/blog/${f.blogName}`}>  {/* 유저 이름 클릭 시 상세 페이지로 이동 */}
+                <Link href={f.blogName ? `/Blog/${f.blogName}` : '#'}>  {/* 유저 이름 클릭 시 상세 페이지로 이동 */}
                   <h3 className="font-medium text-gray-900 hover:text-[#78B3CE] transition-colors cursor-pointer">
                     {f.name}
                   </h3>
