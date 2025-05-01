@@ -57,7 +57,7 @@ export function BlockList() {
     fetchBlockedUsers();
   }, [API_BASE]);
 
-  // 차단 상태 변경 핸들러
+  // 차단 상태 변경 확인 핸들러
   const handleBlockStatusChange = (userId: string, isBlocked: boolean) => {
     // 차단 해제 시 목록에서 제거
     if (!isBlocked) {
