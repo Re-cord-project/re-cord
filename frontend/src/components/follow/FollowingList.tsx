@@ -12,6 +12,7 @@ interface Following {
   role: string;
   imageUrl: string;
   hasFollowed: boolean; // 내가 이 사용자를 팔로우하는지 여부 (백엔드 변경)
+  blogName: string; // blogName 필드 추가
 }
 
 export function FollowingList() {
@@ -47,6 +48,7 @@ export function FollowingList() {
             role: 'Unknown',
             imageUrl: '/default-profile.png',
             hasFollowed: f.hasFollowed || false, // 백엔드에서 hasFollowed 필드로 변경
+            blogName: f.blogName || f.username, // blogName 추가
           }))
         );
       } catch (error) {
@@ -100,7 +102,7 @@ export function FollowingList() {
             >
               <div className="flex items-center space-x-4">
                 {/* 프로필 이미지 */}
-                <Link href={`/blog/${f.id}`} className="relative w-12 h-12 rounded-full overflow-hidden">
+                <Link href={`/blog/${f.blogName}`} className="relative w-12 h-12 rounded-full overflow-hidden">
                   <Image
                     src={f.imageUrl}
                     alt={`${f.name}의 프로필`}
@@ -111,7 +113,7 @@ export function FollowingList() {
                   />
                 </Link>
 
-                <Link href={`/blog/${f.id}`}>  {/* 유저 이름 클릭 시 상세 페이지로 이동 */}
+                <Link href={`/blog/${f.blogName}`}>  {/* 유저 이름 클릭 시 상세 페이지로 이동 */}
                   <h3 className="font-medium text-gray-900 hover:text-[#78B3CE] transition-colors cursor-pointer">
                     {f.name}
                   </h3>
