@@ -35,12 +35,10 @@ export default function LoginPage() {
                 // 로그인 성공 시 홈페이지로 이동
                 window.location.href = '/'
             } else {
-                const data = await response.json()
-                setError(data.message || '로그인에 실패했습니다.')
+                setError('로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.')
             }
         } catch (err) {
-            setError('회원정보가 일치하지 않습니다.')
-            console.error('Login error:', err)
+            setError('로그인에 실패했습니다. 다시 시도해주세요.')
         }
     }
 
@@ -113,7 +111,7 @@ export default function LoginPage() {
 
                     <div className="mt-6 space-y-3">
                         <a
-                            href={`${socialLoginForKakaoUrl}?redirectUrl=${redirectUrlAfterSocialLogin}`}
+                            href={socialLoginForKakaoUrl}
                             className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-[#391B1B] bg-[#FEE500] hover:bg-[#FEE500]/90"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#391B1B">
@@ -125,7 +123,7 @@ export default function LoginPage() {
                             카카오톡으로 로그인
                         </a>
                         <a
-                            href={`${socialLoginForGithubUrl}?redirectUrl=${redirectUrlAfterSocialLogin}`}
+                            href={socialLoginForGithubUrl}
                             className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-white bg-black hover:bg-gray-900"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
