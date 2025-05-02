@@ -118,7 +118,7 @@ re-cord
 
 ## 👥 팀원 소개
 
-| <img src="https://github.com/codefish-sea.png" width="100" height="100"> | <img src="https://github.com/user-attachments/assets/df80877e-4da1-4c5b-be31-9e1ef614973a" width="100"> | <img src="https://github.com/user-attachments/assets/903c4fd8-1c47-46e9-a660-2c42d2d0c3be" width="100" height="100"> | <img src="https://github.com/asdf-qwe.png" width="100" height="100"> | <img src="https://github.com/researcherrabbit.png" width="100" height="100"> |
+| <img src="https://github.com/codefish-sea.png" width="100" height="100"> | <img src="https://github.com/user-attachments/assets/df80877e-4da1-4c5b-be31-9e1ef614973a" width="100"> | <img src="https://github.com/user-attachments/assets/903c4fd8-1c47-46e9-a660-2c42d2d0c3be" width="100" height="100"> | <img src="https://github.com/asdf-qwe.png" width="100" height="100"> | <img src="https://github.com/user-attachments/assets/2f199c6f-19d1-4072-adc9-bb3d88f5bd04" width="100" height="100"> |
 |-------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|
 | **김진경**                     | **한영흔**                     | **근하람**                     | **김현우**                     | **홍보람**                     |
 | BE                            | BE                            | BE                            | BE                            | BE                            |
