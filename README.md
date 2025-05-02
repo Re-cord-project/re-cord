@@ -1,4 +1,5 @@
-![header](https://capsule-render.vercel.app/api?type=waving&&color=0:C9E6F0,100:78B3CE&height=300&section=header&text=Re:cord&fontColor=FFFFFF&fontSize=90)
+<img src="https://capsule-render.vercel.app/api?type=waving&&color=0:C9E6F0,100:78B3CE&height=300&section=header&text=Re:cord&fontColor=FFFFFF&fontSize=90" style="width: 100%; height: auto;" />
+
 ![Image](https://github.com/user-attachments/assets/d39a6389-90ef-4a1f-b896-7abff7d848f8)
 ---
 
