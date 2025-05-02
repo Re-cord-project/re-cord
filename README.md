@@ -1,3 +1,7 @@
+![header](https://capsule-render.vercel.app/api?type=waving&&color=0:C9E6F0,100:78B3CE&height=300&section=header&text=Re:cord&fontColor=FFFFFF&fontSize=90)
+
+
+
 ## 🛠️ Tech Stack
 
 | 분류 | 기술 스택 |
