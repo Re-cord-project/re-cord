@@ -11,8 +11,7 @@
 
 
 
-
-프로젝트 구조 : 
+## 🏗️ Project Structure
 ```
 re-cord
 ├─ backend
