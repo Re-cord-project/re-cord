@@ -119,9 +119,13 @@ re-cord
 
 ## 👥 팀원 소개
 
+
 | <img src="https://github.com/codefish-sea.png" width="100" height="100"> | <img src="https://github.com/user-attachments/assets/df80877e-4da1-4c5b-be31-9e1ef614973a" width="100"> | <img src="https://github.com/user-attachments/assets/903c4fd8-1c47-46e9-a660-2c42d2d0c3be" width="100" height="100"> | <img src="https://github.com/user-attachments/assets/783f3dd6-de36-476d-a06f-0c55029c84ad" width="100" height="100"> | <img src="https://github.com/user-attachments/assets/2f199c6f-19d1-4072-adc9-bb3d88f5bd04" width="100" height="100"> |
 |-------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|
-| **김진경**                     | **한영흔**                     | **근하람**                     | **김현우**                     | **홍보람**                     |
-| BE                            | BE                            | BE                            | BE                            | BE                            |
+| **김진경** | **한영흔** | **근하람** | **김현우** | **홍보람** |
+|------------|------------|------------|------------|------------|
+| 팀장       | 부팀장     | 팀원       | 팀원       | 팀원       |
+| - 마이페이지<br>세부 정보 + 통계 | - 내 블로그<br>댓글 + 추천<br>블로그 홈<br>인기, 최신 게시물 | - 블로그 홈<br>OAuth2<br>회원가입, 로그인 | - 내 블로그<br>포스팅<br>검색<br>카테고리 | - 마이페이지<br>팔로잉 + 차단 |
+
 | [GitHub](https://github.com/codefish-sea) | [GitHub](https://github.com/Heun0) | [GitHub](https://github.com/gkfka9901) | [GitHub](https://github.com/asdf-qwe) | [GitHub](https://github.com/researcherrabbit) |
 
