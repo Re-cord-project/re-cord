@@ -36,4 +36,38 @@ re-cord
 │  ├─ main.tf
 │  └─ variables.tf
 │
-└─ README.md 
+└─ README.md
+```
+
+# 📝 프로젝트 개요
+
+## 📌 DB ERD
+> 이미지 삽입 필요 (예: ERDcloud 또는 dbdiagram.io로 작성한 이미지 링크나 첨부 이미지)
+
+![ERD](이미지_링크_또는_경로.png)
+
+---
+
+## 📑 API 명세서 (Swagger)
+> Swagger를 통해 API 목록을 확인할 수 있습니다.
+
+- [Swagger API 문서 보러가기](http://localhost:8080/swagger-ui/index.html)  
+  (실제 프로젝트 URL에 맞게 수정해주세요)
+
+---
+
+## 👥 팀원 소개
+
+| 이름     | 역할 | GitHub |
+|----------|------|--------|
+| 김진경   | BE   | [https://github.com/codefish-sea](https://github.com/codefish-sea) |
+| 한영흔   | BE   | (깃허브 주소를 입력해주세요) |
+| 근하람   | BE   | (깃허브 주소를 입력해주세요) |
+| 김현우   | BE   | [https://github.com/asdf-qwe](https://github.com/asdf-qwe) |
+| 홍보람   | BE   | [https://github.com/researcherrabbit](https://github.com/researcherrabbit) |
+
+---
+
+> 각 팀원은 백엔드 개발을 담당하였으며, 인증/인가, 데이터베이스 설계, API 구현 등의 역할을 분담하였습니다.
+
+
