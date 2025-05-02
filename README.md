@@ -113,9 +113,7 @@ re-cord
 
 > Swagger를 통해 API 목록을 확인할 수 있습니다.
 
-- 🔗 [Swagger API 문서 보러가기](http://localhost:8080/swagger-ui/index.html)  
-  *(URL은 실제 배포 주소로 변경 필요)*
-
+- 🔗 [Swagger API 문서 보러가기](https://api.blog.re-cord.site/swagger-ui/index.html)
 ---
 
 ## 👥 팀원 소개
