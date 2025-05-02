@@ -118,13 +118,12 @@ re-cord
 
 ## 👥 팀원 소개
 
-| 이름     | 역할 | GitHub |
-|----------|------|--------|
-| 김진경   | BE   | [codefish-sea](https://github.com/codefish-sea) |
-| 한영흔   | BE   | [Heun0](https://github.com/Heun0) |
-| 근하람   | BE   | [gkfka9901](https://github.com/gkfka9901) |
-| 김현우   | BE   | [asdf-qwe](https://github.com/asdf-qwe) |
-| 홍보람   | BE   | [researcherrabbit](https://github.com/researcherrabbit) |
+| <img src="https://github.com/codefish-sea.png" width="100" height="100"> | <img src="https://github.com/Heun0.png" width="100" height="100"> | <img src="https://github.com/gkfka9901.png" width="100" height="100"> | <img src="https://github.com/asdf-qwe.png" width="100" height="100"> | <img src="https://github.com/researcherrabbit.png" width="100" height="100"> |
+|-------------------------------|-------------------------------|-------------------------------|-------------------------------|-------------------------------|
+| **김진경**                     | **한영흔**                     | **근하람**                     | **김현우**                     | **홍보람**                     |
+| BE                            | BE                            | BE                            | BE                            | BE                            |
+| [GitHub](https://github.com/codefish-sea) | [GitHub](https://github.com/Heun0) | [GitHub](https://github.com/gkfka9901) | [GitHub](https://github.com/asdf-qwe) | [GitHub](https://github.com/researcherrabbit) |
 
 > 각 팀원은 백엔드 개발을 담당하였으며,  
 > 인증/인가, 데이터베이스 설계, API 구현 등의 역할을 분담하였습니다.
+
