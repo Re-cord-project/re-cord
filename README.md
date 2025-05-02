@@ -61,8 +61,8 @@ re-cord
 
 | 이름     | 역할 | GitHub |
 |----------|------|--------|
-| 김진경   | BE   | [https://github.com/Heun0](https://github.com/Heun0) |
-| 한영흔   | BE   | [https://github.com/codefish-sea](https://github.com/codefish-sea) |
+| 김진경   | BE   | [https://github.com/codefish-sea](https://github.com/codefish-sea)|
+| 한영흔   | BE   | [https://github.com/Heun0](https://github.com/Heun0)|
 | 근하람   | BE   | [https://github.com/gkfka9901](https://github.com/gkfka9901) |
 | 김현우   | BE   | [https://github.com/asdf-qwe](https://github.com/asdf-qwe) |
 | 홍보람   | BE   | [https://github.com/researcherrabbit](https://github.com/researcherrabbit) |
