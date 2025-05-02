@@ -46,10 +46,7 @@ re-cord
 # 📝 프로젝트 개요
 
 ## 📌 DB ERD
-> 이미지 삽입 필요 (예: ERDcloud 또는 dbdiagram.io로 작성한 이미지 링크나 첨부 이미지)
-
-![ERD](이미지_링크_또는_경로.png)
-
+<img width="1414" alt="Image" src="https://github.com/user-attachments/assets/206afb94-a902-4eae-86d3-b012c89ec8de" />
 ---
 
 ## 📑 API 명세서 (Swagger)
